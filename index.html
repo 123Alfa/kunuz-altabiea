@@ -467,6 +467,15 @@ tr:hover td{background:rgba(15,118,110,.045)}
 .pos-checkout:disabled{opacity:.45;cursor:not-allowed;box-shadow:none}
 .pos-quick-info{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px}
 .pos-chip{background:#f6faf8;border:1px solid var(--border);padding:7px 10px;border-radius:10px;font-size:.72rem;font-weight:800;color:var(--text-light)}
+
+.manual-weight-box{display:flex;gap:6px;align-items:center;margin-top:5px}
+.manual-weight-box input{width:95px;padding:6px 7px;border:1px solid var(--border);border-radius:8px;background:#fff;font-size:.68rem;font-weight:800}
+.manual-weight-box button{padding:6px 8px;border:0;border-radius:8px;background:var(--primary);color:#fff;font-size:.65rem;font-weight:900;cursor:pointer}
+.pos-credit-row{display:none;grid-column:1/-1}
+.pos-credit-row.show{display:block}
+.pos-credit-row input{width:100%;padding:10px;border:1px solid var(--border);border-radius:10px;background:#fff;font-weight:800}
+.pos-payment-status{grid-column:1/-1}
+.pos-payment-status select{width:100%;padding:10px;border:1px solid var(--border);border-radius:10px;background:#fbfdfc;font-weight:800}
 @media(max-width:899px){.pos-cashier{grid-template-columns:1fr}.pos-cart-panel{position:static}.pos-cart-list{max-height:330px}.pos-products-panel{order:1}.pos-cart-panel{order:2}}
 </style>
 <link rel="manifest" href="manifest.json">
@@ -935,7 +944,9 @@ function renderSalesPage(container){
               <div><label>الخصم (ج.م)</label><input type="number" id="posDiscount" value="0" min="0" step="0.01" oninput="updatePOSSummary()"></div>
               <div><label>النوع</label><select id="posSaleType" onchange="refreshPOSCartPrices()"><option value="retail">🛍️ قطاعي</option><option value="wholesale">📦 جملة</option></select></div>
               <div><label>العميل</label><select id="posCustomer" onchange="togglePOSCustomCustomer()"><option value="">عميل عادي — اكتب الاسم اختياريًا</option>${customerOpts}</select><input type="text" id="posCustomCustomer" placeholder="اسم العميل العادي (اختياري)" style="display:none;margin-top:7px" maxlength="80"></div>
+              <div class="pos-payment-status"><label>طريقة السداد</label><select id="posPaymentMethod" onchange="togglePOSCredit()"><option value="cash">💵 نقدي</option><option value="credit">📋 آجل</option></select></div>
               <div><label>المدفوع</label><input type="number" id="posPaid" value="0" min="0" step="0.01" oninput="updatePOSSummary()"></div>
+              <div class="pos-credit-row" id="posCreditRow"><label>تاريخ الاستحقاق (اختياري)</label><input type="date" id="posDueDate"></div>
             </div>
             <div class="pos-summary-row total"><span>المطلوب</span><strong id="posGrandTotal">0 ج.م</strong></div>
             <div class="pos-change"><span>الباقي</span><span id="posChange">0 ج.م</span></div>
@@ -952,6 +963,8 @@ function renderSalesPage(container){
   </div>`;
   renderSaleProductGrid();
   renderPOSCart();
+  togglePOSCustomCustomer();
+  togglePOSCredit();
   renderSalesTable();
   togglePOSCustomCustomer();
 }
@@ -967,7 +980,12 @@ function isKgProduct(p){
   return u.includes('كجم') || u.includes('kg') || u.includes('كيلو');
 }
 function weightLabel(w){
-  return w===1?'1 كجم':w===0.5?'500 جم':'250 جم';
+  const n=Number(w||1);
+  if(Math.abs(n-1)<0.000001)return '1 كجم';
+  if(Math.abs(n-.5)<0.000001)return '500 جم';
+  if(Math.abs(n-.25)<0.000001)return '250 جم';
+  if(n>=1)return `${Number(n.toFixed(3))} كجم`;
+  return `${Math.round(n*1000)} جم`;
 }
 function packagePrice(p,weight,type){
   const base=type==='wholesale'?Number(p.wholesale||0):Number(p.retail||0);
@@ -1006,17 +1024,39 @@ function changePOSWeight(index,newWeight){
   const item=(window.posCart||[])[index];
   if(!item)return;
   const p=(window.saleProducts||[]).find(x=>x.id===item.id); if(!p)return;
-  newWeight=Number(newWeight)||1;
+  if(String(newWeight)==='manual'){
+    const grams=prompt('اكتب الوزن بالجرام، مثال: 750 أو 300', String(Math.round(Number(item.weight||1)*1000)));
+    if(grams===null){renderPOSCart();return;}
+    const g=Number(grams);
+    if(!Number.isFinite(g)||g<=0)return showToast('أدخل وزنًا صحيحًا بالجرام','warning');
+    newWeight=g/1000;
+  }else{newWeight=Number(newWeight)||1;}
   if(!isKgProduct(p))newWeight=1;
   const otherReserved=reservedProductQty(p.id,index);
   const needed=otherReserved+(newWeight*Number(item.qty||0));
-  if(needed>(Number(p.qty)||0)+0.000001){
-    renderPOSCart();
-    return showToast(`المتاح لا يكفي لهذا الوزن — المتاح ${p.qty} ${p.unit||'كجم'}`,'warning');
-  }
-  const same=window.posCart.find((x,i)=>i!==index && x.id===p.id && Number(x.weight||1)===newWeight);
+  if(needed>(Number(p.qty)||0)+0.000001){renderPOSCart();return showToast(`المتاح لا يكفي لهذا الوزن — المتاح ${p.qty} ${p.unit||'كجم'}`,'warning');}
+  const same=window.posCart.find((x,i)=>i!==index && x.id===p.id && Math.abs(Number(x.weight||1)-newWeight)<0.000001);
   if(same){same.qty+=item.qty;window.posCart.splice(index,1);}else item.weight=newWeight;
   renderPOSCart(); renderSaleProductGrid();
+}
+function addManualWeightToPOS(id){
+  const grams=prompt('اكتب الوزن بالجرام، مثال: 750 أو 300','750');
+  if(grams===null)return;
+  const g=Number(grams);
+  if(!Number.isFinite(g)||g<=0)return showToast('أدخل وزنًا صحيحًا بالجرام','warning');
+  addToPOSCart(id,g/1000);
+}
+function togglePOSCustomCustomer(){
+  const sel=document.getElementById('posCustomer');
+  const input=document.getElementById('posCustomCustomer');
+  if(!sel||!input)return;
+  input.style.display=sel.value?'none':'block';
+}
+function togglePOSCredit(){
+  const method=document.getElementById('posPaymentMethod')?.value||'cash';
+  const row=document.getElementById('posCreditRow');
+  if(row)row.classList.toggle('show',method==='credit');
+  updatePOSSummary();
 }
 function removePOSItem(index){window.posCart.splice(index,1);renderPOSCart();renderSaleProductGrid();}
 function clearPOSCart(){window.posCart=[];renderPOSCart();renderSaleProductGrid();}
@@ -1031,7 +1071,7 @@ function renderPOSCart(){
     const weight=Number(item.weight||1);
     const price=packagePrice(p,weight,type);
     const img=p.image?`<img src="${p.image}" alt="${p.name}">`:`<div class="cart-icon">${p.type==='cheese'?'🧀':'❄️'}</div>`;
-    const sizeControl=isKgProduct(p)?`<div class="pos-cart-size"><span style="font-size:.62rem;color:var(--text-muted);font-weight:800">الوزن:</span><select onchange="changePOSWeight(${index},this.value)"><option value="1" ${weight===1?'selected':''}>1 كجم</option><option value="0.5" ${weight===0.5?'selected':''}>500 جم</option><option value="0.25" ${weight===0.25?'selected':''}>250 جم</option></select></div>`:`<div class="pos-cart-size"><span style="font-size:.62rem;color:var(--text-muted);font-weight:800">الوحدة: ${p.unit||'قطعة'}</span></div>`;
+    const sizeControl=isKgProduct(p)?`<div class="pos-cart-size"><span style="font-size:.62rem;color:var(--text-muted);font-weight:800">الوزن:</span><select onchange="changePOSWeight(${index},this.value)"><option value="1" ${weight===1?'selected':''}>1 كجم</option><option value="0.5" ${weight===0.5?'selected':''}>500 جم</option><option value="0.25" ${weight===0.25?'selected':''}>250 جم</option><option value="manual" ${![1,.5,.25].includes(weight)?'selected':''}>وزن يدوي</option></select></div>`:`<div class="pos-cart-size"><span style="font-size:.62rem;color:var(--text-muted);font-weight:800">الوحدة: ${p.unit||'قطعة'}</span></div>`;
     return `<div class="pos-cart-item">${img}<div><div class="pos-cart-name">${p.name}</div><div class="pos-cart-meta">${fmt(price)} × ${item.qty} (${weightLabel(weight)})</div>${sizeControl}<div class="pos-qty"><button onclick="changePOSQty(${index},-1)">−</button><span>${item.qty}</span><button onclick="changePOSQty(${index},1)">+</button><button onclick="removePOSItem(${index})" style="margin-right:5px;color:#b42318">×</button></div></div><div class="pos-cart-total">${fmt(price*item.qty)}</div></div>`;
   }).join('');
   updatePOSSummary();
@@ -1043,13 +1083,15 @@ function updatePOSSummary(){
   const discount=Math.max(0,Number(document.getElementById('posDiscount')?.value||0));
   const total=Math.max(0,subtotal-discount);
   const paid=Math.max(0,Number(document.getElementById('posPaid')?.value||0));
+  const method=document.getElementById('posPaymentMethod')?.value||'cash';
   const change=Math.max(0,paid-total);
+  const remaining=Math.max(0,total-paid);
   const el=(id)=>document.getElementById(id);
   if(el('posSubtotal'))el('posSubtotal').textContent=fmt(subtotal);
   if(el('posGrandTotal'))el('posGrandTotal').textContent=fmt(total);
-  if(el('posChange'))el('posChange').textContent=fmt(change);
-  if(el('posCartCount'))el('posCartCount').textContent=`${(window.posCart||[]).reduce((n,x)=>n+Number(x.qty||0),0)} عبوة`;
-  if(el('posCheckoutBtn'))el('posCheckoutBtn').disabled=!(window.posCart||[]).length || total<=0 || paid<total;
+  if(el('posChange'))el('posChange').textContent=method==='credit'?`آجل: ${fmt(remaining)}`:fmt(change);
+  if(el('posCartCount'))el('posCartCount').textContent=`${(window.posCart||[]).reduce((n,x)=>n+Number(x.qty||0),0)} وحدة`;
+  if(el('posCheckoutBtn'))el('posCheckoutBtn').disabled=!(window.posCart||[]).length || total<=0 || (method==='cash' && paid<total);
 }
 function togglePOSCustomCustomer(){
   const select=document.getElementById('posCustomer');
@@ -1063,15 +1105,18 @@ function togglePOSCustomCustomer(){
 function checkoutPOS(){
   const cart=window.posCart||[]; if(!cart.length)return;
   const type=document.getElementById('posSaleType').value;
+  const method=document.getElementById('posPaymentMethod')?.value||'cash';
   const discount=Math.max(0,Number(document.getElementById('posDiscount').value||0));
   const customerId=document.getElementById('posCustomer').value;
-  const customCustomerName=(document.getElementById('posCustomCustomer')?.value||'').trim();
-  const customerName=customerId?(Store.get('customers').find(c=>c.id===customerId)?.name||''):(customCustomerName||'عميل عادي');
+  const customName=document.getElementById('posCustomCustomer')?.value.trim()||'';
+  const customerName=customerId?(Store.get('customers').find(c=>c.id===customerId)?.name||''):(customName||'عميل عادي');
   const products=window.saleProducts||[];
   const subtotal=cart.reduce((sum,item)=>{const p=products.find(x=>x.id===item.id);return sum+(p?packagePrice(p,Number(item.weight||1),type)*Number(item.qty||0):0)},0);
   const total=Math.max(0,subtotal-discount);
   const paid=Math.max(0,Number(document.getElementById('posPaid').value||0));
-  if(paid<total)return showToast('المبلغ المدفوع أقل من المطلوب','warning');
+  if(method==='cash' && paid<total)return showToast('المبلغ المدفوع أقل من المطلوب','warning');
+  if(method==='credit' && !customerName.trim())return showToast('اكتب اسم العميل عند البيع بالأجل','warning');
+  const remaining=Math.max(0,total-paid);
   cart.forEach(item=>{
     const p=products.find(x=>x.id===item.id); if(!p)return;
     const weight=Number(item.weight||1);
@@ -1085,11 +1130,14 @@ function checkoutPOS(){
     const effectivePackPrice=packs?itemTotal/packs:0;
     const profit=(effectivePackPrice-(costKg*weight))*packs;
     Store.update('products',p.id,{qty:(p.qty||0)-qtyKg});
-    Store.add('sales',{date:today(),productId:p.id,productName:p.name,customerId:customerId||null,customerName,type,qty:qtyKg,packages:packs,weight,unitPrice:unitKgPrice,price:effectivePackPrice,cost:costKg*weight,discount:price?((itemDiscount/(price*packs))*100):0,discountedPrice:effectivePackPrice,total:itemTotal,profit,note:`بيع من الكاشير — ${weightLabel(weight)}`});
+    Store.add('sales',{date:today(),productId:p.id,productName:p.name,customerId:customerId||null,customerName,type,qty:qtyKg,packages:packs,weight,unitPrice:unitKgPrice,price:effectivePackPrice,cost:costKg*weight,discount:price?((itemDiscount/(price*packs))*100):0,discountedPrice:effectivePackPrice,total:itemTotal,profit,paymentMethod:method,paid,remaining,note:`بيع من الكاشير — ${weightLabel(weight)}${method==='credit'?' — آجل':''}`});
   });
   if(customerId){const customers=Store.get('customers');const i=customers.findIndex(c=>c.id===customerId);if(i>=0){customers[i].points=(customers[i].points||0)+Math.floor(total/10);customers[i].totalSpent=(customers[i].totalSpent||0)+total;Store.set('customers',customers);}}
-  const change=paid-total;
-  showToast(`✅ تم البيع بنجاح — الباقي ${fmt(change)}`);
+  if(method==='credit' && remaining>0){
+    Store.add('debts',{date:today(),person:customerName,type:'لنا',amount:remaining,due:document.getElementById('posDueDate')?.value||'',note:`آجل من بيع الكاشير${customerId?' — عميل مسجل':''}`,paid:false,source:'sale',saleTotal:total,paidAmount:paid});
+  }
+  const change=method==='cash'?paid-total:0;
+  showToast(method==='credit'?`📋 تم تسجيل البيع بالأجل — المتبقي ${fmt(remaining)}`:`✅ تم البيع بنجاح — الباقي ${fmt(change)}`);
   window.posCart=[]; renderSalesPage(document.getElementById('contentArea'));
 }
 
