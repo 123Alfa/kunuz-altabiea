@@ -529,6 +529,20 @@ tr:hover td{background:rgba(15,118,110,.045)}
 }
 
 @media(max-width:899px){.pos-cashier{grid-template-columns:1fr}.pos-cart-panel{position:static}.pos-cart-list{max-height:330px}.pos-products-panel{order:1}.pos-cart-panel{order:2}}
+
+/* ===== رصد المبيعات Pro — لوحة متابعة حديثة ===== */
+.rasd-head{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:14px;flex-wrap:wrap}
+.rasd-title{display:flex;align-items:center;gap:10px}.rasd-title .rasd-icon{width:46px;height:46px;border-radius:15px;background:linear-gradient(135deg,var(--primary),var(--accent));color:#fff;display:flex;align-items:center;justify-content:center;font-size:1.25rem;box-shadow:0 7px 20px rgba(15,118,110,.2)}
+.rasd-title h2{font-size:1.2rem;font-weight:950;color:var(--text);margin:0}.rasd-title p{font-size:.72rem;color:var(--text-muted);margin-top:2px}
+.rasd-period{display:flex;gap:6px;background:#fff;border:1px solid var(--border);padding:5px;border-radius:14px;box-shadow:var(--shadow)}
+.rasd-period button{border:0;background:transparent;color:var(--text-light);padding:8px 11px;border-radius:10px;font-family:inherit;font-weight:900;font-size:.72rem;cursor:pointer}.rasd-period button.active{background:var(--primary);color:#fff;box-shadow:0 4px 12px rgba(15,118,110,.2)}
+.rasd-hero{background:linear-gradient(135deg,#0f766e 0%,#126f68 55%,#c99a22 145%);border-radius:22px;padding:18px;color:#fff;box-shadow:0 12px 28px rgba(15,118,110,.16);position:relative;overflow:hidden;margin-bottom:14px}.rasd-hero:after{content:'';position:absolute;width:190px;height:190px;border-radius:50%;background:rgba(255,255,255,.08);left:-70px;bottom:-100px}.rasd-hero-top{display:flex;justify-content:space-between;gap:12px;align-items:flex-start;position:relative;z-index:1}.rasd-hero-label{font-size:.76rem;opacity:.78;font-weight:800}.rasd-hero-value{font-size:2rem;font-weight:950;margin-top:2px}.rasd-hero-meta{font-size:.72rem;opacity:.78;margin-top:4px}.rasd-hero-profit{background:rgba(255,255,255,.13);border:1px solid rgba(255,255,255,.15);border-radius:14px;padding:10px 12px;text-align:center;min-width:120px}.rasd-hero-profit small{display:block;font-size:.65rem;opacity:.75}.rasd-hero-profit strong{font-size:1.05rem;display:block;margin-top:2px}
+.rasd-kpis{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-bottom:14px}.rasd-kpi{background:#fff;border:1px solid var(--border);border-radius:17px;padding:14px 12px;box-shadow:var(--shadow);position:relative;overflow:hidden}.rasd-kpi:before{content:'';position:absolute;top:0;right:0;left:0;height:3px;background:var(--primary)}.rasd-kpi.gold:before{background:var(--accent)}.rasd-kpi.green:before{background:var(--success)}.rasd-kpi.red:before{background:var(--danger)}.rasd-kpi-icon{width:34px;height:34px;border-radius:10px;background:#eef8f5;display:flex;align-items:center;justify-content:center;margin-bottom:7px;font-size:1rem}.rasd-kpi.gold .rasd-kpi-icon{background:#fff7e4}.rasd-kpi.green .rasd-kpi-icon{background:#edf9f4}.rasd-kpi.red .rasd-kpi-icon{background:#fff0f0}.rasd-kpi-label{font-size:.68rem;color:var(--text-muted);font-weight:800}.rasd-kpi-value{font-size:1.05rem;font-weight:950;color:var(--text);margin-top:2px}.rasd-kpi-sub{font-size:.62rem;color:var(--text-muted);margin-top:2px}
+.rasd-grid{display:grid;grid-template-columns:minmax(0,1.45fr) minmax(280px,.8fr);gap:14px;margin-bottom:14px}.rasd-card{background:#fff;border:1px solid var(--border);border-radius:20px;padding:15px;box-shadow:var(--shadow)}.rasd-card-title{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:12px}.rasd-card-title strong{font-size:.9rem;font-weight:950}.rasd-card-title span{font-size:.65rem;color:var(--text-muted)}.rasd-chart{height:235px;position:relative}.rasd-pay-grid{display:grid;grid-template-columns:1fr 1fr;gap:9px}.rasd-pay{border-radius:14px;padding:12px;background:#f7faf8;border:1px solid var(--border)}.rasd-pay strong{display:block;font-size:.88rem}.rasd-pay span{display:block;font-size:.64rem;color:var(--text-muted);margin-top:3px}.rasd-pay.cash strong{color:var(--primary)}.rasd-pay.credit strong{color:var(--danger)}
+.rasd-list{display:flex;flex-direction:column;gap:8px}.rasd-row{display:flex;align-items:center;gap:9px;padding:9px;border:1px solid #edf1ef;border-radius:13px;background:#fcfdfc}.rasd-row .rank{width:27px;height:27px;border-radius:9px;background:#eef7f4;color:var(--primary);display:flex;align-items:center;justify-content:center;font-weight:950;font-size:.7rem;flex:0 0 auto}.rasd-row .info{min-width:0;flex:1}.rasd-row .name{font-size:.75rem;font-weight:900;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.rasd-row .meta{font-size:.6rem;color:var(--text-muted);margin-top:2px}.rasd-row .amount{font-size:.75rem;font-weight:950;color:var(--primary);white-space:nowrap}.rasd-empty{padding:28px 10px;text-align:center;color:var(--text-muted);font-size:.75rem}
+.rasd-alerts{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px}.rasd-alert{padding:12px;border-radius:15px;border:1px solid var(--border);background:#fff;display:flex;align-items:center;gap:10px}.rasd-alert i{width:34px;height:34px;border-radius:10px;display:flex;align-items:center;justify-content:center;background:#fff5e8;color:var(--accent)}.rasd-alert.danger i{background:#fff0f0;color:var(--danger)}.rasd-alert strong{display:block;font-size:.72rem}.rasd-alert span{display:block;font-size:.62rem;color:var(--text-muted);margin-top:2px}
+@media(max-width:899px){.rasd-grid{grid-template-columns:1fr}.rasd-chart{height:220px}}
+@media(max-width:520px){.rasd-head{align-items:flex-start}.rasd-period{width:100%}.rasd-period button{flex:1}.rasd-hero-value{font-size:1.65rem}.rasd-hero-profit{min-width:105px}.rasd-alerts{grid-template-columns:1fr}.rasd-kpis{gap:8px}.rasd-kpi{padding:12px 10px}}
 </style>
 <link rel="manifest" href="manifest.json">
 <link rel="apple-touch-icon" href="icon-192.png">
@@ -609,7 +623,7 @@ tr:hover td{background:rgba(15,118,110,.045)}
   <circle class="hole" cx="45" cy="52" r="6"/><circle class="hole" cx="69" cy="38" r="5"/><circle class="hole" cx="79" cy="61" r="7"/><circle class="hole" cx="43" cy="78" r="5"/>
   <ellipse class="shine" cx="52" cy="34" rx="20" ry="5" transform="rotate(-17 52 34)"/>
 </svg></div>
-      <div class="logo-text">كنوز&nbsp;&nbsp;الطبيعة<small>نظام نقاط البيع المتكامل Pro</small></div>
+      <div class="logo-text">كنوز&nbsp;&nbsp;الطبيعة<small>رصد المبيعات وإدارة نقاط البيع Pro</small></div>
     </h1>
     <div class="user-info">
       <span id="userName" style="font-size:0.85rem;color:var(--text-light)"></span>
@@ -620,7 +634,7 @@ tr:hover td{background:rgba(15,118,110,.045)}
   <div class="sync-status" id="syncStatus"><i class="fas fa-check-circle"></i> متزامن</div>
   <div class="content-area" id="contentArea"></div>
   <nav class="bottom-nav">
-    <button class="bottom-nav-item active" onclick="navigateTo('dashboard')"><i class="fas fa-chart-pie"></i><span>الرئيسية</span></button>
+    <button class="bottom-nav-item active" onclick="navigateTo('dashboard')"><i class="fas fa-chart-pie"></i><span>الرصد</span></button>
     <button class="bottom-nav-item" onclick="navigateTo('products')"><i class="fas fa-cheese"></i><span>الأصناف</span></button>
     <button class="bottom-nav-item" onclick="navigateTo('sales')"><i class="fas fa-shopping-cart"></i><span>المبيعات</span></button>
     <button class="bottom-nav-item" onclick="navigateTo('more')"><i class="fas fa-ellipsis-h"></i><span>المزيد</span></button>
@@ -752,51 +766,86 @@ function navigateTo(tab){
 
 // ==================== الصفحة الرئيسية ====================
 function renderDashboardPage(container){
-  const products=Store.get('products');
-  const sales=Store.get('sales');
-  const debts=Store.get('debts');
+  const products=Store.get('products')||[];
+  const sales=Store.get('sales')||[];
+  const debts=Store.get('debts')||[];
   const todayStr=today();
-  const todaySales=sales.filter(s=>s.date===todayStr);
-  const todayTotal=todaySales.reduce((sum,s)=>sum+(s.total||0),0);
-  const todayProfit=todaySales.reduce((sum,s)=>sum+(s.profit||0),0);
-  const activeDebts=debts.filter(d=>!d.paid&&d.type==='لنا').reduce((sum,d)=>sum+(d.amount||0),0);
-  const debtsOnUs=debts.filter(d=>!d.paid&&d.type==='علينا').reduce((sum,d)=>sum+(d.amount||0),0);
-
-  const lowStock=products.filter(p=>(p.qty||0)<=(p.minStock||5));
-  const lowStockHtml=lowStock.length>0?`<div class="low-stock-alert"><i class="fas fa-exclamation-triangle"></i><span>⚠️ ${lowStock.length} صنف مخزون منخفض: ${lowStock.map(p=>p.name).join('، ')}</span></div>`:'';
+  const period=window.rasdPeriod||'today';
+  const now=new Date();
+  let start=todayStr, end=todayStr, label='اليوم';
+  if(period==='week'){
+    const d=new Date(now); d.setDate(d.getDate()-6);
+    start=d.toISOString().split('T')[0]; end=todayStr; label='آخر 7 أيام';
+  }else if(period==='month'){
+    start=todayStr.slice(0,7)+'-01'; end=todayStr; label='هذا الشهر';
+  }
+  const inPeriod=sales.filter(s=>s.date>=start&&s.date<=end);
+  const total=inPeriod.reduce((sum,s)=>sum+Number(s.total||0),0);
+  const profit=inPeriod.reduce((sum,s)=>sum+Number(s.profit||0),0);
+  const paid=inPeriod.reduce((sum,s)=>sum+Number(s.paid||0),0);
+  const remaining=inPeriod.reduce((sum,s)=>sum+Number(s.remaining||0),0);
+  const discounts=inPeriod.reduce((sum,s)=>{
+    const gross=Number(s.unitPrice||s.price||0)*Number(s.packages||s.qty||0);
+    return sum+Math.max(0,gross-Number(s.total||0));
+  },0);
+  const lowStock=products.filter(p=>Number(p.qty||0)<=Number(p.minStock||5));
+  const activeDebts=debts.filter(d=>!d.paid&&d.type==='لنا').reduce((sum,d)=>sum+Number(d.amount||0),0);
+  const debtsOnUs=debts.filter(d=>!d.paid&&d.type==='علينا').reduce((sum,d)=>sum+Number(d.amount||0),0);
+  const cash=inPeriod.filter(s=>(s.paymentMethod||'cash')==='cash').reduce((sum,s)=>sum+Number(s.total||0),0);
+  const credit=inPeriod.filter(s=>s.paymentMethod==='credit').reduce((sum,s)=>sum+Number(s.total||0),0);
+  const productMap={};
+  inPeriod.forEach(s=>{const key=s.productName||'غير محدد'; if(!productMap[key])productMap[key]={name:key,qty:0,total:0,profit:0}; productMap[key].qty+=Number(s.qty||s.packages||0); productMap[key].total+=Number(s.total||0); productMap[key].profit+=Number(s.profit||0);});
+  const topProducts=Object.values(productMap).sort((a,b)=>b.total-a.total).slice(0,5);
+  const recent=[...inPeriod].sort((a,b)=>((b.id||'')>(a.id||'')?1:-1)).slice(-6).reverse();
+  const profitPct=total>0?((profit/total)*100).toFixed(1):'0.0';
+  const avg= inPeriod.length ? total/inPeriod.length : 0;
+  const typeLabel=period==='today'?'مبيعات اليوم':period==='week'?'مبيعات آخر 7 أيام':'مبيعات هذا الشهر';
+  const lowHtml=lowStock.length?`<div class="rasd-alert danger"><i class="fas fa-triangle-exclamation"></i><div><strong>مخزون منخفض</strong><span>${lowStock.length} صنف يحتاج متابعة</span></div></div>`:`<div class="rasd-alert"><i class="fas fa-circle-check"></i><div><strong>المخزون جيد</strong><span>لا توجد أصناف تحت الحد الأدنى</span></div></div>`;
 
   container.innerHTML=`<div class="fade-in">
-    ${lowStockHtml}
-    <div class="stats-grid">
-      <div class="stat-card primary" onclick="navigateTo('sales')"><div class="stat-icon">💰</div><div class="stat-label">مبيعات اليوم</div><div class="stat-value">${fmt(todayTotal)}</div></div>
-      <div class="stat-card accent" onclick="navigateTo('sales')"><div class="stat-icon">📈</div><div class="stat-label">صافي المكسب</div><div class="stat-value ${todayProfit>=0?'profit-positive':'profit-negative'}">${fmt(todayProfit)}</div></div>
-      <div class="stat-card danger" onclick="navigateTo('debts')"><div class="stat-icon">📋</div><div class="stat-label">ديون مستحقة (لنا)</div><div class="stat-value">${fmt(activeDebts)}</div></div>
-      <div class="stat-card info" onclick="navigateTo('debts')"><div class="stat-icon">📤</div><div class="stat-label">ديون علينا</div><div class="stat-value">${fmt(debtsOnUs)}</div></div>
-      <div class="stat-card success" onclick="navigateTo('products')"><div class="stat-icon">📦</div><div class="stat-label">عدد الأصناف</div><div class="stat-value">${products.length}</div></div>
-      <div class="stat-card primary" onclick="navigateTo('customers')"><div class="stat-icon">👥</div><div class="stat-label">العملاء</div><div class="stat-value">${Store.get('customers').length}</div></div>
+    <div class="rasd-head">
+      <div class="rasd-title"><div class="rasd-icon"><i class="fas fa-chart-line"></i></div><div><h2>رصد المبيعات</h2><p>متابعة سريعة وواضحة لحركة البيع والربح</p></div></div>
+      <div class="rasd-period">
+        <button class="${period==='today'?'active':''}" onclick="setRasdPeriod('today')">اليوم</button>
+        <button class="${period==='week'?'active':''}" onclick="setRasdPeriod('week')">7 أيام</button>
+        <button class="${period==='month'?'active':''}" onclick="setRasdPeriod('month')">الشهر</button>
+      </div>
     </div>
-    <div class="section-header"><h2><i class="fas fa-bolt" style="color:var(--accent)"></i> إجراءات سريعة</h2><div class="line"></div></div>
+    <div class="rasd-hero">
+      <div class="rasd-hero-top"><div><div class="rasd-hero-label">${typeLabel}</div><div class="rasd-hero-value">${fmt(total)}</div><div class="rasd-hero-meta">${inPeriod.length} عملية بيع • متوسط العملية ${fmt(avg)}</div></div><div class="rasd-hero-profit"><small>الربح من المبيعات</small><strong>${fmt(profit)}</strong><small>${profitPct}% هامش</small></div></div>
+    </div>
+    <div class="rasd-kpis">
+      <div class="rasd-kpi green"><div class="rasd-kpi-icon">💵</div><div class="rasd-kpi-label">المحصّل</div><div class="rasd-kpi-value">${fmt(paid||cash)}</div><div class="rasd-kpi-sub">نقدي/مدفوع</div></div>
+      <div class="rasd-kpi red"><div class="rasd-kpi-icon">📋</div><div class="rasd-kpi-label">آجل / متبقي</div><div class="rasd-kpi-value">${fmt(remaining)}</div><div class="rasd-kpi-sub">من عمليات الفترة</div></div>
+      <div class="rasd-kpi gold"><div class="rasd-kpi-icon">🏷️</div><div class="rasd-kpi-label">الخصومات</div><div class="rasd-kpi-value">${fmt(discounts)}</div><div class="rasd-kpi-sub">إجمالي الخصم</div></div>
+      <div class="rasd-kpi"><div class="rasd-kpi-icon">📦</div><div class="rasd-kpi-label">الأصناف</div><div class="rasd-kpi-value">${products.length}</div><div class="rasd-kpi-sub">${lowStock.length} منخفض المخزون</div></div>
+    </div>
+    <div class="rasd-alerts">${lowHtml}<div class="rasd-alert"><i class="fas fa-hand-holding-dollar"></i><div><strong>ديون العملاء</strong><span>لنا ${fmt(activeDebts)} • علينا ${fmt(debtsOnUs)}</span></div></div></div>
+    <div class="rasd-grid">
+      <div class="rasd-card"><div class="rasd-card-title"><strong><i class="fas fa-chart-column" style="color:var(--primary);margin-left:6px"></i> حركة المبيعات</strong><span>${label}</span></div><div class="rasd-chart"><canvas id="rasdSalesChart"></canvas></div></div>
+      <div class="rasd-card"><div class="rasd-card-title"><strong><i class="fas fa-wallet" style="color:var(--accent);margin-left:6px"></i> طريقة الدفع</strong><span>الفترة المحددة</span></div><div class="rasd-pay-grid"><div class="rasd-pay cash"><strong>${fmt(cash)}</strong><span>نقدي</span></div><div class="rasd-pay credit"><strong>${fmt(credit)}</strong><span>آجل</span></div></div><div style="height:18px"></div><div class="rasd-list"><div class="rasd-row"><div class="rank"><i class="fas fa-arrow-trend-up"></i></div><div class="info"><div class="name">هامش الربح</div><div class="meta">ربح ÷ مبيعات</div></div><div class="amount">${profitPct}%</div></div><div class="rasd-row"><div class="rank"><i class="fas fa-cart-shopping"></i></div><div class="info"><div class="name">متوسط العملية</div><div class="meta">إجمالي المبيعات ÷ العمليات</div></div><div class="amount">${fmt(avg)}</div></div></div></div>
+    </div>
+    <div class="rasd-grid">
+      <div class="rasd-card"><div class="rasd-card-title"><strong><i class="fas fa-trophy" style="color:var(--accent);margin-left:6px"></i> الأكثر مبيعًا</strong><span>حسب قيمة المبيعات</span></div><div class="rasd-list">${topProducts.map((p,i)=>`<div class="rasd-row"><div class="rank">${i+1}</div><div class="info"><div class="name">${p.name}</div><div class="meta">كمية ${fmt(p.qty)} • ربح ${fmt(p.profit)}</div></div><div class="amount">${fmt(p.total)}</div></div>`).join('')||'<div class="rasd-empty">لا توجد مبيعات في الفترة المحددة</div>'}</div></div>
+      <div class="rasd-card"><div class="rasd-card-title"><strong><i class="fas fa-clock" style="color:var(--primary);margin-left:6px"></i> آخر العمليات</strong><span>الأحدث</span></div><div class="rasd-list">${recent.map(s=>`<div class="rasd-row"><div class="rank">🛒</div><div class="info"><div class="name">${s.productName||'بيع'}</div><div class="meta">${s.customerName||'عميل نقدي'} • ${s.paymentMethod==='credit'?'آجل':'نقدي'}</div></div><div class="amount">${fmt(s.total||0)}</div></div>`).join('')||'<div class="rasd-empty">لا توجد عمليات</div>'}</div></div>
+    </div>
     <div class="quick-actions">
-      <div class="quick-action" onclick="navigateTo('sales')"><i class="fas fa-shopping-cart"></i><span>بيع سريع</span></div>
-      <div class="quick-action" onclick="navigateTo('expenses')"><i class="fas fa-wallet"></i><span>مصروف</span></div>
-      <div class="quick-action" onclick="navigateTo('purchases')"><i class="fas fa-truck"></i><span>شراء</span></div>
-      <div class="quick-action" onclick="navigateTo('summary')"><i class="fas fa-file-invoice-dollar"></i><span>ملخص الشهر</span></div>
-      <div class="quick-action" onclick="navigateTo('customers')"><i class="fas fa-user-plus"></i><span>عميل جديد</span></div>
-      <div class="quick-action" onclick="navigateTo('offers')"><i class="fas fa-percent"></i><span>عروض</span></div>
+      <div class="quick-action" onclick="navigateTo('sales')"><i class="fas fa-cash-register"></i><span>بيع سريع</span></div>
+      <div class="quick-action" onclick="navigateTo('summary')"><i class="fas fa-chart-pie"></i><span>التقرير المالي</span></div>
+      <div class="quick-action" onclick="navigateTo('products')"><i class="fas fa-boxes-stacked"></i><span>المخزون</span></div>
+      <div class="quick-action" onclick="navigateTo('debts')"><i class="fas fa-file-invoice-dollar"></i><span>الديون</span></div>
     </div>
-    <div class="card"><div class="card-title"><i class="fas fa-chart-line"></i> المبيعات الأسبوعية</div><div class="chart-container"><canvas id="weekChart"></canvas></div></div>
-    <div class="card"><div class="card-title"><i class="fas fa-clock"></i> آخر العمليات</div><div class="table-wrap"><table><thead><tr><th>الوقت</th><th>النوع</th><th>التفاصيل</th><th>المبلغ</th></tr></thead><tbody id="recentActivity"></tbody></table></div></div>
   </div>`;
-  renderWeekChart(sales);
-  const all=[...sales.map(s=>({...s,kind:'بيع',icon:'🛒',time:s.date})),...debts.filter(d=>!d.paid).map(d=>({...d,kind:'دين',icon:'📋',time:d.date,total:d.amount}))].sort((a,b)=>(b.time>a.time?1:-1)).slice(0,8);
-  document.getElementById('recentActivity').innerHTML=all.map(a=>`<tr><td>${a.time}</td><td>${a.icon} ${a.kind}</td><td>${a.productName||a.person||'-'}</td><td style="font-weight:bold;color:var(--primary-light)">${fmt(a.total||0)}</td></tr>`).join('')||'<tr><td colspan="4" class="empty">لا توجد عمليات</td></tr>';
+  renderRasdChart(inPeriod);
 }
 
-function renderWeekChart(sales){
-  const ctx=document.getElementById('weekChart');if(!ctx)return;
-  const days=[],data=[],profitData=[];
-  for(let i=6;i>=0;i--){const d=new Date();d.setDate(d.getDate()-i);const ds=d.toISOString().split('T')[0];days.push(d.toLocaleDateString('ar-EG',{weekday:'short'}));const daySales=sales.filter(s=>s.date===ds);data.push(daySales.reduce((sum,s)=>sum+(s.total||0),0));profitData.push(daySales.reduce((sum,s)=>sum+(s.profit||0),0));}
-  new Chart(ctx,{type:'bar',data:{labels:days,datasets:[{label:'المبيعات',data,backgroundColor:'rgba(15,118,110,0.7)',borderColor:'#0f766e',borderWidth:1,borderRadius:8,yAxisID:'y'},{label:'المكسب',data:profitData,backgroundColor:'rgba(16,185,129,0.7)',borderColor:'#10b981',borderWidth:1,borderRadius:8,yAxisID:'y1'}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:true,labels:{color:'#94a3b8'}}},scales:{y:{beginAtZero:true,grid:{color:'rgba(255,255,255,0.05)'},ticks:{color:'#94a3b8'},position:'right'},y1:{beginAtZero:true,grid:{display:false},ticks:{color:'#10b981'},position:'left'}}}});
+function setRasdPeriod(period){window.rasdPeriod=period;renderDashboardPage(document.getElementById('contentArea'));}
+function renderRasdChart(sales){
+  const ctx=document.getElementById('rasdSalesChart'); if(!ctx||typeof Chart==='undefined')return;
+  const labels=[],data=[],profits=[];
+  const base=new Date();
+  for(let i=6;i>=0;i--){const d=new Date(base);d.setDate(d.getDate()-i);const ds=d.toISOString().split('T')[0];labels.push(d.toLocaleDateString('ar-EG',{weekday:'short'}));const rows=sales.filter(s=>s.date===ds);data.push(rows.reduce((a,s)=>a+Number(s.total||0),0));profits.push(rows.reduce((a,s)=>a+Number(s.profit||0),0));}
+  new Chart(ctx,{type:'bar',data:{labels,datasets:[{label:'المبيعات',data,backgroundColor:'rgba(15,118,110,.78)',borderRadius:8},{label:'الربح',data:profits,backgroundColor:'rgba(201,154,34,.72)',borderRadius:8}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'bottom',labels:{font:{family:'Tajawal'}}}},scales:{x:{grid:{display:false}},y:{beginAtZero:true,grid:{color:'rgba(0,0,0,.06)'}}}}});
 }
 
 // ==================== الأصناف ====================
