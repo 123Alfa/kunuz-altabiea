@@ -573,6 +573,33 @@ tr:hover td{background:rgba(15,118,110,.045)}
 <meta name="apple-mobile-web-app-title" content="كنوز الطبيعة POS Pro">
 <meta name="application-name" content="كنوز الطبيعة POS Pro">
 <meta name="msapplication-TileColor" content="#0f766e">
+
+<style>
+/* تحسين وضوح سلة البيع ومنع تداخل عناصر السعر والمخزون */
+.pos-cart-item .pos-price-editor {
+  margin: 8px 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.pos-cart-item .pos-price-editor input {
+  width: 100px;
+  padding: 6px;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  text-align: center;
+}
+.pos-cart-item .pos-line-total {
+  font-size: 1.1rem;
+  color: var(--primary);
+}
+.pos-cart-item .pos-cart-stock {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  margin: 4px 0;
+}
+</style>
 </head>
 <body>
 <div id="loading-screen">
@@ -1085,6 +1112,34 @@ function setPOSCategory(cat,btn){
   if(btn)btn.classList.add('active');
   renderSaleProductGrid();
 }
+// ==================== دوال مساعدة مفقودة ====================
+function reservedProductQty(productId, excludeIndex = -1) {
+    const cart = window.posCart || [];
+    let total = 0;
+    cart.forEach((item, index) => {
+        if (index === excludeIndex) return;
+        if (item.id === productId && !item.service) {
+            total += (item.weight || 1) * (item.qty || 0);
+        }
+    });
+    return total;
+}
+
+function packagePrice(product, weight, saleType) {
+    if (!product) return 0;
+    const basePrice = Number(
+        saleType === 'wholesale' ? (product.wholesale || 0) : (product.retail || 0)
+    );
+    const safeWeight = Number(weight);
+    if (!Number.isFinite(safeWeight) || safeWeight <= 0) return isKgProduct(product) ? 0 : basePrice;
+    return isKgProduct(product) ? basePrice * safeWeight : basePrice;
+}
+
+function weightLabel(weight) {
+    if (weight === 0) return '0';
+    return weight >= 1 ? weight + ' كجم' : (weight * 1000) + ' جم';
+}
+
 // تحديد المنتجات التي تباع بالوزن
 // الموزاريلا/الجبن بوحدة كجم تسمح بالأوزان الجزئية، بينما العبوات والوحدات الأخرى تباع كقطعة.
 function isKgProduct(p){
@@ -1237,6 +1292,7 @@ function renderPOSCart(){
       </div>`;
     }
     const p=products.find(x=>x.id===item.id); if(!p)return '';
+    // لا نعرض note أو description أو أي حقول وصفية إضافية داخل سلة البيع.
     const weight=Number(item.weight||1);
     const price=getPOSItemUnitPrice(item,p,type);
     const lastPrice=getLastSalePrice(p.id,type);
@@ -1247,15 +1303,32 @@ function renderPOSCart(){
           <span class="weight-unit">جم</span>
           <button onclick="applyManualPOSWeight(${index})">تطبيق</button>
         </div>`:`<div class="pos-cart-size"><span style="font-size:.62rem;color:var(--text-muted);font-weight:800">الوحدة: ${p.unit||'قطعة'}</span></div>`;
-    const lastHtml=lastPrice!==null?`<div class="pos-cart-last"><i class="fas fa-history"></i> آخر سعر بيع: ${fmt(lastPrice)}</div>`:'';
+    const lastHtml=lastPrice!==null && lastPrice!==price
+      ? `<div class="pos-cart-last"><i class="fas fa-history"></i> آخر سعر بيع: ${fmt(lastPrice)}</div>`
+      : '';
     return `<div class="pos-cart-item">
       <div class="cart-visual">${img}</div>
       <div class="pos-cart-main">
-        <div class="pos-cart-topline"><div class="pos-cart-name">${p.name}</div><button class="pos-cart-delete" onclick="removePOSItem(${index})"><i class="fas fa-trash"></i></button></div>
-        ${lastHtml}<div class="pos-cart-stock"><i class="fas fa-box"></i> في المخزن ${Number(p.qty||0)} ${p.unit||'كجم'}</div>
-        <div class="pos-price-editor"><label>سعر البيع</label><input type="number" value="${Number(price.toFixed(2))}" min="0" step="0.01" onchange="updatePOSItemPrice(${index},this.value)"><button title="رجوع للسعر الأساسي" onclick="resetPOSItemPrice(${index})" style="border:0;background:#eef7f4;color:var(--primary);border-radius:8px;padding:7px 8px;cursor:pointer">↺</button></div>
+        <div class="pos-cart-topline">
+          <span class="pos-cart-name">${p.name}</span>
+          <button class="pos-cart-delete" onclick="removePOSItem(${index})"><i class="fas fa-trash"></i></button>
+        </div>
+        ${lastHtml}
+        <div class="pos-cart-stock"><i class="fas fa-box"></i> المخزن: ${Number(p.qty||0)} ${p.unit||'كجم'}</div>
+        <div class="pos-price-editor">
+          <label>سعر الوحدة (${isKgProduct(p) ? 'كجم' : 'قطعة'})</label>
+          <input type="number" value="${Number(price.toFixed(2))}" min="0" step="0.01" onchange="updatePOSItemPrice(${index},this.value)">
+          <button onclick="resetPOSItemPrice(${index})" title="استعادة السعر الافتراضي">↺</button>
+        </div>
         ${sizeControl}
-        <div class="pos-cart-controls"><div class="pos-qty"><button onclick="changePOSQty(${index},-1)">−</button><span>${item.qty}</span><button onclick="changePOSQty(${index},1)">+</button></div><div class="pos-line-total">${fmt(price*Number(item.qty||0))}</div></div>
+        <div class="pos-cart-controls">
+          <div class="pos-qty">
+            <button onclick="changePOSQty(${index},-1)">−</button>
+            <span>${item.qty}</span>
+            <button onclick="changePOSQty(${index},1)">+</button>
+          </div>
+          <div class="pos-line-total"><strong>الإجمالي:</strong> ${fmt(price * Number(item.qty || 0))}</div>
+        </div>
       </div>
     </div>`;
   }).join('');
