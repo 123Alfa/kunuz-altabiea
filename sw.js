@@ -1,4 +1,5 @@
-const CACHE_NAME = 'mozzarella-v1';
+const CACHE_NAME = 'knooz-v1'; // تم التحديث لاسم مشروعك "كنوز الطبيعة"
+
 const STATIC_ASSETS = [
   './',
   './index.html',
@@ -9,20 +10,27 @@ const STATIC_ASSETS = [
   'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css'
 ];
 
-// Install: cache static assets
+// 1. التثبيت: حفظ الملفات بشكل فردي لضمان عدم انهيار الكاش كاملاً في حال تعثر أحد روابط الـ CDN
 self.addEventListener('install', (event) => {
   event.waitUntil(
     caches.open(CACHE_NAME).then((cache) => {
-      return cache.addAll(STATIC_ASSETS).catch(() => {
-        // If external CDN fails, still install with local files
-        return cache.addAll(['./', './index.html', './manifest.json', './icon-192.png', './icon-512.png']);
-      });
+      return Promise.allSettled(
+        STATIC_ASSETS.map((url) =>
+          fetch(url, { mode: 'cors' })
+            .then((response) => {
+              if (response.ok || response.type === 'opaque') {
+                return cache.put(url, response);
+              }
+            })
+            .catch((err) => console.warn('فشل تخزين العنصر محلياً:', url, err))
+        )
+      );
     })
   );
   self.skipWaiting();
 });
 
-// Activate: clean old caches
+// 2. التفعيل: تنظيف النسخ القديمة فوراً
 self.addEventListener('activate', (event) => {
   event.waitUntil(
     caches.keys().then((cacheNames) => {
@@ -36,29 +44,46 @@ self.addEventListener('activate', (event) => {
   self.clients.claim();
 });
 
-// Fetch: cache-first strategy
+// 3. اعتراض الطلبات: إرجاع المحتوى من الكاش فوراً، وحفظ طلبات الـ CDN الخارجية
 self.addEventListener('fetch', (event) => {
+  // تجاهل طلبات قواعد بيانات Firebase لتركها تعمل بخاصية الـ Offline الخاصة بها
+  if (
+    event.request.url.includes('firestore.googleapis.com') ||
+    event.request.url.includes('firebase')
+  ) {
+    return;
+  }
+
   event.respondWith(
     caches.match(event.request).then((cached) => {
+      // إذا كان الملف موجوداً في الكاش، ارجعه فوراً بدون انتظار الشبكة
       if (cached) {
         return cached;
       }
-      return fetch(event.request).then((response) => {
-        // Cache successful responses from same origin
-        if (response.ok && event.request.url.startsWith(self.location.origin)) {
-          const clone = response.clone();
-          caches.open(CACHE_NAME).then((cache) => {
-            cache.put(event.request, clone);
-          });
-        }
-        return response;
-      }).catch(() => {
-        // Offline fallback for navigation
-        if (event.request.mode === 'navigate') {
-          return caches.match('./index.html');
-        }
-        return new Response('Offline', { status: 503 });
-      });
+
+      // إذا لم يكن موجوداً، جلب الملف من الشبكة وتخزينه (بما في ذلك مكتبات الـ CDN)
+      return fetch(event.request)
+        .then((response) => {
+          if (
+            response.status === 200 ||
+            response.type === 'opaque' ||
+            event.request.url.includes('cdn') ||
+            event.request.url.includes('cdnjs')
+          ) {
+            const clone = response.clone();
+            caches.open(CACHE_NAME).then((cache) => {
+              cache.put(event.request, clone);
+            });
+          }
+          return response;
+        })
+        .catch(() => {
+          // فتح الصفحة الرئيسية إذا كان الجهاز غير متصل بالإنترنت
+          if (event.request.mode === 'navigate') {
+            return caches.match('./index.html');
+          }
+          return new Response('Offline', { status: 503 });
+        });
     })
   );
 });
