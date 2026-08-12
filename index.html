@@ -681,6 +681,7 @@ tr:hover td{background:rgba(15,118,110,.045)}
     <div class="user-info">
       <span id="userName" style="font-size:0.85rem;color:var(--text-light)"></span>
       <div class="user-avatar" id="userAvatar">👤</div>
+
       <button class="logout-btn" onclick="logout()"><i class="fas fa-sign-out-alt"></i></button>
     </div>
   </header>
@@ -2525,6 +2526,9 @@ function renderMorePage(container){
         <button class="btn btn-outline" onclick="document.getElementById('importFile').click()"><i class="fas fa-upload"></i> استيراد البيانات</button>
         <input type="file" id="importFile" style="display:none" accept=".json" onchange="importData(this)">
         <button class="btn btn-danger" onclick="clearAllData()"><i class="fas fa-trash-alt"></i> مسح كل البيانات</button>
+        <button class="btn btn-danger" style="margin-top: 10px; width: 100%; font-weight: bold;" onclick="replaceCloudDataWithLocal()">🔄 مسح واستبدال بيانات السحابة</button>
+
+
       </div>
     </div>
   </div>`;
@@ -2624,6 +2628,41 @@ window.addEventListener('DOMContentLoaded',()=>{
   },1500);
   
 });
+// دالة مسح بيانات السحابة واستبدالها ببيانات الموبايل
+async function replaceCloudDataWithLocal() {
+  if (!confirm('⚠️ هل أنت متأكد من مسح جميع البيانات السحابية واستبدالها ببيانات الموبايل الحالية؟')) {
+    return;
+  }
+
+  const collections = ['products', 'sales', 'purchases', 'expenses', 'withdrawals', 'debts', 'customers', 'suppliers', 'offers', 'auditLog'];
+  
+  try {
+    if (typeof showToast === 'function') showToast('⏳ جاري مسح السحابة وتحديث البيانات...', 'info');
+
+    for (const col of collections) {
+      const snapshot = await db.collection(col).get();
+      const batch = db.batch();
+      snapshot.forEach(doc => batch.delete(doc.ref));
+      await batch.commit();
+
+      const localData = Store.get(col);
+      if (Array.isArray(localData) && localData.length > 0) {
+        for (const item of localData) {
+          if (item.id) {
+            await db.collection(col).doc(String(item.id)).set(item);
+          }
+        }
+      }
+    }
+    
+    alert('✅ تم مسح البيانات السحابية وتحديثها بالبيانات الجديدة بنجاح!');
+  } catch (error) {
+    console.error('خطأ أثناء التحديث:', error);
+    alert('❌ حدث خطأ أثناء عملية التحديث');
+  }
+}
+
+
 </script>
 <script>
 if ('serviceWorker' in navigator) {
