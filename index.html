@@ -1153,7 +1153,7 @@ function renderSalesPage(container){
             <div class="pos-payment-grid pos-payment-grid-modern">
               <div><label>الخصم</label><div class="pos-input-prefix"><input type="number" id="posDiscount" value="0" min="0" step="0.01" oninput="updatePOSSummary()"><span>ج.م</span></div></div>
               <div><label>نوع البيع</label><select id="posSaleType" onchange="refreshPOSCartPrices()"><option value="retail">🛍️ قطاعي</option><option value="wholesale">📦 جملة</option></select></div>
-              <div class="pos-full-field"><label>العميل</label><select id="posCustomer" onchange="togglePOSCustomCustomer()"><option value="">عميل عادي — اكتب الاسم اختياريًا</option>${customerOpts}</select><input type="text" id="posCustomCustomer" placeholder="اسم العميل العادي (اختياري)" style="display:none;margin-top:7px" maxlength="80" oninput="updatePOSCustomerPill()"></div>
+              <div class="pos-full-field"><label>العميل</label><select id="posCustomer" onchange="togglePOSCustomCustomer()"><option value="">عميل عادي — اكتب الاسم اختياريًا</option>${customerOpts}</select><input type="text" id="posCustomCustomer" placeholder="اسم العميل العادي (اختياري)" style="display:none" maxlength="80" oninput="updatePOSCustomerPill()"></div>
               <div class="pos-full-field"><label>طريقة السداد</label><div class="pos-methods"><button type="button" class="active" data-method="cash" onclick="setPOSPaymentMethod('cash',this)"><i class="fas fa-money-bill-wave"></i><span>نقدي</span></button><button type="button" data-method="credit" onclick="setPOSPaymentMethod('credit',this)"><i class="fas fa-file-invoice-dollar"></i><span>آجل</span></button><button type="button" data-method="transfer" onclick="setPOSPaymentMethod('transfer',this)"><i class="fas fa-mobile-screen-button"></i><span>تحويل</span></button><button type="button" data-method="card" onclick="setPOSPaymentMethod('card',this)"><i class="fas fa-credit-card"></i><span>بطاقة</span></button></div><select id="posPaymentMethod" style="display:none"><option value="cash">نقدي</option><option value="credit">آجل</option><option value="transfer">تحويل</option><option value="card">بطاقة</option></select></div>
               <div><label>المدفوع</label><div class="pos-input-prefix"><input type="number" id="posPaid" value="0" min="0" step="0.01" oninput="updatePOSSummary()"><span>ج.م</span></div></div>
               <div class="pos-credit-row" id="posCreditRow"><label>تاريخ الاستحقاق</label><input type="date" id="posDueDate"></div>
@@ -1233,29 +1233,41 @@ function setPOSPaymentMethod(method,btn){
   updatePOSSummary();
 }
 
-function addToPOSCart(id,weight=1){
-  // توحيد نوع المعرّف لأن onclick في HTML يمرره كنص، بينما بعض البيانات القديمة قد تكون رقمية
-  const productId=String(id);
-  const p=(window.saleProducts||[]).find(x=>String(x.id)===productId);
-  if(!p)return showToast('تعذر العثور على المنتج','warning');
-  const stock=Number(p.qty);
-  if(!Number.isFinite(stock)||stock<=0)return showToast('المنتج غير متاح في المخزون','warning');
-  weight=Number(weight)||1;
-  if(!isKgProduct(p)) weight=1;
-  const existingReserved=reservedProductQty(productId);
-  if(existingReserved+weight>stock+0.000001)return showToast(`الكمية المتاحة غير كافية — المتاح ${p.qty} ${p.unit||'كجم'}`,'warning');
-  window.posCart=window.posCart||[];
-  const item=window.posCart.find(x=>String(x.id)===productId && Number(x.weight||1)===weight);
-  if(item){
-    item.qty=Number(item.qty||0)+1;
-  }else{
-    window.posCart.push({id:p.id,qty:1,weight,priceOverride:null});
+function addToPOSCart(id, weight = 1) {
+  // توحيد المعرف كـ String
+  const productId = String(id);
+  const p = (window.saleProducts || []).find(x => String(x.id) === productId);
+  if (!p) return showToast('تعذر العثور على المنتج', 'warning');
+  const stock = Number(p.qty);
+  if (!Number.isFinite(stock) || stock <= 0) return showToast('المنتج غير متاح في المخزون', 'warning');
+  // في حال المنتج ليس بالوزن، نثبت الوزن = 1
+  let actualWeight = Number(weight);
+  if (!isKgProduct(p)) actualWeight = 1;
+  else if (!Number.isFinite(actualWeight) || actualWeight <= 0) actualWeight = 1;
+
+  const existingReserved = reservedProductQty(productId);
+  if (existingReserved + actualWeight > stock + 0.000001) {
+    return showToast(`الكمية المتاحة غير كافية — المتاح ${p.qty} ${p.unit || 'كجم'}`, 'warning');
+  }
+
+  window.posCart = window.posCart || [];
+  const existing = window.posCart.find(x => String(x.id) === productId && Math.abs(Number(x.weight || 1) - actualWeight) < 0.000001);
+  if (existing) {
+    existing.qty = Number(existing.qty || 0) + 1;
+  } else {
+    window.posCart.push({
+      id: productId,
+      qty: 1,
+      weight: actualWeight,
+      priceOverride: null
+    });
   }
   renderPOSCart();
   renderSaleProductGrid();
 }
+
 function changePOSQty(index,delta){
-  const p=(window.saleProducts||[]).find(x=>x.id===(window.posCart||[])[index]?.id), item=(window.posCart||[])[index];
+  const p=(window.saleProducts||[]).find(x=>String(x.id)===String((window.posCart||[])[index]?.id)), item=(window.posCart||[])[index];
   if(!p||!item)return;
   const newQty=Number(item.qty||0)+delta;
   if(newQty<=0){window.posCart.splice(index,1);renderPOSCart();renderSaleProductGrid();return;}
@@ -1268,7 +1280,7 @@ function changePOSQty(index,delta){
 function changePOSWeight(index,newWeight){
   const item=(window.posCart||[])[index];
   if(!item)return;
-  const p=(window.saleProducts||[]).find(x=>x.id===item.id); if(!p)return;
+  const p=(window.saleProducts||[]).find(x=>String(x.id)===String(item.id)); if(!p)return;
   newWeight=Number(newWeight);
   if(!Number.isFinite(newWeight)||newWeight<=0)return showToast('أدخل وزنًا صحيحًا بالكيلو','warning');
   // خانة الوزن في السلة تُدخل بالكيلو مباشرة: 5 = 5 كجم، 4.5 = 4.5 كجم.
@@ -1276,7 +1288,7 @@ function changePOSWeight(index,newWeight){
   const otherReserved=reservedProductQty(p.id,index);
   const needed=otherReserved+(newWeight*Number(item.qty||0));
   if(needed>(Number(p.qty)||0)+0.000001){renderPOSCart();return showToast(`المتاح لا يكفي لهذا الوزن — المتاح ${p.qty} ${p.unit||'كجم'}`,'warning');}
-  const same=window.posCart.find((x,i)=>i!==index && x.id===p.id && Math.abs(Number(x.weight||1)-newWeight)<0.000001);
+  const same=window.posCart.find((x,i)=>i!==index && String(x.id)===String(p.id) && Math.abs(Number(x.weight||1)-newWeight)<0.000001);
   if(same){same.qty+=item.qty;window.posCart.splice(index,1);}else item.weight=newWeight;
   renderPOSCart(); renderSaleProductGrid();
 }
@@ -1420,7 +1432,7 @@ function renderPOSCart(){
         </div>
       </div>`;
     }
-    const p=products.find(x=>x.id==item.id); if(!p) return '';
+    const p=products.find(x=>String(x.id)===String(item.id)); if(!p) return '';
     const weight=Number(item.weight||1);
     const price=getPOSItemUnitPrice(item,p,type);
     const lastPrice=getLastSalePrice(p.id,type);
@@ -1449,7 +1461,7 @@ function renderPOSCart(){
           <button class="pos-cart-delete" onclick="removePOSItem(${index})">🗑️</button>
         </div>
         ${lastHtml}
-        <div class="pos-cart-stock"><i class="fas fa-box"></i> المخزن: ${p.stock||0}</div>
+        <div class="pos-cart-stock"><i class="fas fa-box"></i> المخزن: ${p.qty||0}</div>
         <div class="pos-price-editor">
           <label>سعر الوحدة (${isKgProduct(p)?'كجم':'قطع'}):</label>
           <input type="number" value="${Number(price)}" onchange="updatePOSItemPrice(${index},this.value)">
@@ -1471,12 +1483,19 @@ function renderPOSCart(){
   if(typeof updatePOSSummary==='function') updatePOSSummary();
 }
 function updatePOSSummary(){
-  const type=document.getElementById('posSaleType')?.value||'retail';
-  const products=window.saleProducts||[];
-  const subtotal=(window.posCart||[]).reduce((sum,item)=>{
-    if(item.service)return sum+Number(item.price||0)*Number(item.qty||0);
-    const p=products.find(x=>x.id===item.id);return p?getPOSItemUnitPrice(item,p,type)*Number(item.weight||1)*Number(item.qty||0):0;
-  },0);
+  const type = document.getElementById('posSaleType')?.value || 'retail';
+  const products = window.saleProducts || [];
+  const subtotal = (window.posCart || []).reduce((sum, item) => {
+    if (item.service) {
+      return sum + (Number(item.price || 0) * Number(item.qty || 0));
+    }
+    const p = products.find(x => String(x.id) === String(item.id));
+    if (!p) return sum;
+    const unitPrice = getPOSItemUnitPrice(item, p, type);
+    const weight = Number(item.weight || 1);
+    const qty = Number(item.qty || 0);
+    return sum + (unitPrice * weight * qty);
+  }, 0);
   const discount=Math.max(0,Number(document.getElementById('posDiscount')?.value||0));
   const total=Math.max(0,subtotal-discount);
   const paid=Math.max(0,Number(document.getElementById('posPaid')?.value||0));
@@ -1514,7 +1533,7 @@ function checkoutPOS(){
   const products=window.saleProducts||[];
   const subtotal=cart.reduce((sum,item)=>{
     if(item.service)return sum+Number(item.price||0)*Number(item.qty||0);
-    const p=products.find(x=>x.id===item.id);return p?getPOSItemUnitPrice(item,p,type)*Number(item.weight||1)*Number(item.qty||0):0;
+    const p=products.find(x=>String(x.id)===String(item.id));return p?getPOSItemUnitPrice(item,p,type)*Number(item.weight||1)*Number(item.qty||0):0;
   },0);
   const total=Math.max(0,subtotal-discount);
   const paid=Math.max(0,Number(document.getElementById('posPaid').value||0));
@@ -1529,7 +1548,7 @@ function checkoutPOS(){
       Store.add('sales',{date:today(),productId:null,productName:item.name,customerId:customerId||null,customerName,type,qty:item.qty,packages:item.qty,weight:1,unitPrice:Number(item.price||0),price:Number(item.price||0),cost:0,discount:serviceTotal?((itemDiscount/serviceTotal)*100):0,discountedPrice:Number(item.price||0),total:itemTotal,profit:itemTotal,paymentMethod:method,paid,remaining,note:'خدمة من الكاشير'});
       return;
     }
-    const p=products.find(x=>x.id===item.id); if(!p)return;
+    const p=products.find(x=>String(x.id)===String(item.id)); if(!p)return;
     const weight=Number(item.weight||1), packs=Number(item.qty||0);
     const price=getPOSItemUnitPrice(item,p,type);
     const qtyKg=weight*packs;
