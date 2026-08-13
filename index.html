@@ -1270,8 +1270,8 @@ function changePOSWeight(index,newWeight){
   if(!item)return;
   const p=(window.saleProducts||[]).find(x=>x.id===item.id); if(!p)return;
   newWeight=Number(newWeight);
-  if(!Number.isFinite(newWeight)||newWeight<=0)return showToast('أدخل وزنًا صحيحًا بالجرام','warning');
-  newWeight=newWeight/1000;
+  if(!Number.isFinite(newWeight)||newWeight<=0)return showToast('أدخل وزنًا صحيحًا بالكيلو','warning');
+  // خانة الوزن في السلة تُدخل بالكيلو مباشرة: 5 = 5 كجم، 4.5 = 4.5 كجم.
   if(!isKgProduct(p))newWeight=1;
   const otherReserved=reservedProductQty(p.id,index);
   const needed=otherReserved+(newWeight*Number(item.qty||0));
@@ -1281,9 +1281,10 @@ function changePOSWeight(index,newWeight){
   renderPOSCart(); renderSaleProductGrid();
 }
 function setPOSQuickWeight(index,grams){
-  const el=document.getElementById(`manualWeight_${index}`);
-  if(el){el.value=grams;}
-  changePOSWeight(index,grams);
+  const kg = Number(grams) / 1000;
+  const el=document.getElementById(`manualWeight_${index}`) || document.getElementById(`weightInput_${index}`);
+  if(el){el.value=kg;}
+  changePOSWeight(index,kg);
 }
 // دالة الحساب اللحظي المباشر للوزن والسعر
 // دالة الحساب اللحظي المباشر للوزن والسعر (مُعدّلة ومحمية)
@@ -1300,11 +1301,6 @@ function handleLiveWeightInput(index, value, pricePerKg) {
     // حماية ضد القيم الفارغة أو النواقص أثناء الكتابة
     if (isNaN(weightInKg) || weightInKg < 0) {
         weightInKg = 0;
-    }
-
-    // إذا كتب الكاشير 250 (أكبر من 10) يتم تحويلها تلقائياً لجرامات (0.250 كجم)
-    if (weightInKg > 10) {
-        weightInKg = weightInKg / 1000;
     }
 
     // 1. تحديث الوزن في مصفوفة السلة فوراً
@@ -1361,8 +1357,16 @@ function getLastSalePrice(productId,type){
 }
 function getPOSItemUnitPrice(item,p,type){
   if(item.service)return Number(item.price||0);
-  if(item.priceOverride!==null && item.priceOverride!==undefined && Number(item.priceOverride)>=0)return Number(item.priceOverride);
-  return packagePrice(p,Number(item.weight||1),type);
+
+  // هذا الحقل هو سعر الوحدة فقط (سعر الكيلو)، وليس إجمالي الوزن.
+  // مثال: براميلي 100 جنيه/كجم × 5 كجم = 500 جنيه.
+  if(item.priceOverride!==null && item.priceOverride!==undefined && Number(item.priceOverride)>=0){
+    return Number(item.priceOverride);
+  }
+
+  return Number(
+    type === 'wholesale' ? (p.wholesale || 0) : (p.retail || 0)
+  );
 }
 function updatePOSItemPrice(index,value){
   const item=(window.posCart||[])[index]; if(!item)return;
@@ -1425,12 +1429,12 @@ function renderPOSCart(){
     const sizeControl = isKgProduct(p) ? `<div class="manual-weight-box" style="margin-top: 6px;">
       <div style="display: flex; align-items: center; gap: 8px;">
         <div style="display: flex; align-items: center; border: 1.5px solid #004d40; border-radius: 18px; overflow: hidden; background: #fff; flex: 1;">
-          <input id="weightInput_${index}" type="text" value="${item.weight ? item.weight : '.250'}" placeholder=".250" oninput="handleLiveWeightInput(${index}, this.value, ${price})" style="width: 100%; border: none; text-align: center; font-weight: bold; font-size: 17px; outline: none; padding: 6px; color: #222;">
+          <input id="weightInput_${index}" type="number" inputmode="decimal" pattern="[0-9]*[.,]?[0-9]*" min="0" step="0.001" value="${item.weight ? item.weight : '.250'}" placeholder="0.250" oninput="handleLiveWeightInput(${index}, this.value, ${price})" onkeydown="return ['e','E','+','-'].includes(event.key) ? false : true" style="width: 100%; border: none; text-align: center; font-weight: bold; font-size: 17px; outline: none; padding: 6px; color: #222;">
           <span style="background: #004d40; color: white; padding: 7px 12px; font-weight: bold; font-size: 13px;">كجم</span>
         </div>
         <div style="border: 1.5px solid #004d40; border-radius: 18px; padding: 4px 10px; text-align: center; min-width: 85px; background: #e8f5e9;">
           <span style="font-size: 10px; color: #555; display: block; font-weight: bold;">سعر البيع</span>
-          <strong id="livePrice_${index}" style="font-size: 16px; color: #004d40;">${((item.weight || 0.25) * price).toFixed(2)}</strong> <small style="font-size: 10px; font-weight: bold;">جنيه</small>
+          <strong id="livePrice_${index}" style="font-size: 16px; color: #004d40;">${((item.weight || 0.25) * price * (item.qty||1)).toFixed(2)}</strong> <small style="font-size: 10px; font-weight: bold;">جنيه</small>
         </div>
       </div>
     </div>` : `<div class="pos-cart-size"><span style="font-size:.62rem;color:#888;">الكمية: ${item.qty||1}</span></div>`;
