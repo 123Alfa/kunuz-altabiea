@@ -1475,7 +1475,7 @@ function updatePOSSummary(){
   const products=window.saleProducts||[];
   const subtotal=(window.posCart||[]).reduce((sum,item)=>{
     if(item.service)return sum+Number(item.price||0)*Number(item.qty||0);
-    const p=products.find(x=>x.id===item.id);return sum+(p?getPOSItemUnitPrice(item,p,type)*Number(item.qty||0):0);
+    const p=products.find(x=>x.id===item.id);return p?getPOSItemUnitPrice(item,p,type)*Number(item.weight||1)*Number(item.qty||0):0;
   },0);
   const discount=Math.max(0,Number(document.getElementById('posDiscount')?.value||0));
   const total=Math.max(0,subtotal-discount);
@@ -1514,7 +1514,7 @@ function checkoutPOS(){
   const products=window.saleProducts||[];
   const subtotal=cart.reduce((sum,item)=>{
     if(item.service)return sum+Number(item.price||0)*Number(item.qty||0);
-    const p=products.find(x=>x.id===item.id);return sum+(p?getPOSItemUnitPrice(item,p,type)*Number(item.qty||0):0);
+    const p=products.find(x=>x.id===item.id);return p?getPOSItemUnitPrice(item,p,type)*Number(item.weight||1)*Number(item.qty||0):0;
   },0);
   const total=Math.max(0,subtotal-discount);
   const paid=Math.max(0,Number(document.getElementById('posPaid').value||0));
@@ -1534,7 +1534,7 @@ function checkoutPOS(){
     const price=getPOSItemUnitPrice(item,p,type);
     const qtyKg=weight*packs;
     const costKg=Number(p.purchase||0);
-    const gross=price*packs;
+    const gross=price*weight*packs;
     const itemDiscount=subtotal?discount*(gross/subtotal):0;
     const itemTotal=Math.max(0,gross-itemDiscount);
     const effectivePackPrice=packs?itemTotal/packs:0;
