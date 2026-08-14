@@ -5,17 +5,10 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>كنوز الطبيعة - نظام إدارة المبيعات</title>
 
-<!-- أيقونات التطبيق للمتصفح والموبايل -->
-<!-- أيقونة المتصفح (Favicon) باستخدام شعار SVG مباشر (الحل الأول) -->
-<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ccircle cx='50' cy='50' r='48' fill='%230f766e'/%3E%3Cpolygon points='20,75 45,30 70,75' fill='%2314b8a6'/%3E%3Cellipse cx='50' cy='75' rx='35' ry='10' fill='%2322c55e'/%3E%3Ccircle cx='70' cy='30' r='10' fill='%23fbbf24'/%3E%3Crect x='46' y='45' width='8' height='20' fill='%2378350f'/%3E%3Cpath d='M38 45 Q50 32 62 45' fill='%234ade80'/%3E%3C/svg%3E">
-
-<!-- أيقونات احتياطية للمتصفحات القديمة (اختياري - يمكنك حذفها لو عايز) -->
+<!-- أيقونة المتصفح -->
 <link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
 <link rel="icon" type="image/png" sizes="512x512" href="icon-512.png">
 <link rel="apple-touch-icon" href="icon-192.png">
-
-<!-- لون شريط المتصفح العلوي في الموبايل -->
-<meta name="theme-color" content="#0f766e">
 
 <!-- لون شريط المتصفح العلوي في الموبايل -->
 <meta name="theme-color" content="#0f766e">
@@ -61,9 +54,9 @@
 body{font-family:'Tajawal','Segoe UI',sans-serif;background:var(--bg);color:var(--text);line-height:1.6;min-height:100vh;overflow-x:hidden;word-spacing:0.5px}
 #loading-screen{position:fixed;inset:0;z-index:9999;background:linear-gradient(135deg,#f5f7f5 0%,#ffffff 50%,#fff8e8 100%);display:flex;flex-direction:column;align-items:center;justify-content:center;color:white;transition:opacity 0.6s ease}
 #loading-screen.hidden{opacity:0;pointer-events:none}
-.loading-logo{width:100px;height:100px;background:linear-gradient(135deg,var(--primary),var(--accent));border-radius:24px;display:flex;align-items:center;justify-content:center;font-size:3rem;margin-bottom:24px;animation:pulse-glow 2s ease-in-out infinite;box-shadow:0 0 40px rgba(15,118,110,0.4)}
+.loading-logo{width:100px;height:100px;background:linear-gradient(135deg,var(--primary),var(--accent));border-radius:24px;display:flex;align-items:center;justify-content:center;margin-bottom:24px;animation:pulse-glow 2s ease-in-out infinite;box-shadow:0 0 40px rgba(15,118,110,0.4)}
 @keyframes pulse-glow{0%,100%{transform:scale(1);box-shadow:0 0 40px rgba(15,118,110,0.4)}50%{transform:scale(1.05);box-shadow:0 0 60px rgba(15,118,110,0.6)}}
-.brand-logo{display:block;width:100%;height:100%;overflow:visible}
+.brand-logo{display:block;width:100%;height:100%;object-fit:contain;border-radius:inherit}
 .loading-logo .brand-logo{width:72px;height:72px}
 .auth-logo .icon .brand-logo{width:58px;height:58px}
 .app-header .logo-icon .brand-logo{width:34px;height:34px}
@@ -507,39 +500,8 @@ tr:hover td{background:rgba(15,118,110,.045)}
 <body>
 <div id="loading-screen">
   <div class="loading-logo">
-    <!-- شعار جديد: طبيعة + تجارة -->
-    <svg class="brand-logo" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" aria-label="شعار كنوز الطبيعة" role="img">
-      <defs>
-        <linearGradient id="natureGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-          <stop offset="0%" stop-color="#0f766e"/>
-          <stop offset="100%" stop-color="#115e59"/>
-        </linearGradient>
-        <linearGradient id="goldGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-          <stop offset="0%" stop-color="#fbbf24"/>
-          <stop offset="100%" stop-color="#c99a22"/>
-        </linearGradient>
-      </defs>
-      <circle cx="50" cy="50" r="46" fill="url(#natureGrad)"/>
-      <circle cx="50" cy="50" r="46" fill="none" stroke="url(#goldGrad)" stroke-width="3"/>
-      <polygon points="15,75 45,28 75,75" fill="#14b8a6" opacity="0.9"/>
-      <polygon points="45,28 75,75 88,75 58,28" fill="#0d9488" opacity="0.9"/>
-      <ellipse cx="50" cy="78" rx="40" ry="12" fill="#22c55e" opacity="0.8"/>
-      <circle cx="72" cy="30" r="11" fill="url(#goldGrad)"/>
-      <line x1="72" y1="14" x2="72" y2="8" stroke="#fbbf24" stroke-width="2" stroke-linecap="round"/>
-      <line x1="84" y1="22" x2="90" y2="18" stroke="#fbbf24" stroke-width="2" stroke-linecap="round"/>
-      <line x1="88" y1="34" x2="94" y2="34" stroke="#fbbf24" stroke-width="2" stroke-linecap="round"/>
-      <rect x="46" y="48" width="8" height="22" fill="#78350f" rx="2"/>
-      <path d="M38 48 Q50 34 62 48 Q50 41 38 48" fill="#4ade80"/>
-      <path d="M34 42 Q50 26 66 42 Q50 34 34 42" fill="#22c55e"/>
-      <path d="M42 54 Q50 46 58 54 Q50 50 42 54" fill="#86efac"/>
-      <g transform="translate(50,82) scale(0.5)" fill="#fef08a" opacity="0.95">
-        <rect x="-18" y="-6" width="36" height="4" rx="2"/>
-        <rect x="-12" y="-2" width="2" height="12"/>
-        <rect x="10" y="-2" width="2" height="12"/>
-        <polygon points="-12,10 -20,18 -4,18"/>
-        <polygon points="12,10 4,18 20,18"/>
-      </g>
-    </svg>
+    <!-- تم التحديث: وضع صورة الشجرة بدلاً من كود SVG -->
+    <img src="tree-icon.png" class="brand-logo" alt="شعار كنوز الطبيعة">
   </div>
   <div class="loading-text">كنوز الطبيعة</div>
   <div class="loading-subtext">نظام نقاط البيع الذكي - Pro</div>
@@ -549,38 +511,8 @@ tr:hover td{background:rgba(15,118,110,.045)}
   <div class="auth-card">
     <div class="auth-logo">
       <div class="icon">
-        <svg class="brand-logo" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" aria-label="شعار كنوز الطبيعة" role="img">
-          <defs>
-            <linearGradient id="natureGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-              <stop offset="0%" stop-color="#0f766e"/>
-              <stop offset="100%" stop-color="#115e59"/>
-            </linearGradient>
-            <linearGradient id="goldGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-              <stop offset="0%" stop-color="#fbbf24"/>
-              <stop offset="100%" stop-color="#c99a22"/>
-            </linearGradient>
-          </defs>
-          <circle cx="50" cy="50" r="46" fill="url(#natureGrad)"/>
-          <circle cx="50" cy="50" r="46" fill="none" stroke="url(#goldGrad)" stroke-width="3"/>
-          <polygon points="15,75 45,28 75,75" fill="#14b8a6" opacity="0.9"/>
-          <polygon points="45,28 75,75 88,75 58,28" fill="#0d9488" opacity="0.9"/>
-          <ellipse cx="50" cy="78" rx="40" ry="12" fill="#22c55e" opacity="0.8"/>
-          <circle cx="72" cy="30" r="11" fill="url(#goldGrad)"/>
-          <line x1="72" y1="14" x2="72" y2="8" stroke="#fbbf24" stroke-width="2" stroke-linecap="round"/>
-          <line x1="84" y1="22" x2="90" y2="18" stroke="#fbbf24" stroke-width="2" stroke-linecap="round"/>
-          <line x1="88" y1="34" x2="94" y2="34" stroke="#fbbf24" stroke-width="2" stroke-linecap="round"/>
-          <rect x="46" y="48" width="8" height="22" fill="#78350f" rx="2"/>
-          <path d="M38 48 Q50 34 62 48 Q50 41 38 48" fill="#4ade80"/>
-          <path d="M34 42 Q50 26 66 42 Q50 34 34 42" fill="#22c55e"/>
-          <path d="M42 54 Q50 46 58 54 Q50 50 42 54" fill="#86efac"/>
-          <g transform="translate(50,82) scale(0.5)" fill="#fef08a" opacity="0.95">
-            <rect x="-18" y="-6" width="36" height="4" rx="2"/>
-            <rect x="-12" y="-2" width="2" height="12"/>
-            <rect x="10" y="-2" width="2" height="12"/>
-            <polygon points="-12,10 -20,18 -4,18"/>
-            <polygon points="12,10 4,18 20,18"/>
-          </g>
-        </svg>
+        <!-- تم التحديث: وضع صورة الشجرة بدلاً من كود SVG -->
+        <img src="tree-icon.png" class="brand-logo" alt="شعار كنوز الطبيعة">
       </div>
       <h1>كنوز الطبيعة</h1>
       <p>نظام إدارة متكامل للمبيعات والمشتريات</p>
@@ -609,38 +541,8 @@ tr:hover td{background:rgba(15,118,110,.045)}
   <header class="app-header">
     <h1>
       <div class="logo-icon">
-        <svg class="brand-logo" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" aria-label="شعار كنوز الطبيعة" role="img">
-          <defs>
-            <linearGradient id="natureGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-              <stop offset="0%" stop-color="#0f766e"/>
-              <stop offset="100%" stop-color="#115e59"/>
-            </linearGradient>
-            <linearGradient id="goldGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-              <stop offset="0%" stop-color="#fbbf24"/>
-              <stop offset="100%" stop-color="#c99a22"/>
-            </linearGradient>
-          </defs>
-          <circle cx="50" cy="50" r="46" fill="url(#natureGrad)"/>
-          <circle cx="50" cy="50" r="46" fill="none" stroke="url(#goldGrad)" stroke-width="3"/>
-          <polygon points="15,75 45,28 75,75" fill="#14b8a6" opacity="0.9"/>
-          <polygon points="45,28 75,75 88,75 58,28" fill="#0d9488" opacity="0.9"/>
-          <ellipse cx="50" cy="78" rx="40" ry="12" fill="#22c55e" opacity="0.8"/>
-          <circle cx="72" cy="30" r="11" fill="url(#goldGrad)"/>
-          <line x1="72" y1="14" x2="72" y2="8" stroke="#fbbf24" stroke-width="2" stroke-linecap="round"/>
-          <line x1="84" y1="22" x2="90" y2="18" stroke="#fbbf24" stroke-width="2" stroke-linecap="round"/>
-          <line x1="88" y1="34" x2="94" y2="34" stroke="#fbbf24" stroke-width="2" stroke-linecap="round"/>
-          <rect x="46" y="48" width="8" height="22" fill="#78350f" rx="2"/>
-          <path d="M38 48 Q50 34 62 48 Q50 41 38 48" fill="#4ade80"/>
-          <path d="M34 42 Q50 26 66 42 Q50 34 34 42" fill="#22c55e"/>
-          <path d="M42 54 Q50 46 58 54 Q50 50 42 54" fill="#86efac"/>
-          <g transform="translate(50,82) scale(0.5)" fill="#fef08a" opacity="0.95">
-            <rect x="-18" y="-6" width="36" height="4" rx="2"/>
-            <rect x="-12" y="-2" width="2" height="12"/>
-            <rect x="10" y="-2" width="2" height="12"/>
-            <polygon points="-12,10 -20,18 -4,18"/>
-            <polygon points="12,10 4,18 20,18"/>
-          </g>
-        </svg>
+        <!-- تم التحديث: وضع صورة الشجرة بدلاً من كود SVG -->
+        <img src="tree-icon.png" class="brand-logo" alt="شعار كنوز الطبيعة">
       </div>
       <div class="logo-text">كنوز الطبيعة<small>نظام نقاط البيع المتكامل Pro</small></div>
     </h1>
