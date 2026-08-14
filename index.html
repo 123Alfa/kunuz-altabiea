@@ -602,31 +602,46 @@ const firebaseConfig = {
   appId: "1:795977355730:web:ae192c95eb80d2a950b80b"
 };
 
-firebase.initializeApp(firebaseConfig);
-const db = firebase.firestore();
+// Firebase اختياري: البرنامج يعمل محليًا حتى بدون إنترنت
+let db = null;
+try {
+  if (typeof firebase !== 'undefined' && firebase.firestore) {
+    firebase.initializeApp(firebaseConfig);
+    db = firebase.firestore();
+  } else {
+    console.warn('Firebase غير متاح - العمل بوضع عدم الاتصال');
+  }
+} catch (e) {
+  console.warn('تعذر تهيئة Firebase - العمل بالبيانات المحلية:', e);
+}
 
 // =====================================================
 // 🔥 دوال مساعدة للتواصل مع Firebase
 // =====================================================
 async function syncToFirebase(collection, docId, data) {
+  if (!db || !navigator.onLine) return false;
   try {
     await db.collection(collection).doc(docId).set(data, { merge: true });
+    return true;
   } catch (e) {
     console.warn('❌ فشل حفظ في Firebase:', e);
-    showToast('⚠️ فشل الاتصال بالسحابة، لكن البيانات محفوظة محلياً', 'warning');
+    return false;
   }
 }
 
 async function deleteFromFirebase(collection, docId) {
+  if (!db || !navigator.onLine) return false;
   try {
     await db.collection(collection).doc(docId).delete();
+    return true;
   } catch (e) {
     console.warn('❌ فشل حذف من Firebase:', e);
-    showToast('⚠️ فشل حذف السحابة، حاول مجدداً', 'warning');
+    return false;
   }
 }
 
 async function loadCollectionFromFirebase(collection) {
+  if (!db || !navigator.onLine) return null;
   try {
     const snapshot = await db.collection(collection).get();
     const data = [];
@@ -748,11 +763,44 @@ async function showApp(){
   document.getElementById('app').style.display='block';
   document.getElementById('userName').textContent=currentUser?.name||'مستخدم';
   document.getElementById('userAvatar').textContent=(currentUser?.name||'م')[0];
-  // تحميل البيانات من Firebase أولاً
-  await loadAllFromFirebase();
+
+  // فتح البرنامج فورًا من البيانات المحلية بدون انتظار الإنترنت.
   navigateTo('dashboard');
+
+  // إذا توفر الإنترنت، نحاول المزامنة في الخلفية فقط.
+  if (navigator.onLine && db) {
+    setTimeout(async () => {
+      try {
+        await loadAllFromFirebase();
+        // إعادة الرسم بعد المزامنة فقط إذا نجحت، حتى تظهر أحدث البيانات.
+        navigateTo(currentTab || 'dashboard');
+      } catch (e) {
+        console.warn('تعذر المزامنة في الخلفية:', e);
+      }
+    }, 50);
+  } else {
+    const status = document.getElementById('syncStatus');
+    if (status) status.innerHTML = '<i class="fas fa-wifi-slash"></i> وضع عدم الاتصال';
+  }
 }
 function logout(){if(confirm('تسجيل الخروج؟')){currentUser=null;showAuthScreen();}}
+
+window.addEventListener('online', () => {
+  const status = document.getElementById('syncStatus');
+  if (status) status.innerHTML = '<i class="fas fa-sync-alt fa-spin"></i> جاري المزامنة...';
+  if (db) {
+    loadAllFromFirebase().then(() => {
+      const s = document.getElementById('syncStatus');
+      if (s) s.innerHTML = '<i class="fas fa-check-circle"></i> متزامن';
+      navigateTo(currentTab || 'dashboard');
+    }).catch(() => {});
+  }
+});
+
+window.addEventListener('offline', () => {
+  const status = document.getElementById('syncStatus');
+  if (status) status.innerHTML = '<i class="fas fa-wifi-slash"></i> وضع عدم الاتصال';
+});
 
 // ==================== التنقل ====================
 function navigateTo(tab){
@@ -822,6 +870,8 @@ function renderDashboardPage(container){
 }
 
 function renderWeekChart(sales){
+  if (typeof Chart === 'undefined') { console.warn('Chart.js غير متاح بدون إنترنت'); return; }
+
   const ctx=document.getElementById('weekChart');if(!ctx)return;
   const days=[],data=[],profitData=[];
   for(let i=6;i>=0;i--){const d=new Date();d.setDate(d.getDate()-i);const ds=d.toISOString().split('T')[0];days.push(d.toLocaleDateString('ar-EG',{weekday:'short'}));const daySales=sales.filter(s=>s.date===ds);data.push(daySales.reduce((sum,s)=>sum+(s.total||0),0));profitData.push(daySales.reduce((sum,s)=>sum+(s.profit||0),0));}
@@ -871,19 +921,36 @@ function calcProductProfit(){
 
 // ==================== تنسيق كميات المخزون والمباع حسب نوع الجبن (تم الإصلاح) ====================
 function getProductQtyDecimals(p){
-  if (!p) return 2;
-  // إذا كان المنتج يُباع بالكيلو، نعرض رقمين عشريين
-  if (isKgProduct(p)) return 2;
-  // إذا كان نوعه جبن، نعرض رقمين عشريين أيضًا
-  if (p.type === 'cheese') return 2;
-  // باقي المنتجات (مجمدات) نعرض رقمين عشريين للدقة
-  return 2;
+  if (!p) return null;
+
+  const name = String(p.name || '').trim().toLowerCase();
+
+  // موزاريلا + كيري + قشطة + رومي: رقمان عشريان
+  if (/موزاريلا|موتزاريلا|mozzarella|كيري|kiri|قشطة|قشطه|cream|رومي|رومى|romy/.test(name)) {
+    return 2;
+  }
+
+  // براميلي + جبنة الثلاجة: رقمان عشريان
+  if (/براميلي|براميل|ثلاجة|ثلاجه|fridge/.test(name)) {
+    return 2;
+  }
+
+  // باقي المنتجات: لا نغيّر تنسيقها.
+  return null;
 }
 
 function formatProductQty(p, qty){
   const value = Number(qty);
   if(!Number.isFinite(value)) return '0';
-  return value.toFixed(getProductQtyDecimals(p));
+
+  const decimals = getProductQtyDecimals(p);
+
+  // الأصناف غير المميزة: لا نغيّر تنسيقها بالقوة.
+  if(decimals === null){
+    return String(qty);
+  }
+
+  return value.toFixed(decimals);
 }
 
 // الدالة النهائية لتصفية وعرض المنتجات بثلاثة أرقام عشرية
@@ -2454,6 +2521,8 @@ function loadSummary(){
 
 // ==================== التقارير (مُحسّن) ====================
 function renderReportsPage(container){
+  if (typeof Chart === 'undefined') { console.warn('Chart.js غير متاح بدون إنترنت'); return; }
+
   container.innerHTML=`<div class="fade-in">
     <div class="card"><div class="card-title"><i class="fas fa-chart-line"></i> تحليل المبيعات الشهرية</div><div class="chart-container"><canvas id="salesChart"></canvas></div></div>
     <div class="card"><div class="card-title"><i class="fas fa-chart-pie"></i> توزيع المصروفات</div><div class="chart-container"><canvas id="expenseChart"></canvas></div></div>
