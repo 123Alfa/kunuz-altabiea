@@ -218,6 +218,30 @@ tr:hover td{background:rgba(15,118,110,0.05)}
 .sale-product-card{background:#fff;border:2px solid var(--border);border-radius:18px;padding:9px;cursor:pointer;transition:all .22s;position:relative;overflow:hidden;box-shadow:0 3px 12px rgba(31,55,48,.05)}
 .sale-product-card:hover{transform:translateY(-3px);border-color:rgba(15,118,110,.35);box-shadow:var(--shadow)}
 .sale-product-card.active{border-color:var(--primary);box-shadow:0 0 0 3px rgba(15,118,110,.10),var(--shadow);background:linear-gradient(180deg,#fff,#f3fbf8)}
+.sale-product-card.sale-selected{
+  border-color:#0f766e!important;
+  box-shadow:0 0 0 4px rgba(15,118,110,.18),0 8px 24px rgba(15,118,110,.22)!important;
+  background:linear-gradient(180deg,#ffffff,#e8f8f3)!important;
+  transform:scale(.985);
+}
+.sale-product-card.sale-selected::after{
+  content:'✓ تمت الإضافة';
+  position:absolute;
+  inset:auto 8px 8px auto;
+  background:#0f766e;
+  color:#fff;
+  border-radius:10px;
+  padding:4px 8px;
+  font-size:.62rem;
+  font-weight:900;
+  z-index:5;
+  animation:saleSelectedBadge .35s ease-out;
+}
+@keyframes saleSelectedBadge{
+  from{opacity:0;transform:scale(.75) translateY(5px)}
+  to{opacity:1;transform:scale(1) translateY(0)}
+}
+
 .sale-product-card.disabled{opacity:.5;filter:grayscale(.2)}
 .sale-product-card .sp-image{height:100px;border-radius:13px;overflow:hidden;background:#f4f7f5;display:flex;align-items:center;justify-content:center;font-size:2rem;margin-bottom:8px}
 .sale-product-card .sp-image img{width:100%;height:100%;object-fit:cover}
@@ -1122,6 +1146,52 @@ function setPOSPaymentMethod(method,btn){
   updatePOSSummary();
 }
 
+// ==================== تنبيه اختيار المنتج في نقطة البيع ====================
+let posSaleAudioContext = null;
+
+function playPOSAddSound(){
+  try{
+    const AudioCtx = window.AudioContext || window.webkitAudioContext;
+    if(!AudioCtx) return;
+
+    posSaleAudioContext = posSaleAudioContext || new AudioCtx();
+    if(posSaleAudioContext.state === 'suspended') posSaleAudioContext.resume();
+
+    const now = posSaleAudioContext.currentTime;
+    const osc = posSaleAudioContext.createOscillator();
+    const gain = posSaleAudioContext.createGain();
+
+    osc.type = 'sine';
+    osc.frequency.setValueAtTime(880, now);
+    osc.frequency.exponentialRampToValueAtTime(1320, now + 0.07);
+
+    gain.gain.setValueAtTime(0.0001, now);
+    gain.gain.exponentialRampToValueAtTime(0.07, now + 0.008);
+    gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.11);
+
+    osc.connect(gain);
+    gain.connect(posSaleAudioContext.destination);
+    osc.start(now);
+    osc.stop(now + 0.12);
+  }catch(e){
+    console.warn('تعذر تشغيل صوت إضافة المنتج:', e);
+  }
+}
+
+function showPOSProductSelected(productId){
+  const cards = document.querySelectorAll('.sale-product-card');
+  cards.forEach(card => card.classList.remove('sale-selected'));
+
+  const card = Array.from(cards).find(el => String(el.dataset.productId) === String(productId));
+  if(card){
+    card.classList.add('sale-selected');
+    setTimeout(() => card.classList.remove('sale-selected'), 450);
+  }
+
+  // صوت خفيف فقط عند نجاح إضافة المنتج
+  playPOSAddSound();
+}
+
 function addToPOSCart(id, weight = 1) {
   const productId = String(id);
   const p = (window.saleProducts || []).find(x => String(x.id) === productId);
@@ -1151,6 +1221,7 @@ function addToPOSCart(id, weight = 1) {
   }
   renderPOSCart();
   renderSaleProductGrid();
+  showPOSProductSelected(productId);
 }
 
 function changePOSQty(index,delta){
@@ -1460,7 +1531,7 @@ function renderSaleProductGrid(){
       <button class="sp-size" ${Number(p.qty||0)<.5?'disabled':''} onclick="addToPOSCart('${p.id}',0.5)">500 جم</button>
       <button class="sp-size" ${Number(p.qty||0)<.25?'disabled':''} onclick="addToPOSCart('${p.id}',0.25)">250 جم</button>
     </div>`:`<button class="sp-add-one" ${out?'disabled':''} onclick="event.stopPropagation();addToPOSCart('${p.id}',1)"><i class="fas fa-plus"></i> إضافة للسلة</button>`;
-    return `<div class="sale-product-card pos-product-card ${out?'disabled':''}" onclick="addToPOSCart('${p.id}',1)">
+    return `<div class="sale-product-card pos-product-card ${out?'disabled':''}" data-product-id="${String(p.id).replace(/"/g,'&quot;')}" onclick="addToPOSCart('${p.id}',1)">
       <div class="sp-stock-badge ${out?'out':''}">${out?'⚠️ نفد':`📦 ${formatProductQty(p, p.qty || 0)} ${p.unit||'كجم'}`}</div>
       ${sold>0?`<div class="sp-best-badge">🔥 ${formatProductQty(p, sold)} مباع</div>`:''}
       <div class="sp-image pos-sp-image">${img}</div>
