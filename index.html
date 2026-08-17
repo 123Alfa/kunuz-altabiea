@@ -830,6 +830,11 @@ tr:hover td{background:rgba(15,118,110,.045)}
 .purchase-payment-v9 .pay-box{border:1px solid #e3ebe8;border-radius:12px;padding:8px;background:#fbfdfc;text-align:center}.purchase-payment-v9 small{display:block;color:#7c8985;font-size:.58rem}.purchase-payment-v9 strong{display:block;margin-top:3px;font-size:.78rem}.purchase-payment-v9 .remaining{background:#fff8e8;border-color:#ead8a7}.purchase-payment-v9 .remaining strong{color:#b47700}
 .purchase-credit-row{display:flex;gap:7px;align-items:center;margin-top:9px}.purchase-credit-row button{border:1px solid #d9e6e1;background:#fff;border-radius:10px;padding:9px 12px;font:inherit;font-size:.65rem;font-weight:900}.purchase-credit-row button.active{background:#075e54;color:#fff;border-color:#075e54}.purchase-paid-input{flex:1}.purchase-paid-input input{width:100%}
 @media(max-width:430px){.purchase-payment-v9{grid-template-columns:1fr 1fr}.purchase-payment-v9 .remaining{grid-column:1/-1}.purchase-credit-row{flex-wrap:wrap}.purchase-paid-input{width:100%;flex-basis:100%}}
+.about-version-card{margin-top:14px;text-align:center;border:1px solid var(--border);background:linear-gradient(135deg,rgba(15,118,110,.06),rgba(245,158,11,.06));}
+.about-version-logo{width:64px;height:64px;border-radius:18px;margin:0 auto 10px;display:flex;align-items:center;justify-content:center;background:rgba(15,118,110,.10);font-size:2rem;box-shadow:0 8px 20px rgba(15,118,110,.10);}
+.about-version-name{font-size:1.05rem;font-weight:900;color:var(--text);}
+.about-version-number{display:inline-block;margin-top:7px;padding:6px 13px;border-radius:999px;background:var(--primary);color:#fff;font-size:.72rem;font-weight:900;}
+.about-version-meta{margin-top:8px;color:var(--text-muted);font-size:.62rem;}
 </style>
 </head>
 <body>
@@ -901,6 +906,11 @@ tr:hover td{background:rgba(15,118,110,.045)}
   <div class="modal" id="modalContent"></div>
 </div>
 <script>
+// ==================== معلومات الإصدار ====================
+const APP_VERSION = "v1.0.0";
+const APP_NAME = "كنوز الطبيعة";
+const APP_BUILD_DATE = "18 أغسطس 2026";
+
 // =====================================================
 // 🔥 تهيئة Firebase (بياناتك الخاصة)
 // =====================================================
@@ -3159,9 +3169,9 @@ function updateOfferPreview(){
   const pct=base>0?Math.min(100,(discount/base)*100):0;
   const final=Math.max(0,base-discount);
   const pe=document.getElementById('oDiscountPercent'); if(pe)pe.value=`${pct.toFixed(2)}%`;
-  const fe=document.getElementById('oOfferPrice'); if(fe)fe.value=base>0?`${fmt(final)} ج.م`:'-';
+  const fe=document.getElementById('oOfferPrice'); if(fe)fe.value=base>0?fmt(final):'-';
   const box=document.getElementById('offerPreviewBox');
-  if(box) box.innerHTML=base>0 && discount>0 ? `🏷️ خصم <strong>${fmt(discount)} ج.م</strong> = <strong>${pct.toFixed(2)}%</strong> من ${fmt(base)} ج.م → السعر بعد الخصم <strong>${fmt(final)} ج.م</strong>` : 'أدخل قيمة الخصم واختر الصنف لعرض النسبة والسعر بعد الخصم.';
+  if(box) box.innerHTML=base>0 && discount>0 ? `🏷️ خصم <strong>${fmt(discount)}</strong> = <strong>${pct.toFixed(2)}%</strong> من ${fmt(base)} → السعر بعد الخصم <strong>${fmt(final)}</strong>` : 'أدخل قيمة الخصم واختر الصنف لعرض النسبة والسعر بعد الخصم.';
 }
 function addOffer(){
   const name=document.getElementById('oName').value.trim();
@@ -3186,8 +3196,8 @@ function renderOffersList(){
     return `<div class="offer-card ${isActive?'active':''}">
       <div class="offer-title">${o.name} ${isActive?'<span style="color:var(--success)">● نشط</span>':'<span style="color:var(--text-muted)">● غير نشط/منتهي</span>'}</div>
       <div class="offer-details">📦 ${productName} | 📅 ${o.startDate||'-'} ${o.endDate?' إلى '+o.endDate:''}</div>
-      <div class="offer-discount">خصم ${fmt(d)} ج.م${pct!==null?` · ${pct.toFixed(2)}%`:''}</div>
-      ${base>0?`<div class="offer-details">💰 ${fmt(base)} ج → ${fmt(final)} ج</div>`:''}
+      <div class="offer-discount">خصم ${fmt(d)}${pct!==null?` · ${pct.toFixed(2)}%`:''}</div>
+      ${base>0?`<div class="offer-details">💰 ${fmt(base)} → ${fmt(final)}</div>`:''}
       <div style="margin-top:10px;display:flex;gap:6px">
         <button class="btn btn-sm ${o.active?'btn-danger':'btn-success'}" onclick="toggleOffer('${o.id}',${o.active!==false})">${o.active?'إيقاف':'تفعيل'}</button>
         <button class="btn btn-sm btn-danger" onclick="deleteOffer('${o.id}')"><i class="fas fa-trash"></i></button>
@@ -3409,9 +3419,28 @@ function renderMorePage(container){
         <input type="file" id="importFile" style="display:none" accept=".json" onchange="importData(this)">
         <button class="btn btn-danger" onclick="clearAllData()"><i class="fas fa-trash-alt"></i> مسح كل البيانات</button>
         <button class="btn btn-danger" style="margin-top: 10px; width: 100%; font-weight: bold;" onclick="replaceCloudDataWithLocal()">🔄 مسح واستبدال بيانات السحابة</button>
+        <button class="btn btn-outline" style="margin-top: 4px; width: 100%; font-weight: bold;" onclick="showAboutApp()"><i class="fas fa-info-circle"></i> حول البرنامج</button>
       </div>
     </div>
   </div>`;
+}
+
+// ==================== حول البرنامج ====================
+function showAboutApp(){
+  const content = `
+    <div style="text-align:center">
+      <div class="about-version-logo">🌿</div>
+      <div class="about-version-name">${APP_NAME}</div>
+      <div class="about-version-number">الإصدار ${APP_VERSION}</div>
+      <div class="about-version-meta">نظام نقاط البيع المتكامل Pro</div>
+      <div class="about-version-meta">آخر تحديث: ${APP_BUILD_DATE}</div>
+      <div style="margin-top:18px;padding:12px;border-radius:12px;background:rgba(15,118,110,.06);font-size:.7rem;color:var(--text-muted);line-height:1.8">
+        هذه النسخة هي الإصدار الرسمي الحالي للبرنامج.<br>
+        يتم تحديث رقم الإصدار مع كل تطوير رئيسي أو تحديث مهم.
+      </div>
+      <button class="btn btn-primary" style="margin-top:14px;width:100%" onclick="closeModal()">حسنًا</button>
+    </div>`;
+  openModal(content);
 }
 
 // ==================== التصدير والاستيراد ====================
