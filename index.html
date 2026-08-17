@@ -487,6 +487,16 @@ tr:hover td{background:rgba(15,118,110,.045)}
 @media(max-width:900px){.pos-cashier{grid-template-columns:1fr}.pos-cart-panel{position:static;order:2}.pos-products-panel{order:1}.pos-hero{align-items:flex-start}.pos-hero-stats{display:none}.pos-product-grid-modern{grid-template-columns:repeat(2,minmax(0,1fr))}.pos-sp-image{height:125px!important}}
 @media(max-width:520px){.pos-hero{padding:13px;border-radius:16px}.pos-hero-icon{width:42px;height:42px}.pos-hero h2{font-size:1.08rem}.pos-hero p{font-size:.66rem}.pos-products-body,.pos-cart-body{padding:10px}.pos-product-grid-modern{gap:8px}.pos-product-card{padding:8px!important;border-radius:14px!important}.pos-sp-image{height:105px!important}.pos-methods{grid-template-columns:repeat(4,1fr)}.pos-methods button{font-size:.55rem;padding:7px 2px}.pos-payment-grid-modern{gap:7px}.pos-search-row{grid-template-columns:1fr auto}.pos-scan-btn span{display:none}.pos-scan-btn{width:43px;justify-content:center}.pos-cart-item{padding:14px 0 16px!important}.manual-weight-box{margin-top:8px}.pos-cart-controls{margin-top:10px}.pos-line-total{font-size:.92rem}.sales-history-card{margin-bottom:8px!important}}
 @media(max-width:520px){.sales-history-modern{margin-top:12px!important}.sales-history-head{min-height:64px}.sales-history-title h3{font-size:.98rem}.sales-history-title small{font-size:.6rem}.sales-history-open-btn,.sales-refresh-btn{width:32px;height:32px}}
+
+/* تحسين خانة العروض في الإجراءات السريعة */
+.quick-action.quick-offers{position:relative;overflow:hidden;cursor:pointer;}
+.quick-action.quick-offers i{font-size:1.35rem;margin-bottom:5px;}
+.quick-action.quick-offers span{font-weight:800;}
+.quick-action.quick-offers small{display:block;font-size:.62rem;line-height:1.2;color:var(--text-muted);margin-top:3px;}
+.quick-action.quick-offers:hover{transform:translateY(-2px);}
+@media(max-width:600px){
+  .quick-action.quick-offers small{font-size:.58rem;}
+}
 </style>
 <link rel="manifest" href="manifest.json">
 <link rel="apple-touch-icon" href="icon-192.png">
@@ -813,6 +823,13 @@ tr:hover td{background:rgba(15,118,110,.045)}
 .purchases-cards-list{display:grid;gap:8px}.purchase-record-card{border:1px solid #e1ebe7;border-radius:15px;padding:11px;background:#fff}.purchase-record-top{display:flex;align-items:flex-start;justify-content:space-between;gap:8px}.purchase-product{min-width:0}.purchase-product span{display:block;color:#87938f;font-size:.58rem}.purchase-product strong{display:block;color:#27363a;font-size:.78rem;line-height:1.35;margin-top:3px;overflow-wrap:anywhere}.purchase-net{color:#08796d;font-size:.85rem;font-weight:950;white-space:nowrap}.purchase-net small{display:block;color:#8a9692;font-size:.55rem;text-align:left}.purchase-record-meta{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-top:9px}.purchase-record-meta>div{background:#f7faf9;border-radius:10px;padding:6px;text-align:center;min-width:0}.purchase-record-meta small{display:block;color:#84908d;font-size:.52rem}.purchase-record-meta strong{display:block;color:#37464a;font-size:.63rem;margin-top:2px;overflow-wrap:anywhere}.purchase-record-note{margin-top:7px;padding:7px 8px;border-radius:9px;background:#faf6e9;color:#766a45;font-size:.58rem}.purchase-record-note i{margin-left:4px}.purchase-record-actions{display:flex;gap:7px;margin-top:9px}.purchase-record-actions button{flex:1}.purchase-empty{padding:28px 12px;text-align:center;color:#8a9793}.purchase-empty i{display:block;font-size:1.6rem;margin-bottom:6px}.purchase-empty strong{display:block;color:#52615d}.purchase-empty span{font-size:.65rem}
 @media(max-width:700px){.sale-ref-customer-row{grid-template-columns:minmax(0,.85fr) minmax(0,1.15fr)!important}.sale-ref-customer{grid-template-columns:38px minmax(0,1fr) 22px!important}.sale-ref-customer-select{grid-template-columns:1fr!important;gap:3px!important}.sale-ref-customer-select>span{font-size:.58rem!important}.sale-ref-customer-select select{font-size:.67rem!important;padding:8px 5px!important}.sale-ref-customer-edit{width:38px!important;height:38px!important}.sale-ref-whatsapp{height:54px!important}.sale-ref-checkout-actions{grid-template-columns:minmax(0,1fr) 72px!important}.purchases-stats-grid{grid-template-columns:1fr 1fr}.purchase-stat-card.total{grid-column:1/-1}.purchase-form-grid{grid-template-columns:1fr 1fr}.purchase-filter-grid{grid-template-columns:1fr 1fr}.purchase-search{grid-column:1/-1}.purchase-clear{grid-column:1/-1}.purchase-record-meta{grid-template-columns:1fr 1fr}.purchase-record-meta>div:last-child{grid-column:1/-1}}
 @media(max-width:430px){.sale-ref-customer-row{grid-template-columns:minmax(0,.8fr) minmax(0,1.2fr)!important}.sale-ref-customer{grid-template-columns:34px minmax(0,1fr) 18px!important;gap:4px!important}.sale-ref-customer-edit{width:34px!important;height:34px!important}.sale-ref-user-icon{font-size:.9rem!important}.sale-ref-customer-select select{font-size:.62rem!important}.sale-ref-whatsapp{width:68px!important}.sale-ref-checkout-actions{grid-template-columns:minmax(0,1fr) 68px!important}.purchase-form-grid{grid-template-columns:1fr}.purchase-note-field{grid-column:auto}.purchase-total-preview{grid-template-columns:1fr 1fr}.purchase-total-preview .net{grid-column:1/-1}.purchase-filter-grid{grid-template-columns:1fr 1fr}.purchase-search,.purchase-clear{grid-column:1/-1}.purchase-record-meta{grid-template-columns:1fr 1fr}.purchase-record-meta>div:last-child{grid-column:1/-1}.purchase-product strong{font-size:.72rem}.purchase-net{font-size:.75rem}}
+</style>
+
+<style id="purchase-credit-v9">
+.purchase-payment-v9{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-top:10px}
+.purchase-payment-v9 .pay-box{border:1px solid #e3ebe8;border-radius:12px;padding:8px;background:#fbfdfc;text-align:center}.purchase-payment-v9 small{display:block;color:#7c8985;font-size:.58rem}.purchase-payment-v9 strong{display:block;margin-top:3px;font-size:.78rem}.purchase-payment-v9 .remaining{background:#fff8e8;border-color:#ead8a7}.purchase-payment-v9 .remaining strong{color:#b47700}
+.purchase-credit-row{display:flex;gap:7px;align-items:center;margin-top:9px}.purchase-credit-row button{border:1px solid #d9e6e1;background:#fff;border-radius:10px;padding:9px 12px;font:inherit;font-size:.65rem;font-weight:900}.purchase-credit-row button.active{background:#075e54;color:#fff;border-color:#075e54}.purchase-paid-input{flex:1}.purchase-paid-input input{width:100%}
+@media(max-width:430px){.purchase-payment-v9{grid-template-columns:1fr 1fr}.purchase-payment-v9 .remaining{grid-column:1/-1}.purchase-credit-row{flex-wrap:wrap}.purchase-paid-input{width:100%;flex-basis:100%}}
 </style>
 </head>
 <body>
@@ -1244,7 +1261,8 @@ function navigateTo(tab){
   try{
     document.querySelectorAll('.bottom-nav-item').forEach(b=>b.classList.remove('active'));
     const tabs={dashboard:0,products:1,sales:2,more:3};
-    document.querySelectorAll('.bottom-nav-item')[tabs[tab]||0]?.classList.add('active');
+    const navIndex=Object.prototype.hasOwnProperty.call(tabs,tab)?tabs[tab]:-1;
+    if(navIndex>=0) document.querySelectorAll('.bottom-nav-item')[navIndex]?.classList.add('active');
     const content=document.getElementById('contentArea');
     if(!content) return;
     content.innerHTML='';
@@ -1312,7 +1330,7 @@ function renderDashboardPage(container){
       <div class="quick-action" onclick="navigateTo('purchases')"><i class="fas fa-truck"></i><span>شراء</span></div>
       <div class="quick-action" onclick="navigateTo('summary')"><i class="fas fa-file-invoice-dollar"></i><span>ملخص الشهر</span></div>
       <div class="quick-action" onclick="navigateTo('customers')"><i class="fas fa-user-plus"></i><span>عميل جديد</span></div>
-      <div class="quick-action" onclick="navigateTo('offers')"><i class="fas fa-percent"></i><span>عروض</span></div>
+      <div class="quick-action quick-offers" onclick="navigateTo('offers')" title="إدارة العروض والخصومات"><i class="fas fa-tags"></i><span>العروض</span><small>إضافة ومتابعة العروض</small></div>
     </div>
     <div class="card"><div class="card-title"><i class="fas fa-chart-line"></i> المبيعات الأسبوعية</div><div class="chart-container"><canvas id="weekChart"></canvas></div></div>
     <div class="card"><div class="card-title"><i class="fas fa-clock"></i> آخر العمليات</div><div class="table-wrap"><table><thead><tr><th>الوقت</th><th>النوع</th><th>التفاصيل</th><th>المبلغ</th></tr></thead><tbody id="recentActivity"></tbody></table></div></div>
@@ -1886,14 +1904,37 @@ function getLastSalePrice(productId,type){
   if(last.weight && last.weight>0) return Number(last.price||0);
   return Number(last.price||0);
 }
+function getActiveOfferForProduct(productId){
+  const offers=Store.get('offers')||[];
+  const now=today();
+  const active=offers.filter(o=>{
+    if(!o || o.active===false) return false;
+    if(o.startDate && o.startDate>now) return false;
+    if(o.endDate && o.endDate<now) return false;
+    return !o.productId || String(o.productId)===String(productId);
+  });
+  // العرض الخاص بالصنف له الأولوية على العرض العام
+  return active.sort((a,b)=>{
+    const as=a.productId?1:0, bs=b.productId?1:0;
+    return bs-as;
+  })[0]||null;
+}
+function getOfferDiscountForProduct(productId,basePrice){
+  const offer=getActiveOfferForProduct(productId);
+  if(!offer) return {offer:null,discount:0,price:Number(basePrice)||0,percent:0};
+  const discount=Math.min(Math.max(0,Number(offer.discountValue!=null?offer.discountValue:offer.discount)||0),Math.max(0,Number(basePrice)||0));
+  const price=Math.max(0,(Number(basePrice)||0)-discount);
+  const percent=(Number(basePrice)>0)?(discount/Number(basePrice))*100:0;
+  return {offer,discount,price,percent};
+}
 function getPOSItemUnitPrice(item,p,type){
   if(item.service)return Number(item.price||0);
   if(item.priceOverride!==null && item.priceOverride!==undefined && Number(item.priceOverride)>=0){
     return Number(item.priceOverride);
   }
-  return Number(
-    type === 'wholesale' ? (p.wholesale || 0) : (p.retail || 0)
-  );
+  const base=Number(type === 'wholesale' ? (p.wholesale || 0) : (p.retail || 0));
+  const result=getOfferDiscountForProduct(p.id,base);
+  return result.price;
 }
 function updatePOSItemPrice(index,value){
   const item=(window.posCart||[])[index]; if(!item)return;
@@ -1977,6 +2018,9 @@ function renderPOSCart(){
     const out=(p.qty||0)<=0;
     const isWeight=isKgProduct(p);
     const total=price*(item.qty||1)*(isWeight?weight:1);
+    const basePrice=Number(type === 'wholesale' ? (p.wholesale || 0) : (p.retail || 0));
+    const offerInfo=getOfferDiscountForProduct(p.id,basePrice);
+    const offerHtml=offerInfo.offer && offerInfo.discount>0 ? `<div class="pos-cart-offer">🏷️ ${offerInfo.offer.name}: خصم ${fmt(offerInfo.discount)} ج (${offerInfo.percent.toFixed(2)}%)</div>` : '';
     const lastHtml=(lastPrice!=null && lastPrice!==price)?`<div class="pos-cart-last"><i class="fas fa-history"></i> آخر سعر: ${fmt(lastPrice)} ج.م</div>`:'';
     const weightControl=isWeight?`<div class="pos-weight-control"><input id="weightInput_${index}" type="number" inputmode="decimal" pattern="[0-9]*[.,]?[0-9]*" min="0" step="0.001" value="${item.weight ? item.weight : '.250'}" placeholder="0.250" oninput="handleLiveWeightInput(${index}, this.value, ${price})" onkeydown="return ['e','E','+','-'].includes(event.key) ? false : true"><span>كجم</span></div>`:`<span class="pos-unit-label">${p.unit||'قطعة'}</span>`;
     return `<div class="pos-cart-item pos-cart-product-row">
@@ -1984,7 +2028,7 @@ function renderPOSCart(){
         <div class="cart-visual">${img}</div>
         <div class="pos-cart-main">
           <div class="pos-cart-topline"><span class="pos-cart-name">${p.name}</span><button class="pos-cart-delete" onclick="removePOSItem(${index})" title="حذف">🗑️</button></div>
-          ${lastHtml}
+          ${lastHtml}${offerHtml}
           <div class="pos-cart-stock-badge ${out?'out':''}">${out?'⚠️ نفد':`📦 المخزون: ${formatProductQty(p,p.qty||0)} ${p.unit||'كجم'}`}</div>
         </div>
       </div>
@@ -2180,7 +2224,7 @@ function renderSaleProductGrid(){
       ${sold>0?`<div class="sp-best-badge">🔥 ${formatProductQty(p, sold)} مباع</div>`:''}
       <div class="sp-image pos-sp-image">${img}</div>
       <div class="sp-name" title="${p.name}">${p.name}</div>
-      <div class="sp-price">${fmt(p.retail||0)} <small>/ ${p.unit||'كجم'}</small></div>
+      ${(()=>{const oi=getOfferDiscountForProduct(p.id,Number(p.retail||0)); return oi.offer&&oi.discount>0?`<div class="sp-offer-badge">🏷️ ${oi.offer.name} · خصم ${fmt(oi.discount)} ج</div><div class="sp-price sp-price-offer"><del>${fmt(p.retail||0)}</del> ${fmt(oi.price)} <small>/ ${p.unit||'كجم'}</small></div>`:`<div class="sp-price">${fmt(p.retail||0)} <small>/ ${p.unit||'كجم'}</small></div>`;})()}
       <div class="sp-pack-price">${kg?`500 جم ${fmt(Number(p.retail||0)*.5)} · 250 جم ${fmt(Number(p.retail||0)*.25)}`:'اضغط للإضافة'}</div>
       ${sizeButtons}
     </div>`;
@@ -2549,8 +2593,12 @@ function updatePurchasePreview(){
   const qty=Number(document.getElementById('purQty')?.value||0);
   const price=Number(document.getElementById('purPrice')?.value||0);
   const total=Math.max(0,qty*price);
+  const paid=Math.min(Math.max(0,Number(document.getElementById('purPaid')?.value||0)),total);
+  const remaining=Math.max(0,total-paid);
   const d=document.getElementById('purTotalPreview');
   if(d)d.textContent=fmt(total);
+  const pd=document.getElementById('purPaidPreview'); if(pd)pd.textContent=fmt(paid);
+  const rd=document.getElementById('purRemainingPreview'); if(rd)rd.textContent=fmt(remaining);
 }
 function clearPurchaseFilters(){
   ['purchaseSearch','purchaseFrom','purchaseTo','purchaseSupplierFilter'].forEach(id=>{const e=document.getElementById(id);if(e)e.value='';});
@@ -2579,9 +2627,19 @@ function renderPurchasesPage(container){
         <label>الكمية<input type="number" id="purQty" placeholder="0" step="0.001" min="0" oninput="updatePurchasePreview()"></label>
         <label>سعر الشراء للوحدة<input type="number" id="purPrice" placeholder="0.00" step="0.01" min="0" oninput="updatePurchasePreview()"></label>
         <label>المورد<select id="purSupplier"><option value="">بدون مورد</option>${supplierOpts}</select></label>
+        <label>المبلغ المدفوع<input type="number" id="purPaid" placeholder="0.00" step="0.01" min="0" oninput="updatePurchasePreview()"></label>
         <label class="purchase-note-v6">ملاحظات<input type="text" id="purNote" placeholder="اختياري"></label>
       </div>
       <div class="purchase-total-v6"><span>إجمالي العملية</span><strong id="purTotalPreview">0 ج.م</strong></div>
+      <div class="purchase-payment-v9">
+        <div class="pay-box"><small>المدفوع</small><strong id="purPaidPreview">0 ج.م</strong></div>
+        <div class="pay-box remaining"><small>آجل / متبقي</small><strong id="purRemainingPreview">0 ج.م</strong></div>
+        <div class="pay-box"><small>حالة السداد</small><strong id="purPaymentStatus">مدفوع بالكامل</strong></div>
+      </div>
+      <div class="purchase-credit-row">
+        <button type="button" id="purFullPaidBtn" class="active" onclick="setPurchasePayment('full')">مدفوع بالكامل</button>
+        <button type="button" id="purCreditBtn" onclick="setPurchasePayment('credit')">آجل</button>
+      </div>
       <button type="button" class="purchase-save-v6" onclick="addPurchase()"><i class="fas fa-check-circle"></i> حفظ عملية الشراء</button>
     </section>
     <section class="purchase-box-v6">
@@ -2600,12 +2658,27 @@ function renderPurchasesPage(container){
   renderPurchasesTable();
 }
 
+function setPurchasePayment(mode){
+  const total=Number(document.getElementById('purTotalPreview')?.textContent?.replace(/[^0-9.]/g,'')||0);
+  const paid=document.getElementById('purPaid');
+  const fullBtn=document.getElementById('purFullPaidBtn');
+  const creditBtn=document.getElementById('purCreditBtn');
+  if(mode==='full'){ if(paid)paid.value=total||''; if(fullBtn)fullBtn.classList.add('active'); if(creditBtn)creditBtn.classList.remove('active'); }
+  else { if(paid)paid.value=''; if(creditBtn)creditBtn.classList.add('active'); if(fullBtn)fullBtn.classList.remove('active'); }
+  const st=document.getElementById('purPaymentStatus'); if(st)st.textContent=mode==='full'?'مدفوع بالكامل':'آجل / جزئي';
+  updatePurchasePreview();
+}
+
 function addPurchase(){
   const pid=document.getElementById('purProduct').value;
   const qty=parseFloat(document.getElementById('purQty').value)||0;
   const price=parseFloat(document.getElementById('purPrice').value)||0;
   const total=qty*price;
+  let paid=parseFloat(document.getElementById('purPaid')?.value)||0;
   if(!pid||qty<=0||price<=0)return showToast('أكمل البيانات','warning');
+  if(paid<0)paid=0;
+  if(paid>total)return showToast('المبلغ المدفوع أكبر من إجمالي الشراء','warning');
+  const remaining=Math.max(0,total-paid);
   const products=Store.get('products');
   const product=products.find(p=>p.id===pid);if(!product)return;
   const netUnitPrice=qty>0?total/qty:price;
@@ -2615,11 +2688,16 @@ function addPurchase(){
   const avgPurchasePrice=totalNewQty>0?((oldQty*oldPurchasePrice)+(qty*netUnitPrice))/totalNewQty:netUnitPrice;
   Store.update('products',pid,{qty:totalNewQty,purchase:avgPurchasePrice});
   const supplierId=document.getElementById('purSupplier').value;
-  const supplierName=supplierId?(Store.get('suppliers').find(s=>s.id===supplierId)?.name||''):'';
-  Store.add('purchases',{date:document.getElementById('purDate').value||today(),productId:pid,productName:product.name,qty,price,total,supplierId:supplierId||null,supplierName,note:document.getElementById('purNote').value});
-  showToast('✅ تم الشراء: '+fmt(total));
+  const supplierName=supplierId?(Store.get('suppliers').find(s=>s.id===supplierId)?.name||''):'بائع/مورد';
+  const purchaseBatchId='PUR-'+Date.now()+'-'+Math.random().toString(36).slice(2,8);
+  Store.add('purchases',{purchaseBatchId,date:document.getElementById('purDate').value||today(),productId:pid,productName:product.name,qty,price,total,paid,remaining,supplierId:supplierId||null,supplierName,note:document.getElementById('purNote').value,paymentMethod:remaining>0?'credit':'cash'});
+  if(remaining>0){
+    Store.add('debts',{purchaseBatchId,sourcePurchaseId:null,date:document.getElementById('purDate').value||today(),person:supplierName,type:'علينا',amount:remaining,due:'',note:`آجل من شراء ${product.name}`,paid:false,source:'purchase',purchaseTotal:total,paidAmount:paid});
+  }
+  showToast(remaining>0?'✅ تم الشراء وتسجيل المتبقي آجل: '+fmt(remaining):'✅ تم الشراء: '+fmt(total));
   renderPurchasesPage(document.getElementById('contentArea'));
 }
+
 function renderPurchasesTable(){
   const target=document.getElementById('purchasesCards'); if(!target)return;
   const purchases=Store.get('purchases')||[];
@@ -2635,7 +2713,7 @@ function renderPurchasesTable(){
     const total=Number(p.total ?? (Number(p.qty||0)*Number(p.price||0)));
     return `<article class="purchase-card-v6">
       <div class="purchase-card-head-v6"><div><small>${p.date||'-'}</small><h3>${p.productName||'-'}</h3></div><strong>${fmt(total)}</strong></div>
-      <div class="purchase-card-data-v6"><div><span>الكمية</span><b>${Number(p.qty||0).toLocaleString('ar-EG',{maximumFractionDigits:3})}</b></div><div><span>سعر الوحدة</span><b>${fmt(p.price||0)}</b></div><div><span>المورد</span><b>${p.supplierName||'بدون مورد'}</b></div></div>
+      <div class="purchase-card-data-v6"><div><span>الكمية</span><b>${Number(p.qty||0).toLocaleString('ar-EG',{maximumFractionDigits:3})}</b></div><div><span>سعر الوحدة</span><b>${fmt(p.price||0)}</b></div><div><span>المورد</span><b>${p.supplierName||'بدون مورد'}</b></div><div><span>السداد</span><b>${Number(p.remaining||0)>0?`آجل: ${fmt(p.remaining)}`:'مدفوع'}</b></div></div>
       ${p.note?`<div class="purchase-note-v6"><i class="fas fa-note-sticky"></i>${p.note}</div>`:''}
       <div class="purchase-card-actions-v6"><button type="button" onclick="editPurchase('${p.id}')"><i class="fas fa-edit"></i> تعديل</button><button type="button" onclick="deletePurchase('${p.id}')"><i class="fas fa-trash"></i> حذف</button></div>
     </article>`;
@@ -2658,6 +2736,7 @@ function editPurchase(id){
       <div class="form-group"><label>الكمية</label><input type="number" id="epurQty" value="${purchase.qty}" step="0.01"></div>
       <div class="form-group"><label>سعر الشراء (للوحدة)</label><input type="number" id="epurPrice" value="${purchase.price}" step="0.01"></div>
       <div class="form-group"><label>المورد</label><select id="epurSupplier"><option value="">اختر مورد...</option>${supplierOpts}</select></div>
+      <div class="form-group"><label>المبلغ المدفوع</label><input type="number" id="epurPaid" value="${purchase.paid||0}" step="0.01" min="0"></div>
       <div class="form-group"><label>ملاحظات</label><input type="text" id="epurNote" value="${purchase.note||''}"></div>
     </div>
     <button class="btn btn-primary btn-block" onclick="savePurchaseEdit('${id}')"><i class="fas fa-save"></i> حفظ التعديلات</button>`);
@@ -2672,6 +2751,10 @@ function savePurchaseEdit(id){
   const qty=parseFloat(document.getElementById('epurQty').value)||0;
   const price=parseFloat(document.getElementById('epurPrice').value)||0;
   const total=qty*price;
+  let paid=parseFloat(document.getElementById('epurPaid')?.value)||0;
+  if(paid<0)paid=0;
+  if(paid>total)return showToast('المبلغ المدفوع أكبر من إجمالي الشراء','warning');
+  const remaining=Math.max(0,total-paid);
 
   if(!pid||qty<=0||price<=0)return showToast('أكمل البيانات','warning');
 
@@ -2697,6 +2780,7 @@ function savePurchaseEdit(id){
 
   const supplierId=document.getElementById('epurSupplier').value;
   const supplierName=supplierId?(Store.get('suppliers').find(s=>s.id===supplierId)?.name||''):'';
+  const purchaseBatchId=original.purchaseBatchId||('PUR-'+Date.now()+'-'+Math.random().toString(36).slice(2,8));
 
   Store.update('purchases',id,{
     date:document.getElementById('epurDate').value||today(),
@@ -2705,10 +2789,23 @@ function savePurchaseEdit(id){
     qty,
     price,
     total,
+    paid,
+    remaining,
+    paymentMethod:remaining>0?'credit':'cash',
+    purchaseBatchId:original.purchaseBatchId||('PUR-'+Date.now()+'-'+Math.random().toString(36).slice(2,8)),
     supplierId:supplierId||null,
     supplierName:supplierName,
     note:document.getElementById('epurNote').value
   });
+
+  // إعادة ضبط دين المورد المرتبط بهذه الفاتورة
+  const batchId=original.purchaseBatchId;
+  if(batchId){
+    Store.get('debts').filter(d=>d.purchaseBatchId===batchId).forEach(d=>Store.delete('debts',d.id));
+  }
+  if(remaining>0){
+    Store.add('debts',{purchaseBatchId:original.purchaseBatchId||purchaseBatchId,date:document.getElementById('epurDate').value||today(),person:supplierName||'بائع/مورد',type:'علينا',amount:remaining,due:'',note:`آجل من شراء ${product.name}`,paid:false,source:'purchase',purchaseTotal:total,paidAmount:paid});
+  }
 
   closeModal();showToast('✅ تم التعديل');renderPurchasesPage(document.getElementById('contentArea'));
 }
@@ -2732,6 +2829,8 @@ function deletePurchase(id){
 
   Store.update('products',purchase.productId,{qty:Math.max(0,newQty)});
 
+  const batchId=purchase.purchaseBatchId;
+  if(batchId){Store.get('debts').filter(d=>d.purchaseBatchId===batchId).forEach(d=>Store.delete('debts',d.id));}
   Store.delete('purchases',id);
 
   showToast('🗑️ تم الحذف وتحديث المخزون');
@@ -3019,66 +3118,84 @@ function deleteSupplier(id){if(!confirm('حذف المورد؟'))return;Store.de
 
 // ==================== العروض والخصومات (ميزة جديدة) ====================
 function renderOffersPage(container){
-  const offers=Store.get('offers');
-  const products=Store.get('products');
+  const offers=Store.get('offers')||[];
+  const products=Store.get('products')||[];
   const productOpts=products.map(p=>`<option value="${p.id}">${p.name}</option>`).join('');
   container.innerHTML=`<div class="fade-in">
     <div class="card"><div class="card-title"><i class="fas fa-percent"></i> إضافة عرض جديد</div>
       <div class="form-grid">
         <div class="form-group"><label>اسم العرض</label><input type="text" id="oName" placeholder="مثال: عرض العيد"></div>
         <div class="form-group"><label>الصنف</label><select id="oProduct"><option value="">كل الأصناف</option>${productOpts}</select></div>
-        <div class="form-group"><label>نسبة الخصم (%)</label><input type="number" id="oDiscount" placeholder="10" min="1" max="99" step="0.1"></div>
+        <div class="form-group"><label>قيمة الخصم (جنيه)</label><input type="number" id="oDiscount" placeholder="مثال: 10" min="0.01" step="0.01" oninput="updateOfferPreview()"></div>
+        <div class="form-group"><label>السعر الأصلي</label><input type="number" id="oBasePrice" placeholder="اختر الصنف أو اكتب السعر" min="0" step="0.01" oninput="updateOfferPreview()"></div>
+        <div class="form-group"><label>نسبة الخصم المحسوبة</label><input type="text" id="oDiscountPercent" value="0%" readonly></div>
+        <div class="form-group"><label>السعر بعد الخصم</label><input type="text" id="oOfferPrice" value="-" readonly></div>
         <div class="form-group"><label>تاريخ البداية</label><input type="date" id="oStart" value="${today()}"></div>
         <div class="form-group"><label>تاريخ النهاية</label><input type="date" id="oEnd"></div>
         <div class="form-group"><label>ملاحظات</label><input type="text" id="oNote" placeholder="اختياري"></div>
       </div>
+      <div class="offer-preview-box" id="offerPreviewBox">أدخل قيمة الخصم واختر الصنف لعرض النسبة والسعر بعد الخصم.</div>
       <button class="btn btn-primary btn-block" onclick="addOffer()"><i class="fas fa-save"></i> حفظ العرض</button>
     </div>
     <div class="card"><div class="card-title"><i class="fas fa-tags"></i> العروض النشطة</div><div id="offersList"></div></div>
   </div>`;
+  const productSelect=document.getElementById('oProduct');
+  productSelect?.addEventListener('change',()=>{
+    const p=products.find(x=>String(x.id)===String(productSelect.value));
+    const base=document.getElementById('oBasePrice');
+    if(base && p) base.value=Number(p.retail||0);
+    updateOfferPreview();
+  });
   renderOffersList();
+}
+function updateOfferPreview(){
+  const discount=Math.max(0,Number(document.getElementById('oDiscount')?.value||0));
+  const productId=document.getElementById('oProduct')?.value||'';
+  const products=Store.get('products')||[];
+  const p=products.find(x=>String(x.id)===String(productId));
+  const baseEl=document.getElementById('oBasePrice');
+  const base=Number(baseEl?.value|| (p?.retail||0));
+  if(baseEl && p && !baseEl.value) baseEl.value=Number(p.retail||0);
+  const pct=base>0?Math.min(100,(discount/base)*100):0;
+  const final=Math.max(0,base-discount);
+  const pe=document.getElementById('oDiscountPercent'); if(pe)pe.value=`${pct.toFixed(2)}%`;
+  const fe=document.getElementById('oOfferPrice'); if(fe)fe.value=base>0?`${fmt(final)} ج.م`:'-';
+  const box=document.getElementById('offerPreviewBox');
+  if(box) box.innerHTML=base>0 && discount>0 ? `🏷️ خصم <strong>${fmt(discount)} ج.م</strong> = <strong>${pct.toFixed(2)}%</strong> من ${fmt(base)} ج.م → السعر بعد الخصم <strong>${fmt(final)} ج.م</strong>` : 'أدخل قيمة الخصم واختر الصنف لعرض النسبة والسعر بعد الخصم.';
 }
 function addOffer(){
   const name=document.getElementById('oName').value.trim();
-  const discount=parseFloat(document.getElementById('oDiscount').value)||0;
-  if(!name||discount<=0)return showToast('أكمل بيانات العرض','warning');
-  Store.add('offers',{
-    name,
-    productId:document.getElementById('oProduct').value||null,
-    discount,
-    startDate:document.getElementById('oStart').value||today(),
-    endDate:document.getElementById('oEnd').value||null,
-    note:document.getElementById('oNote').value,
-    active:true
-  });
-  showToast('✅ تم إضافة العرض');
-  document.getElementById('oName').value='';
-  document.getElementById('oDiscount').value='';
-  document.getElementById('oNote').value='';
+  const discount=Math.max(0,Number(document.getElementById('oDiscount').value||0));
+  const productId=document.getElementById('oProduct').value||null;
+  if(!name||discount<=0)return showToast('أكمل اسم العرض وقيمة الخصم','warning');
+  Store.add('offers',{name,productId,discountValue:discount,discount:discount,startDate:document.getElementById('oStart').value||today(),endDate:document.getElementById('oEnd').value||null,note:document.getElementById('oNote').value,active:true});
+  showToast('✅ تم إضافة العرض وتفعيله في المبيعات');
   renderOffersPage(document.getElementById('contentArea'));
 }
 function renderOffersList(){
-  const offers=Store.get('offers');
+  const offers=Store.get('offers')||[];
+  const products=Store.get('products')||[];
   const now=today();
   document.getElementById('offersList').innerHTML=offers.map(o=>{
-    const isActive=o.active&&(!o.endDate||o.endDate>=now);
-    const productName=o.productId?(Store.get('products').find(p=>p.id===o.productId)?.name||'كل الأصناف'):'كل الأصناف';
+    const isActive=o.active!==false&&(!o.startDate||o.startDate<=now)&&(!o.endDate||o.endDate>=now);
+    const productName=o.productId?(products.find(p=>String(p.id)===String(o.productId))?.name||'الصنف غير موجود'):'كل الأصناف';
+    const base=o.productId?(Number(products.find(p=>String(p.id)===String(o.productId))?.retail||0)):0;
+    const d=Math.max(0,Number(o.discountValue!=null?o.discountValue:o.discount)||0);
+    const pct=base>0?Math.min(100,d/base*100):null;
+    const final=base>0?Math.max(0,base-d):null;
     return `<div class="offer-card ${isActive?'active':''}">
-      <div class="offer-title">${o.name} ${isActive?'<span style="color:var(--success)">● نشط</span>':'<span style="color:var(--text-muted)">● منتهي</span>'}</div>
-      <div class="offer-details">📦 ${productName} | 📅 ${o.startDate} ${o.endDate?' إلى '+o.endDate:''}</div>
-      <span class="offer-discount">-${o.discount}%</span>
+      <div class="offer-title">${o.name} ${isActive?'<span style="color:var(--success)">● نشط</span>':'<span style="color:var(--text-muted)">● غير نشط/منتهي</span>'}</div>
+      <div class="offer-details">📦 ${productName} | 📅 ${o.startDate||'-'} ${o.endDate?' إلى '+o.endDate:''}</div>
+      <div class="offer-discount">خصم ${fmt(d)} ج.م${pct!==null?` · ${pct.toFixed(2)}%`:''}</div>
+      ${base>0?`<div class="offer-details">💰 ${fmt(base)} ج → ${fmt(final)} ج</div>`:''}
       <div style="margin-top:10px;display:flex;gap:6px">
-        <button class="btn btn-sm ${o.active?'btn-danger':'btn-success'}" onclick="toggleOffer('${o.id}',${o.active})">${o.active?'إيقاف':'تفعيل'}</button>
+        <button class="btn btn-sm ${o.active?'btn-danger':'btn-success'}" onclick="toggleOffer('${o.id}',${o.active!==false})">${o.active?'إيقاف':'تفعيل'}</button>
         <button class="btn btn-sm btn-danger" onclick="deleteOffer('${o.id}')"><i class="fas fa-trash"></i></button>
       </div>
     </div>`;
   }).join('')||'<div class="empty-state"><i class="fas fa-tags"></i><p>لا يوجد عروض</p></div>';
 }
-function toggleOffer(id,currentActive){
-  Store.update('offers',id,{active:!currentActive});
-  showToast(!currentActive?'✅ تم التفعيل':'⏹️ تم الإيقاف');
-  renderOffersList();
-}
+function toggleOffer(id,currentActive){Store.update('offers',id,{active:!currentActive});showToast(!currentActive?'✅ تم التفعيل وتطبيق العرض في المبيعات':'⏹️ تم إيقاف العرض');renderOffersList();}
 function deleteOffer(id){if(!confirm('حذف العرض؟'))return;Store.delete('offers',id);showToast('🗑️ تم الحذف');renderOffersList();}
 
 // ==================== سجل التعديلات (ميزة جديدة) ====================
@@ -3628,4 +3745,10 @@ html,body{width:100%;max-width:100%;overflow-x:hidden}
 .sale-ref-methods button.active{font-weight:800;transform:translateY(-1px)}
 .pos-credit-row.show{display:flex!important}
 .sale-ref-paid-input input{direction:ltr;text-align:center}
+
+/* عروض مرتبطة بالمبيعات - V11 */
+.offer-preview-box{margin:10px 0;padding:12px;border-radius:12px;background:var(--bg-input);border:1px dashed var(--accent);font-size:.86rem;line-height:1.7;text-align:center}
+.sp-offer-badge{display:inline-block;margin:4px 0;padding:3px 8px;border-radius:12px;background:#fff3cd;color:#8a5a00;font-size:.68rem;font-weight:800}
+.sp-price-offer{color:var(--success)!important}.sp-price-offer del{color:var(--text-muted);font-size:.72em;margin-left:4px}
+.pos-cart-offer{display:inline-block;margin-top:4px;padding:3px 8px;border-radius:10px;background:#fff3cd;color:#8a5a00;font-size:.68rem;font-weight:800}
 </style>
