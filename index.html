@@ -152,6 +152,38 @@ body{font-family:'Tajawal','Segoe UI',sans-serif;background:var(--bg);color:var(
 .btn-outline:hover{background:rgba(15,118,110,0.1)}
 .btn-sm{padding:8px 14px;font-size:0.8rem}
 .btn-block{width:100%}
+.settings-hero{background:linear-gradient(135deg,#0f766e,#0b5f58);color:#fff;border-radius:18px;padding:20px;margin-bottom:16px;box-shadow:0 10px 28px rgba(15,118,110,.20)}
+.settings-hero-top{display:flex;align-items:center;justify-content:space-between;gap:12px}
+.settings-hero h2{margin:0;font-size:1.2rem;font-weight:900}
+.settings-hero p{margin:7px 0 0;color:rgba(255,255,255,.82);font-size:.78rem}
+.settings-back{border:1px solid rgba(255,255,255,.35);background:rgba(255,255,255,.12);color:#fff;border-radius:11px;padding:9px 12px;cursor:pointer;font-family:inherit;font-weight:800}
+.settings-version{background:rgba(255,255,255,.16);padding:6px 10px;border-radius:999px;font-size:.72rem;font-weight:800}
+.settings-list{display:flex;flex-direction:column;gap:0}
+.settings-row{display:flex;align-items:center;gap:12px;padding:15px 4px;border-bottom:1px solid var(--border);cursor:pointer}
+.settings-row:last-child{border-bottom:none}
+.settings-icon{width:42px;height:42px;min-width:42px;border-radius:13px;display:flex;align-items:center;justify-content:center;font-size:1.05rem;background:rgba(15,118,110,.10);color:var(--primary)}
+.settings-row-main{flex:1;min-width:0}
+.settings-row-title{font-weight:900;color:var(--text);font-size:.9rem}
+.settings-row-sub{font-size:.72rem;color:var(--text-muted);margin-top:3px;line-height:1.5}
+.settings-arrow{color:var(--text-muted);font-size:.85rem}
+.settings-badge{font-size:.65rem;padding:4px 8px;border-radius:999px;background:rgba(16,185,129,.12);color:var(--success);font-weight:800}
+.settings-stat-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}
+.settings-mini-stat{background:var(--bg-elevated);border:1px solid var(--border);border-radius:13px;padding:12px;text-align:center}
+.settings-mini-stat strong{display:block;font-size:1rem;color:var(--primary-light)}
+.settings-mini-stat span{display:block;margin-top:4px;font-size:.68rem;color:var(--text-muted)}
+.settings-switch{position:relative;width:46px;height:26px;flex:0 0 46px}
+.settings-switch input{display:none}
+.settings-switch span{position:absolute;inset:0;background:#cbd5e1;border-radius:999px;transition:.2s}
+.settings-switch span:before{content:'';position:absolute;width:20px;height:20px;top:3px;right:23px;background:#fff;border-radius:50%;box-shadow:0 2px 5px rgba(0,0,0,.18);transition:.2s}
+.settings-switch input:checked+span{background:var(--primary)}
+.settings-switch input:checked+span:before{right:3px}
+.settings-note{padding:12px;border-radius:12px;background:rgba(245,158,11,.08);border:1px solid rgba(245,158,11,.20);color:var(--text-light);font-size:.74rem;line-height:1.7}
+.settings-profile{display:flex;align-items:center;gap:12px;padding:12px;background:var(--bg-elevated);border:1px solid var(--border);border-radius:14px}
+.settings-profile-avatar{width:48px;height:48px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,var(--primary),var(--primary-light));color:#fff;font-weight:900;font-size:1.15rem}
+.settings-profile-info{flex:1;min-width:0}
+.settings-profile-info strong{display:block;font-size:.9rem}
+.settings-profile-info span{display:block;color:var(--text-muted);font-size:.72rem;margin-top:3px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+
 .btn:disabled{opacity:0.5;transform:none}
 .table-wrap{overflow-x:auto;border-radius:12px;border:1px solid var(--border);-webkit-overflow-scrolling:touch}
 table{width:100%;border-collapse:collapse;font-size:0.88rem;table-layout:auto}
@@ -1270,7 +1302,7 @@ function navigateTo(tab){
   currentTab=tab;
   try{
     document.querySelectorAll('.bottom-nav-item').forEach(b=>b.classList.remove('active'));
-    const tabs={dashboard:0,products:1,sales:2,more:3};
+    const tabs={dashboard:0,products:1,sales:2,more:3,settings:3};
     const navIndex=Object.prototype.hasOwnProperty.call(tabs,tab)?tabs[tab]:-1;
     if(navIndex>=0) document.querySelectorAll('.bottom-nav-item')[navIndex]?.classList.add('active');
     const content=document.getElementById('contentArea');
@@ -1281,6 +1313,7 @@ function navigateTo(tab){
       case 'products':renderProductsPage(content);break;
       case 'sales':renderSalesPage(content);break;
       case 'more':renderMorePage(content);break;
+      case 'settings':renderSettingsPage(content);break;
       case 'purchases':renderPurchasesPage(content);break;
       case 'expenses':renderExpensesPage(content);break;
       case 'withdrawals':renderWithdrawalsPage(content);break;
@@ -3413,16 +3446,184 @@ function renderMorePage(container){
     </div>
     <div class="section-header" style="margin-top:20px"><h2><i class="fas fa-cog" style="color:var(--text-muted)"></i> الإعدادات</h2><div class="line"></div></div>
     <div class="card">
-      <div style="display:flex;flex-direction:column;gap:12px">
-        <button class="btn btn-outline" onclick="exportData()"><i class="fas fa-download"></i> تصدير البيانات</button>
-        <button class="btn btn-outline" onclick="document.getElementById('importFile').click()"><i class="fas fa-upload"></i> استيراد البيانات</button>
-        <input type="file" id="importFile" style="display:none" accept=".json" onchange="importData(this)">
-        <button class="btn btn-danger" onclick="clearAllData()"><i class="fas fa-trash-alt"></i> مسح كل البيانات</button>
-        <button class="btn btn-danger" style="margin-top: 10px; width: 100%; font-weight: bold;" onclick="replaceCloudDataWithLocal()">🔄 مسح واستبدال بيانات السحابة</button>
-        <button class="btn btn-outline" style="margin-top: 4px; width: 100%; font-weight: bold;" onclick="showAboutApp()"><i class="fas fa-info-circle"></i> حول البرنامج</button>
+      <div class="settings-row" onclick="navigateTo('settings')" style="border-bottom:none;padding:4px 0">
+        <div class="settings-icon"><i class="fas fa-sliders-h"></i></div>
+        <div class="settings-row-main">
+          <div class="settings-row-title">الإعدادات</div>
+          <div class="settings-row-sub">البيانات العامة، الإشعارات، النسخ الاحتياطي، الاستعادة، المستخدم والحساب</div>
+        </div>
+        <div class="settings-arrow"><i class="fas fa-chevron-left"></i></div>
       </div>
     </div>
   </div>`;
+}
+
+
+// ==================== صفحة الإعدادات ====================
+function getAppSettings(){
+  try{
+    return JSON.parse(localStorage.getItem('bm_settings')||'{}');
+  }catch(e){ return {}; }
+}
+function saveAppSettings(data){
+  localStorage.setItem('bm_settings',JSON.stringify(data||{}));
+}
+function toggleAppSetting(key,checked){
+  const s=getAppSettings();
+  s[key]=!!checked;
+  saveAppSettings(s);
+  showToast(checked?'✅ تم تفعيل الإعداد':'⏸️ تم إيقاف الإعداد');
+}
+function getDataCounts(){
+  const keys=['products','sales','purchases','expenses','withdrawals','debts','customers','suppliers','offers'];
+  const counts={};
+  keys.forEach(k=>counts[k]=(Store.get(k)||[]).length);
+  return counts;
+}
+function getLastBackup(){
+  return localStorage.getItem('bm_last_backup')||'لم يتم إنشاء نسخة احتياطية بعد';
+}
+function renderSettingsPage(container){
+  const s=getAppSettings();
+  const c=getDataCounts();
+  const last=getLastBackup();
+  const name=currentUser?.name||'مستخدم';
+  const email=currentUser?.email||'غير مسجل';
+  const initial=(name||'م')[0];
+
+  container.innerHTML=`<div class="fade-in">
+    <div class="settings-hero">
+      <div class="settings-hero-top">
+        <button class="settings-back" onclick="navigateTo('more')"><i class="fas fa-arrow-right"></i> رجوع</button>
+        <span class="settings-version">${APP_VERSION}</span>
+      </div>
+      <div style="margin-top:18px">
+        <h2>⚙️ الإعدادات</h2>
+        <p>إدارة البرنامج والبيانات والنسخ الاحتياطي والحساب من مكان واحد.</p>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title"><i class="fas fa-store"></i> البيانات العامة</div>
+      <div class="settings-profile">
+        <div class="settings-profile-avatar">${initial}</div>
+        <div class="settings-profile-info">
+          <strong>${name}</strong>
+          <span>${email}</span>
+        </div>
+        <span class="settings-badge">متصل محليًا</span>
+      </div>
+      <div class="settings-stat-grid" style="margin-top:12px">
+        <div class="settings-mini-stat"><strong>${c.products}</strong><span>الأصناف</span></div>
+        <div class="settings-mini-stat"><strong>${c.sales}</strong><span>المبيعات</span></div>
+        <div class="settings-mini-stat"><strong>${c.purchases}</strong><span>المشتريات</span></div>
+        <div class="settings-mini-stat"><strong>${c.customers}</strong><span>العملاء</span></div>
+      </div>
+      <button class="btn btn-outline btn-block" style="margin-top:12px" onclick="editProfile()"><i class="fas fa-user-edit"></i> تعديل بيانات المستخدم</button>
+    </div>
+
+    <div class="card">
+      <div class="card-title"><i class="fas fa-bell"></i> الإشعارات</div>
+      <div class="settings-list">
+        <label class="settings-row" style="cursor:default">
+          <div class="settings-icon"><i class="fas fa-save"></i></div>
+          <div class="settings-row-main"><div class="settings-row-title">تنبيه بعد الحفظ</div><div class="settings-row-sub">إظهار رسالة تأكيد بعد حفظ العمليات</div></div>
+          <div class="settings-switch"><input type="checkbox" ${s.saveNotifications!==false?'checked':''} onchange="toggleAppSetting('saveNotifications',this.checked)"><span></span></div>
+        </label>
+        <label class="settings-row" style="cursor:default">
+          <div class="settings-icon"><i class="fas fa-cloud"></i></div>
+          <div class="settings-row-main"><div class="settings-row-title">تنبيهات المزامنة</div><div class="settings-row-sub">إظهار حالة المزامنة والاتصال بالسحابة</div></div>
+          <div class="settings-switch"><input type="checkbox" ${s.syncNotifications!==false?'checked':''} onchange="toggleAppSetting('syncNotifications',this.checked)"><span></span></div>
+        </label>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title"><i class="fas fa-cloud-download-alt"></i> النسخ الاحتياطي</div>
+      <div class="settings-note" style="margin-bottom:12px">
+        يتم حفظ نسخة JSON تشمل الأصناف والمبيعات والمشتريات والمصروفات والسحوبات والديون والعملاء والموردين والعروض وسجل التعديلات.
+      </div>
+      <div style="padding:12px;background:var(--bg-elevated);border:1px solid var(--border);border-radius:12px;margin-bottom:12px">
+        <div style="font-size:.72rem;color:var(--text-muted)">آخر نسخة احتياطية</div>
+        <div style="font-weight:900;margin-top:4px">${last}</div>
+      </div>
+      <button class="btn btn-primary btn-block" onclick="createSettingsBackup()"><i class="fas fa-cloud-download-alt"></i> إنشاء نسخة احتياطية الآن</button>
+      <button class="btn btn-outline btn-block" style="margin-top:10px" onclick="document.getElementById('settingsImportFile').click()"><i class="fas fa-upload"></i> استعادة البيانات</button>
+      <input type="file" id="settingsImportFile" style="display:none" accept=".json" onchange="importData(this)">
+      <button class="btn btn-outline btn-block" style="margin-top:10px" onclick="replaceCloudDataWithLocal()"><i class="fas fa-sync-alt"></i> مسح واستبدال بيانات السحابة</button>
+    </div>
+
+    <div class="card">
+      <div class="card-title"><i class="fas fa-users-cog"></i> إدارة المستخدمين</div>
+      <div class="settings-row" onclick="editProfile()" style="padding-top:4px">
+        <div class="settings-icon"><i class="fas fa-user"></i></div>
+        <div class="settings-row-main">
+          <div class="settings-row-title">المستخدم الحالي</div>
+          <div class="settings-row-sub">${name} — ${email}</div>
+        </div>
+        <div class="settings-arrow"><i class="fas fa-chevron-left"></i></div>
+      </div>
+      <div class="settings-note" style="margin-top:12px">
+        إدارة عدة حسابات وصلاحيات مستقلة تحتاج ربطها بنظام المصادقة السحابي الحالي، لذلك لن يتم تغيير نظام الدخول الحالي أو التأثير على بياناتك.
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title"><i class="fas fa-lock"></i> تغيير كلمة المرور</div>
+      <div class="settings-note">
+        نظام الدخول الحالي في هذه النسخة يعتمد على البريد المسجل محليًا ولا يتحقق من كلمة مرور محفوظة داخل التطبيق. لذلك لم أضع زرًا وهميًا لتغيير كلمة المرور حتى لا يؤثر على تسجيل الدخول الحالي.
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title"><i class="fas fa-info-circle"></i> حول البرنامج</div>
+      <div class="settings-list">
+        <div class="settings-row" onclick="showAboutApp()">
+          <div class="settings-icon"><i class="fas fa-info-circle"></i></div>
+          <div class="settings-row-main">
+            <div class="settings-row-title">كنوز الطبيعة</div>
+            <div class="settings-row-sub">الإصدار ${APP_VERSION} — آخر تحديث: ${APP_BUILD_DATE}</div>
+          </div>
+          <div class="settings-arrow"><i class="fas fa-chevron-left"></i></div>
+        </div>
+      </div>
+    </div>
+
+    <button class="btn btn-danger btn-block" style="margin-bottom:18px" onclick="logout()"><i class="fas fa-sign-out-alt"></i> تسجيل الخروج</button>
+  </div>`;
+}
+function createSettingsBackup(){
+  exportData();
+  const stamp=new Date().toLocaleString('ar-EG');
+  localStorage.setItem('bm_last_backup',stamp);
+  showToast('✅ تم إنشاء النسخة الاحتياطية');
+  setTimeout(()=>navigateTo('settings'),350);
+}
+function editProfile(){
+  const name=currentUser?.name||'';
+  const email=currentUser?.email||'';
+  const capital=currentUser?.capital||0;
+  openModal(`
+    <div class="card-title"><i class="fas fa-user-edit"></i> تعديل بيانات المستخدم</div>
+    <div class="form-group"><label>الاسم</label><input id="settingsProfileName" value="${String(name).replace(/"/g,'&quot;')}"></div>
+    <div class="form-group" style="margin-top:12px"><label>البريد الإلكتروني</label><input id="settingsProfileEmail" type="email" value="${String(email).replace(/"/g,'&quot;')}"></div>
+    <div class="form-group" style="margin-top:12px"><label>رأس المال</label><input id="settingsProfileCapital" type="number" value="${capital}"></div>
+    <button class="btn btn-primary btn-block" style="margin-top:16px" onclick="saveProfile()"><i class="fas fa-save"></i> حفظ البيانات</button>
+    <button class="btn btn-outline btn-block" style="margin-top:10px" onclick="closeModal()">إلغاء</button>
+  `);
+}
+function saveProfile(){
+  const name=document.getElementById('settingsProfileName')?.value.trim();
+  const email=document.getElementById('settingsProfileEmail')?.value.trim();
+  const capital=parseFloat(document.getElementById('settingsProfileCapital')?.value)||0;
+  if(!name||!email){showToast('⚠️ الاسم والبريد مطلوبان','warning');return;}
+  currentUser={...(currentUser||{}),name,email,capital};
+  Store.setUser(currentUser);
+  document.getElementById('userName').textContent=name;
+  document.getElementById('userAvatar').textContent=name[0];
+  closeModal();
+  showToast('✅ تم تحديث بيانات المستخدم');
+  navigateTo('settings');
 }
 
 // ==================== حول البرنامج ====================
