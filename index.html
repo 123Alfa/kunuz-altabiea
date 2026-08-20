@@ -1012,7 +1012,7 @@ tr:hover td{background:rgba(15,118,110,.045)}
 </div>
 <script>
 // ==================== معلومات الإصدار ====================
-const APP_VERSION = "v1.5.3";
+const APP_VERSION = "v1.5.5";
 const APP_NAME = "كنوز الطبيعة";
 const APP_BUILD_DATE = "20 أغسطس 2026";
 
@@ -1175,8 +1175,8 @@ async function loadCollectionFromFirebase(collection) {
 }
 
 async function loadAllFromFirebase() {
-  // نرفع أولًا كل ما تم إدخاله/تعديله/حذفه أثناء Offline
-  // حتى لا تستبدل السحابة البيانات المحلية الجديدة.
+  // المزامنة العامة للبيانات الأساسية مع Firebase مستقلة تمامًا عن
+  // النسخ الاحتياطي المرتبط بحساب Google.
   if(!db || !navigator.onLine) return false;
 
   const flushed = await flushSyncQueue();
@@ -1197,8 +1197,17 @@ async function loadAllFromFirebase() {
   }
 
   updateSyncStatus();
-  if (anyLoaded) showToast('✅ تمت مزامنة البيانات مع السحابة', 'success');
-  else showToast('⚠️ تعذر الاتصال بالسحابة، نعرض البيانات المحلية', 'warning');
+
+  // بعد العودة من تسجيل Google لا نعرض رسالة المزامنة العامة حتى لا تختلط
+  // على المستخدم مع رسالة النسخ الاحتياطي بحساب Google.
+  const suppressToast = sessionStorage.getItem('bm_google_auth_flow') === '1';
+  if (suppressToast) sessionStorage.removeItem('bm_google_auth_flow');
+
+  const settings = getAppSettings();
+  if (!suppressToast && settings.syncNotifications !== false) {
+    if (anyLoaded) showToast('🔄 تمت مزامنة بيانات البرنامج مع Firebase', 'success');
+    else showToast('⚠️ تعذر الاتصال بالسحابة، نعرض البيانات المحلية', 'warning');
+  }
   return anyLoaded;
 }
 
@@ -1234,6 +1243,7 @@ const Store={
     this.set(key,arr);
     this.logAudit('إضافة',key,data.id,data.name||data.person||'');
     syncToFirebase(key, data.id, data);
+    scheduleGoogleBackup('add');
     return data;
   },
   update(key,id,data){
@@ -1245,6 +1255,7 @@ const Store={
       this.set(key,arr);
       this.logAudit('تعديل',key,id,oldName);
       syncToFirebase(key, id, arr[i]);
+      scheduleGoogleBackup('update');
     }
   },
   delete(key,id){
@@ -1253,6 +1264,7 @@ const Store={
     this.set(key,arr.filter(x=>x.id!==id));
     if(item)this.logAudit('حذف',key,id,item.name||item.person||'');
     deleteFromFirebase(key, id);
+    scheduleGoogleBackup('delete');
   },
   getUser(){return JSON.parse(localStorage.getItem('bm_user')||'null')},
   setUser(u){localStorage.setItem('bm_user',JSON.stringify(u))},
@@ -1337,6 +1349,8 @@ async function signInWithGoogleBackup(){
       console.warn('تعذر ضبط حفظ جلسة Google:',persistenceError);
     }
 
+    // نضع علامة مؤقتة حتى لا تظهر رسالة المزامنة العامة بعد العودة من Google.
+    sessionStorage.setItem('bm_google_auth_flow','1');
     showToast('⏳ جاري فتح حساب Google...','info');
     await auth.signInWithRedirect(provider);
   }catch(e){
@@ -1364,6 +1378,7 @@ async function handleGoogleRedirectResult(){
       localStorage.setItem('bm_google_email',user.email||'');
       localStorage.setItem('bm_google_name',user.displayName||'');
       showToast('✅ تم ربط حساب Google: '+(user.email||''),'success');
+      scheduleGoogleBackup('google-login');
       if(typeof navigateTo==='function') navigateTo('settings');
       return user;
     }
@@ -1404,12 +1419,28 @@ async function ensureGoogleBackupUser(){
   return null;
 }
 function getBackupCollections(){return ['products','sales','purchases','expenses','withdrawals','debts','customers','suppliers','offers','auditLog'];}
-async function backupToGoogle(){
+let googleBackupTimer=null;
+let googleBackupInProgress=false;
+let googleBackupPending=false;
+
+async function backupToGoogle(options={}){
+  const silent=options.silent===true;
   const user=await ensureGoogleBackupUser();
-  if(!user)return signInWithGoogleBackup();
-  if(!db)return showToast('⚠️ قاعدة البيانات السحابية غير متاحة','warning');
+  if(!user){
+    if(!silent) return signInWithGoogleBackup();
+    return false;
+  }
+  if(!db || !navigator.onLine){
+    if(!silent) showToast('⚠️ تحتاج النسخة الاحتياطية إلى اتصال بالإنترنت','warning');
+    return false;
+  }
+  if(googleBackupInProgress){
+    googleBackupPending=true;
+    return false;
+  }
+  googleBackupInProgress=true;
   try{
-    showToast('⏳ جاري رفع بياناتك إلى حساب Google...','info');
+    if(!silent) showToast('⏳ جاري رفع النسخة الاحتياطية إلى Google...','info');
     const root=db.collection('googleBackups').doc(user.uid);
     await root.set({email:user.email||'',name:user.displayName||'',updatedAt:new Date().toISOString(),version:APP_VERSION},{merge:true});
     for(const col of getBackupCollections()){
@@ -1417,9 +1448,33 @@ async function backupToGoogle(){
       await root.collection('data').doc(col).set({items:Array.isArray(data)?data:[],updatedAt:new Date().toISOString()});
     }
     localStorage.setItem('bm_google_backup_at',new Date().toLocaleString('ar-EG'));
-    showToast('☁️ تم حفظ النسخة الاحتياطية على حساب Google بنجاح','success');
-    navigateTo('settings');
-  }catch(e){console.error(e);showToast('❌ فشل النسخ السحابي. راجع اتصال الإنترنت وقواعد Firebase.','error');}
+    if(!silent) {
+      showToast('☁️ تمت مزامنة النسخة الاحتياطية مع حساب Google بنجاح','success');
+      navigateTo('settings');
+    }
+    return true;
+  }catch(e){
+    console.error('Google automatic backup error:',e);
+    if(!silent) showToast('❌ فشل النسخ السحابي. راجع اتصال الإنترنت وقواعد Firebase.','error');
+    return false;
+  }finally{
+    googleBackupInProgress=false;
+    if(googleBackupPending){
+      googleBackupPending=false;
+      scheduleGoogleBackup('pending');
+    }
+  }
+}
+
+// نسخ احتياطي تلقائي ذكي: يجمع عدة تعديلات في عملية واحدة بدل الرفع بعد كل ضغطة.
+function scheduleGoogleBackup(reason='change'){
+  if(!navigator.onLine || !db) return;
+  if(!getGoogleBackupUser()) return;
+  clearTimeout(googleBackupTimer);
+  googleBackupTimer=setTimeout(async()=>{
+    googleBackupTimer=null;
+    await backupToGoogle({silent:true,auto:true});
+  },5000);
 }
 async function restoreFromGoogle(){
   const user=await ensureGoogleBackupUser();
@@ -1440,14 +1495,25 @@ async function restoreFromGoogle(){
     }
     const meta=snap.data()||{};
     localStorage.setItem('bm_google_backup_at',meta.updatedAt||new Date().toLocaleString('ar-EG'));
-    showToast('✅ تمت استعادة بياناتك من Google','success');
+    showToast('☁️ تمت استعادة النسخة الاحتياطية من حساب Google بنجاح','success');
     setTimeout(()=>location.reload(),700);
   }catch(e){console.error(e);showToast('❌ فشلت استعادة النسخة السحابية','error');}
 }
-function cloudBackupStatus(){
+function getGoogleBackupUser(){
   const auth=getFirebaseAuth();
-  const email=auth?.currentUser?.email || googleAuthUser?.email || localStorage.getItem('bm_google_email');
-  return email || 'غير مرتبط بحساب Google';
+  const user=auth?.currentUser || googleAuthUser || null;
+  if(user?.email) return user;
+  const email=localStorage.getItem('bm_google_email')||'';
+  if(email) return {email,displayName:localStorage.getItem('bm_google_name')||'',uid:localStorage.getItem('bm_google_uid')||''};
+  return null;
+}
+function cloudBackupStatus(){
+  const user=getGoogleBackupUser();
+  return user ? 'مرتبط بحساب Google' : 'غير مرتبط بحساب Google';
+}
+function cloudBackupEmail(){
+  const user=getGoogleBackupUser();
+  return user?.email || 'لم يتم اختيار حساب Google بعد';
 }
 
 // ==================== المصادقة ====================
@@ -1530,6 +1596,7 @@ window.addEventListener('online', async () => {
       // ثانيًا فقط: جلب أحدث نسخة من السحابة.
       if (ok) {
         await loadAllFromFirebase();
+        scheduleGoogleBackup('online');
         navigateTo(currentTab || 'dashboard');
       } else {
         updateSyncStatus();
@@ -3959,7 +4026,7 @@ function renderSettingsPage(container){
     <div class="card cloud-backup-card">
       <div class="card-title"><i class="fab fa-google"></i> النسخ الاحتياطي بحساب Google</div>
       <div class="settings-note" style="margin-bottom:12px">اربط البرنامج بحساب Google لحفظ نسخة سحابية من الأصناف والمبيعات والمشتريات والعملاء والديون وباقي البيانات، ثم استعادتها عند تغيير الهاتف أو حذف التطبيق.</div>
-      <div class="settings-profile" style="margin-bottom:10px"><div class="settings-profile-avatar"><i class="fab fa-google"></i></div><div class="settings-profile-info"><strong>${cloudBackupStatus()}</strong><span>آخر نسخة: ${localStorage.getItem('bm_google_backup_at')||'لم يتم الرفع بعد'}</span></div></div>
+      <div class="settings-profile" style="margin-bottom:10px"><div class="settings-profile-avatar"><i class="fab fa-google"></i></div><div class="settings-profile-info"><strong>${cloudBackupStatus()}</strong><span>${cloudBackupEmail()}</span><span style="margin-top:4px">آخر نسخة احتياطية: ${localStorage.getItem('bm_google_backup_at')||'لم يتم الرفع بعد'}</span></div></div>
       <button class="btn btn-primary btn-block" onclick="signInWithGoogleBackup()"><i class="fab fa-google"></i> ربط حساب Google</button>
       <button class="btn btn-success btn-block" style="margin-top:10px" onclick="backupToGoogle()"><i class="fas fa-cloud-arrow-up"></i> رفع نسخة الآن</button>
       <button class="btn btn-outline btn-block" style="margin-top:10px" onclick="restoreFromGoogle()"><i class="fas fa-cloud-arrow-down"></i> استعادة من Google</button>
@@ -4184,6 +4251,7 @@ window.addEventListener('DOMContentLoaded', () => {
         localStorage.setItem('bm_google_uid',u.uid||'');
         localStorage.setItem('bm_google_email',u.email||'');
         localStorage.setItem('bm_google_name',u.displayName||'');
+        scheduleGoogleBackup('google-session');
         if(currentTab==='settings') setTimeout(()=>navigateTo('settings'),50);
       }
     });
