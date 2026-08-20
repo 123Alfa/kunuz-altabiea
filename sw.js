@@ -1,6 +1,5 @@
-const CACHE_NAME = 'knooz-v2';
-
-const STATIC_ASSETS = [
+const CACHE_NAME = 'knooz-v1.5.5-20260820';
+const APP_SHELL = [
   './',
   './index.html',
   './manifest.json',
@@ -8,88 +7,68 @@ const STATIC_ASSETS = [
   './icon-512.png'
 ];
 
-// تثبيت النسخة الجديدة
 self.addEventListener('install', event => {
   event.waitUntil(
     caches.open(CACHE_NAME)
-      .then(cache => cache.addAll(STATIC_ASSETS))
+      .then(cache => cache.addAll(APP_SHELL))
+      .catch(err => console.warn('App shell cache warning:', err))
       .then(() => self.skipWaiting())
   );
 });
 
-// حذف أي نسخ قديمة
 self.addEventListener('activate', event => {
   event.waitUntil(
-    caches.keys()
-      .then(cacheNames =>
-        Promise.all(
-          cacheNames
-            .filter(name => name !== CACHE_NAME)
-            .map(name => caches.delete(name))
-        )
-      )
-      .then(() => self.clients.claim())
+    caches.keys().then(keys => Promise.all(
+      keys.filter(key => key !== CACHE_NAME).map(key => caches.delete(key))
+    )).then(() => self.clients.claim())
   );
 });
 
-// التعامل مع الملفات والصفحات
+function isFirebaseRequest(url){
+  return url.hostname.includes('firebase') ||
+         url.hostname.includes('googleapis.com') ||
+         url.hostname.includes('identitytoolkit') ||
+         url.hostname.includes('gstatic.com');
+}
+
 self.addEventListener('fetch', event => {
   const request = event.request;
+  if (request.method !== 'GET') return;
 
-  // لا نتدخل في Firebase / Google
-  if (
-    request.url.includes('firebase') ||
-    request.url.includes('googleapis.com') ||
-    request.url.includes('accounts.google.com')
-  ) {
-    return;
-  }
+  const url = new URL(request.url);
 
-  // عند فتح صفحات البرنامج:
-  // نحاول أخذ أحدث نسخة من الإنترنت أولاً
-  if (request.mode === 'navigate') {
+  // Do not interfere with Firebase/Google API traffic.
+  if (isFirebaseRequest(url)) return;
+
+  // Always prefer the live index when online, with cache fallback offline.
+  if (request.mode === 'navigate' || url.pathname.endsWith('/index.html') || url.pathname === '/') {
     event.respondWith(
-      fetch(request)
+      fetch(request, { cache: 'no-store' })
         .then(response => {
           if (response && response.ok) {
             const copy = response.clone();
-
-            caches.open(CACHE_NAME)
-              .then(cache => cache.put(request, copy));
-
-            return response;
+            caches.open(CACHE_NAME).then(cache => cache.put('./index.html', copy)).catch(()=>{});
           }
-
-          return caches.match(request);
+          return response;
         })
-        .catch(() => caches.match(request))
+        .catch(() => caches.match('./index.html').then(cached => cached || caches.match('./')))
     );
-
     return;
   }
 
-  // باقي الملفات: الكاش أولاً ثم الإنترنت
-  event.respondWith(
-    caches.match(request)
-      .then(cachedResponse => {
-        if (cachedResponse) {
-          return cachedResponse;
-        }
-
-        return fetch(request)
-          .then(response => {
-            if (!response || response.status !== 200) {
-              return response;
-            }
-
+  // Same-origin static files: cache first, then network.
+  if (url.origin === self.location.origin) {
+    event.respondWith(
+      caches.match(request).then(cached => {
+        if (cached) return cached;
+        return fetch(request).then(response => {
+          if (response && response.ok) {
             const copy = response.clone();
-
-            caches.open(CACHE_NAME)
-              .then(cache => cache.put(request, copy));
-
-            return response;
-          });
+            caches.open(CACHE_NAME).then(cache => cache.put(request, copy)).catch(()=>{});
+          }
+          return response;
+        });
       })
-      .catch(() => caches.match('./index.html'))
-  );
+    );
+  }
 });

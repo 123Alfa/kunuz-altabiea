@@ -1010,9 +1010,9 @@ tr:hover td{background:rgba(15,118,110,.045)}
 </div>
 <script>
 // ==================== معلومات الإصدار ====================
-const APP_VERSION = "v1.5.4";
+const APP_VERSION = "v1.5.5";
 const APP_NAME = "كنوز الطبيعة";
-const APP_BUILD_DATE = "20 أغسطس 2026 — Google Drive فقط — إصلاح OAuth";
+const APP_BUILD_DATE = "20 أغسطس 2026 — توحيد النسخ الاحتياطي وإصلاح حالة رفع Google";
 
 // =====================================================
 // ☁️ Google Drive فقط — بدون Google Drive
@@ -1220,13 +1220,15 @@ async function backupToGoogle(options={}){
     const stamp=new Date().toLocaleString('ar-EG');
     localStorage.setItem('bm_google_backup_at',stamp);
     localStorage.setItem('bm_last_backup',stamp);
-    if(!silent) showToast('☁️ تم حفظ النسخة الاحتياطية على Google Drive بنجاح','success');
+    refreshGoogleBackupStatusUI();
+    if(!silent) showToast('☁️ تم حفظ النسخة الاحتياطية على Google بنجاح','success');
     return true;
   }catch(e){
     console.error('Google Drive backup failed:',e);
+    refreshGoogleBackupStatusUI();
     if(!silent){
       if(e.message==='GOOGLE_TOKEN_EXPIRED') showToast('⚠️ انتهت جلسة Google، اضغط ربط حساب Google مرة أخرى','warning');
-      else showToast('❌ فشل رفع النسخة إلى Google Drive','error');
+      else showToast('❌ فشل رفع النسخة إلى Google','error');
     }
     return false;
   }finally{
@@ -1281,9 +1283,27 @@ function signInWithGoogleBackup(){
 
 function cloudBackupStatus(){
   const email=localStorage.getItem('bm_google_email')||'';
-  if(email) return 'Google Drive: '+email;
+  if(email) return 'Google: '+email;
   if(localStorage.getItem('bm_google_connected')==='1') return 'حساب Google مرتبط';
   return 'غير مرتبط بحساب Google';
+}
+
+function getGoogleBackupDisplay(){
+  const stamp=localStorage.getItem('bm_google_backup_at')||'';
+  const fileId=localStorage.getItem('bm_google_drive_file_id')||'';
+  if(stamp) return {title:'آخر رفع ناجح',value:stamp,ok:true};
+  if(fileId) return {title:'حالة النسخة على Google',value:'تم العثور على نسخة محفوظة',ok:true};
+  if(localStorage.getItem('bm_google_connected')==='1') return {title:'حالة النسخة على Google',value:'لا توجد نسخة مرفوعة على Google حتى الآن',ok:false};
+  return {title:'حالة النسخة على Google',value:'لم يتم ربط حساب Google بعد',ok:false};
+}
+
+function refreshGoogleBackupStatusUI(){
+  const box=document.getElementById('googleBackupStatusBox');
+  const localBox=document.getElementById('localBackupStatusValue');
+  if(localBox) localBox.textContent=localStorage.getItem('bm_last_backup')||'لم يتم إنشاء نسخة احتياطية بعد';
+  if(!box) return;
+  const st=getGoogleBackupDisplay();
+  box.innerHTML=`<div style="font-size:.72rem;color:var(--text-muted)">${st.title}</div><div style="font-weight:900;margin-top:4px;color:${st.ok?'var(--success)':'var(--text)'}">${st.value}</div>`;
 }
 
 function scheduleDriveBackup(){
@@ -3887,12 +3907,20 @@ function renderSettingsPage(container){
     </div>
 
     <div class="card cloud-backup-card">
-      <div class="card-title"><i class="fab fa-google"></i> النسخ الاحتياطي بحساب Google</div>
-      <div class="settings-note" style="margin-bottom:12px">اربط البرنامج بحساب Google لحفظ نسخة احتياطية مباشرة في Google Drive. البيانات الأصلية تظل محفوظة محليًا وتعمل بدون إنترنت.</div>
-      <div class="settings-profile" style="margin-bottom:10px"><div class="settings-profile-avatar"><i class="fab fa-google"></i></div><div class="settings-profile-info"><strong>${cloudBackupStatus()}</strong><span>آخر نسخة: ${localStorage.getItem('bm_google_backup_at')||'لم يتم الرفع بعد'}</span></div></div>
-      <button class="btn btn-primary btn-block" onclick="signInWithGoogleBackup()"><i class="fab fa-google"></i> ربط حساب Google Drive</button>
-      <button class="btn btn-success btn-block" style="margin-top:10px" onclick="backupToGoogle()"><i class="fas fa-cloud-arrow-up"></i> رفع نسخة الآن</button>
-      <button class="btn btn-outline btn-block" style="margin-top:10px" onclick="restoreFromGoogle()"><i class="fas fa-cloud-arrow-down"></i> استعادة من Google</button>
+      <div class="card-title"><i class="fas fa-cloud"></i> النسخ الاحتياطي</div>
+      <div class="settings-note" style="margin-bottom:12px">نسخة واحدة لبيانات البرنامج: تُحفظ على الجهاز أولًا، ويمكن رفع نفس النسخة إلى حساب Google لاستعادتها عند الحاجة. البيانات المحلية تظل محفوظة وتعمل بدون إنترنت.</div>
+      <div class="settings-profile" style="margin-bottom:10px"><div class="settings-profile-avatar"><i class="fab fa-google"></i></div><div class="settings-profile-info"><strong>${cloudBackupStatus()}</strong><span id="googleBackupAccountHint">${localStorage.getItem('bm_google_connected')==='1'?'حساب Google جاهز للنسخ السحابي':'اربط حساب Google لحفظ نسخة سحابية'}</span></div></div>
+      <div style="padding:12px;background:var(--bg-elevated);border:1px solid var(--border);border-radius:12px;margin-bottom:10px">
+        <div style="font-size:.72rem;color:var(--text-muted)">آخر نسخة على الجهاز</div>
+        <div id="localBackupStatusValue" style="font-weight:900;margin-top:4px">${last}</div>
+      </div>
+      <div id="googleBackupStatusBox" style="padding:12px;background:var(--bg-elevated);border:1px solid var(--border);border-radius:12px;margin-bottom:12px"></div>
+      <button class="btn btn-primary btn-block" onclick="createSettingsBackup()"><i class="fas fa-shield-halved"></i> إنشاء نسخة احتياطية الآن</button>
+      <button class="btn btn-success btn-block" style="margin-top:10px" onclick="backupToGoogle()"><i class="fas fa-cloud-arrow-up"></i> رفع النسخة إلى Google</button>
+      <button class="btn btn-outline btn-block" style="margin-top:10px" onclick="signInWithGoogleBackup()"><i class="fab fa-google"></i> ربط أو تغيير حساب Google</button>
+      <button class="btn btn-outline btn-block" style="margin-top:10px" onclick="document.getElementById('settingsImportFile').click()"><i class="fas fa-upload"></i> استعادة نسخة من الجهاز</button>
+      <input type="file" id="settingsImportFile" style="display:none" accept=".json" onchange="importData(this)">
+      <button class="btn btn-outline btn-block" style="margin-top:10px" onclick="restoreFromGoogle()"><i class="fas fa-cloud-arrow-down"></i> استعادة النسخة من Google</button>
     </div>
 
     <div class="card">
@@ -3909,21 +3937,6 @@ function renderSettingsPage(container){
           <div class="settings-switch"><input type="checkbox" ${s.syncNotifications!==false?'checked':''} onchange="toggleAppSetting('syncNotifications',this.checked)"><span></span></div>
         </label>
       </div>
-    </div>
-
-    <div class="card">
-      <div class="card-title"><i class="fas fa-cloud-download-alt"></i> النسخ الاحتياطي</div>
-      <div class="settings-note" style="margin-bottom:12px">
-        يتم حفظ نسخة JSON تشمل الأصناف والمبيعات والمشتريات والمصروفات والسحوبات والديون والعملاء والموردين والعروض وسجل التعديلات.
-      </div>
-      <div style="padding:12px;background:var(--bg-elevated);border:1px solid var(--border);border-radius:12px;margin-bottom:12px">
-        <div style="font-size:.72rem;color:var(--text-muted)">آخر نسخة احتياطية</div>
-        <div style="font-weight:900;margin-top:4px">${last}</div>
-      </div>
-      <button class="btn btn-primary btn-block" onclick="createSettingsBackup()"><i class="fas fa-cloud-download-alt"></i> إنشاء نسخة احتياطية الآن</button>
-      <button class="btn btn-outline btn-block" style="margin-top:10px" onclick="document.getElementById('settingsImportFile').click()"><i class="fas fa-upload"></i> استعادة البيانات</button>
-      <input type="file" id="settingsImportFile" style="display:none" accept=".json" onchange="importData(this)">
-      <button class="btn btn-outline btn-block" style="margin-top:10px" onclick="replaceCloudDataWithLocal()"><i class="fas fa-sync-alt"></i> استبدال نسخة Google بالبيانات الحالية</button>
     </div>
 
     <div class="card">
@@ -3964,15 +3977,19 @@ function renderSettingsPage(container){
 
     <button class="btn btn-danger btn-block" style="margin-bottom:18px" onclick="logout()"><i class="fas fa-sign-out-alt"></i> تسجيل الخروج</button>
   </div>`;
+  refreshGoogleBackupStatusUI();
+  if(driveAccessTokenValid()) findGoogleBackupFile().then(()=>refreshGoogleBackupStatusUI()).catch(()=>{});
 }
 async function createSettingsBackup(){
   exportData();
   const stamp=new Date().toLocaleString('ar-EG');
   localStorage.setItem('bm_last_backup',stamp);
+  refreshGoogleBackupStatusUI();
   if(driveAccessTokenValid()) await backupToGoogle({silent:false});
-  else showToast('✅ تم إنشاء النسخة المحلية. يمكنك رفعها إلى Google Drive من زر النسخ السحابي.');
+  else showToast('✅ تم إنشاء النسخة على الجهاز. يمكنك ربط Google ورفعها للسحابة عند الحاجة.','success');
   setTimeout(()=>navigateTo('settings'),350);
 }
+
 function editProfile(){
   const name=currentUser?.name||'';
   const email=currentUser?.email||'';
@@ -4127,7 +4144,7 @@ async function replaceCloudDataWithLocal() {
 <script>
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', function() {
-    navigator.serviceWorker.register('sw.js?v=9')
+    navigator.serviceWorker.register('sw.js?v=10')
       .then(function(registration) {
         registration.update().catch(function(){});
         console.log('SW registered: ', registration.scope);
