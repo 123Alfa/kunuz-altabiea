@@ -1010,7 +1010,7 @@ tr:hover td{background:rgba(15,118,110,.045)}
 </div>
 <script>
 // ==================== معلومات الإصدار ====================
-const APP_VERSION = "v1.5.6";
+const APP_VERSION='v1.5.7';
 const APP_NAME = "كنوز الطبيعة";
 const APP_BUILD_DATE = "20 أغسطس 2026 — تطوير مركز النسخ الاحتياطي وتصميمه";
 
@@ -1077,12 +1077,10 @@ function initGoogleDriveClient(){
           console.error('Google Drive file check failed:', driveError);
           showToast('⚠️ تم ربط الحساب، لكن يحتاج Google Drive API إلى التفعيل في Google Cloud','warning');
         }
-
-        // بعد الربط نحاول رفع نسخة محلية فورًا.
-        // فشل الرفع لا يلغي ربط الحساب.
-        const ok = await backupToGoogle({silent:true});
-        if(ok) showToast('☁️ تم حفظ النسخة الاحتياطية على Google Drive','success');
-        else if(!googleDriveFileId) showToast('ℹ️ الحساب مرتبط، فعّل Google Drive API ثم اضغط "رفع نسخة الآن"','info');
+        // لا نرفع أي بيانات تلقائيًا بعد ربط الحساب.
+        // الرفع يتم فقط بعد ضغط المستخدم على «رفع النسخة إلى Google»،
+        // مع حماية تمنع رفع نسخة فارغة.
+        if(!googleDriveFileId) showToast('ℹ️ الحساب مرتبط. اضغط «رفع النسخة إلى Google» عند الحاجة.','info');
 
       }catch(e){
         console.error('Google account initialization error:',e);
@@ -1146,12 +1144,14 @@ async function findGoogleBackupFile(){
     q,
     spaces:'drive',
     fields:'files(id,name,modifiedTime,size)',
-    pageSize:'10'
+    orderBy:'modifiedTime desc',
+    pageSize:'20'
   });
   const r=await driveFetch(url);
   if(!r.ok) throw new Error('Drive list '+r.status+' '+await r.text());
   const data=await r.json();
-  const file=(data.files||[])[0]||null;
+  const files=(data.files||[]).slice().sort((a,b)=>new Date(b.modifiedTime||0)-new Date(a.modifiedTime||0));
+  const file=files[0]||null;
   googleDriveFileId=file?.id||'';
   if(googleDriveFileId) localStorage.setItem('bm_google_drive_file_id',googleDriveFileId);
   else localStorage.removeItem('bm_google_drive_file_id');
@@ -1175,6 +1175,23 @@ function buildBackupPayload(){
     offers:Store.get('offers'),
     auditLog:Store.get('auditLog')
   };
+}
+
+
+function backupRecordCounts(data){
+  const keys=getBackupCollections();
+  const counts={};
+  let total=0;
+  keys.forEach(k=>{counts[k]=Array.isArray(data?.[k])?data[k].length:0; total+=counts[k];});
+  return {counts,total};
+}
+function backupSummary(data){
+  const {counts,total}=backupRecordCounts(data);
+  return `الأصناف ${counts.products} • المبيعات ${counts.sales} • المشتريات ${counts.purchases} • العملاء ${counts.customers} • إجمالي السجلات ${total}`;
+}
+function isUsableBackup(data){
+  if(!data || typeof data!=='object') return false;
+  return backupRecordCounts(data).total>0;
 }
 
 async function createDriveBackupFile(payload){
@@ -1216,6 +1233,10 @@ async function backupToGoogle(options={}){
   try{
     if(!googleDriveFileId) await findGoogleBackupFile();
     const payload=buildBackupPayload();
+    if(!isUsableBackup(payload)){
+      if(!silent) showToast('🛡️ تم منع رفع نسخة فارغة إلى Google Drive','warning');
+      return false;
+    }
     await uploadDriveBackupData(payload);
     const stamp=new Date().toLocaleString('ar-EG');
     localStorage.setItem('bm_google_backup_at',stamp);
@@ -1256,6 +1277,11 @@ async function restoreFromGoogle(){
     const data=await r.json();
     const collections=getBackupCollections();
     if(!data || typeof data!=='object') throw new Error('INVALID_BACKUP');
+    if(!isUsableBackup(data)){
+      showToast('🛡️ النسخة الموجودة على Google فارغة، وتم إيقاف الاستعادة لحماية بياناتك','error');
+      return;
+    }
+    if(!confirm('تم العثور على نسخة صالحة على Google Drive.\n'+backupSummary(data)+'\n\nهل تريد استعادتها واستبدال البيانات الحالية؟')) return;
     for(const col of collections) Store.set(col,Array.isArray(data[col])?data[col]:[]);
     if(data.userData){ currentUser=data.userData; Store.setUser(currentUser); }
     const stamp=data.exportedAt ? new Date(data.exportedAt).toLocaleString('ar-EG') : new Date().toLocaleString('ar-EG');
@@ -4118,11 +4144,18 @@ function importData(input){
   const file=input.files[0];if(!file)return;
   const reader=new FileReader();
   reader.onload=e=>{
-    const data=JSON.parse(e.target.result);
-    if(!confirm('سيتم استبدال جميع البيانات. متأكد؟'))return;
-    ['products','sales','purchases','expenses','withdrawals','debts','customers','suppliers','offers','auditLog'].forEach(k=>Store.set(k,data[k]||[]));
+  const data=JSON.parse(e.target.result);
+    if(!isUsableBackup(data)){
+      showToast('🛡️ ملف النسخة الاحتياطية فارغ أو غير صالح، ولم يتم تغيير أي بيانات','error');
+      return;
+    }
+    if(!confirm('تم العثور على نسخة صالحة.\n'+backupSummary(data)+'\n\nسيتم استبدال البيانات الحالية. هل تريد المتابعة؟'))return;
+    ['products','sales','purchases','expenses','withdrawals','debts','customers','suppliers','offers','auditLog'].forEach(k=>Store.set(k,Array.isArray(data[k])?data[k]:[]));
     if(data.userData)Store.setUser(data.userData);
-    showToast('✅ تم الاستيراد');navigateTo('dashboard');
+    const stamp=new Date().toLocaleString('ar-EG');
+    localStorage.setItem('bm_last_backup',stamp);
+    refreshGoogleBackupStatusUI();
+    showToast('✅ تمت استعادة النسخة من الجهاز بنجاح');navigateTo('dashboard');
   };
   reader.readAsText(file);
 }
