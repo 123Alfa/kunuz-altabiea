@@ -325,7 +325,7 @@ tr:hover td{background:rgba(15,118,110,0.05)}
 .toast.error{background:rgba(239,68,68,0.15);color:var(--danger-light);border-color:rgba(239,68,68,0.3)}
 .toast.warning{background:rgba(245,158,11,0.15);color:var(--accent-light);border-color:rgba(245,158,11,0.3)}
 @keyframes toastIn{from{opacity:0;transform:translateY(-20px)}to{opacity:1;transform:translateY(0)}}
-.sync-status{position:fixed;top:80px;left:15px;z-index:150;background:rgba(16,185,129,0.15);color:var(--success-light);padding:8px 16px;border-radius:20px;font-size:0.75rem;font-weight:800;display:flex;align-items:center;gap:8px;opacity:0;transition:opacity 0.3s;border:1px solid rgba(16,185,129,0.3);backdrop-filter:blur(10px)}
+.sync-status{display:none!important}
 .sync-status.show{opacity:1}
 .fade-in{animation:fadeIn 0.4s ease}
 @keyframes fadeIn{from{opacity:0;transform:translateY(15px)}to{opacity:1;transform:translateY(0)}}
@@ -1010,9 +1010,9 @@ tr:hover td{background:rgba(15,118,110,.045)}
 </div>
 <script>
 // ==================== معلومات الإصدار ====================
-const APP_VERSION = "v1.5.5";
+const APP_VERSION = "v1.5.6";
 const APP_NAME = "كنوز الطبيعة";
-const APP_BUILD_DATE = "20 أغسطس 2026 — توحيد النسخ الاحتياطي وإصلاح حالة رفع Google";
+const APP_BUILD_DATE = "20 أغسطس 2026 — تطوير مركز النسخ الاحتياطي وتصميمه";
 
 // =====================================================
 // ☁️ Google Drive فقط — بدون Google Drive
@@ -1300,10 +1300,23 @@ function getGoogleBackupDisplay(){
 function refreshGoogleBackupStatusUI(){
   const box=document.getElementById('googleBackupStatusBox');
   const localBox=document.getElementById('localBackupStatusValue');
+  const accountTitle=document.getElementById('backupAccountTitle');
+  const accountHint=document.getElementById('googleBackupAccountHint');
+  const accountBadge=document.getElementById('backupAccountBadge');
+  const overall=document.getElementById('backupOverallStatus');
   if(localBox) localBox.textContent=localStorage.getItem('bm_last_backup')||'لم يتم إنشاء نسخة احتياطية بعد';
+  if(accountTitle) accountTitle.textContent=cloudBackupStatus();
+  const connected=localStorage.getItem('bm_google_connected')==='1';
+  if(accountHint) accountHint.textContent=connected?'حساب Google مرتبط وجاهز للنسخ السحابي':'اربط حساب Google لحفظ نسخة سحابية';
+  if(accountBadge){ accountBadge.textContent=connected?'مرتبط':'غير مرتبط'; accountBadge.style.background=connected?'rgba(21,154,114,.11)':'rgba(148,163,184,.13)'; accountBadge.style.color=connected?'var(--success)':'var(--text-muted)'; }
   if(!box) return;
   const st=getGoogleBackupDisplay();
-  box.innerHTML=`<div style="font-size:.72rem;color:var(--text-muted)">${st.title}</div><div style="font-weight:900;margin-top:4px;color:${st.ok?'var(--success)':'var(--text)'}">${st.value}</div>`;
+  box.textContent=st.value;
+  box.style.color=st.ok?'var(--success)':'var(--text)';
+  if(overall){
+    overall.innerHTML=st.ok ? '<i class="fas fa-circle"></i> النسخ السحابي جاهز' : (connected ? '<i class="fas fa-circle"></i> الحساب مرتبط' : '<i class="fas fa-circle"></i> محلي فقط');
+    overall.style.background=st.ok?'rgba(255,255,255,.15)':'rgba(255,255,255,.10)';
+  }
 }
 
 function scheduleDriveBackup(){
@@ -3906,21 +3919,66 @@ function renderSettingsPage(container){
       </label>
     </div>
 
-    <div class="card cloud-backup-card">
-      <div class="card-title"><i class="fas fa-cloud"></i> النسخ الاحتياطي</div>
-      <div class="settings-note" style="margin-bottom:12px">نسخة واحدة لبيانات البرنامج: تُحفظ على الجهاز أولًا، ويمكن رفع نفس النسخة إلى حساب Google لاستعادتها عند الحاجة. البيانات المحلية تظل محفوظة وتعمل بدون إنترنت.</div>
-      <div class="settings-profile" style="margin-bottom:10px"><div class="settings-profile-avatar"><i class="fab fa-google"></i></div><div class="settings-profile-info"><strong>${cloudBackupStatus()}</strong><span id="googleBackupAccountHint">${localStorage.getItem('bm_google_connected')==='1'?'حساب Google جاهز للنسخ السحابي':'اربط حساب Google لحفظ نسخة سحابية'}</span></div></div>
-      <div style="padding:12px;background:var(--bg-elevated);border:1px solid var(--border);border-radius:12px;margin-bottom:10px">
-        <div style="font-size:.72rem;color:var(--text-muted)">آخر نسخة على الجهاز</div>
-        <div id="localBackupStatusValue" style="font-weight:900;margin-top:4px">${last}</div>
+    <div class="backup-center cloud-backup-card">
+      <div class="backup-head">
+        <div class="backup-head-top">
+          <div style="display:flex;align-items:center;gap:11px;min-width:0">
+            <div class="backup-head-icon"><i class="fas fa-shield-halved"></i></div>
+            <div style="min-width:0">
+              <h3>مركز النسخ الاحتياطي</h3>
+              <p>احفظ بياناتك على الجهاز وارفع نسخة آمنة إلى Google Drive.</p>
+            </div>
+          </div>
+          <div class="backup-head-status" id="backupOverallStatus"><i class="fas fa-circle"></i> جاهز</div>
+        </div>
       </div>
-      <div id="googleBackupStatusBox" style="padding:12px;background:var(--bg-elevated);border:1px solid var(--border);border-radius:12px;margin-bottom:12px"></div>
-      <button class="btn btn-primary btn-block" onclick="createSettingsBackup()"><i class="fas fa-shield-halved"></i> إنشاء نسخة احتياطية الآن</button>
-      <button class="btn btn-success btn-block" style="margin-top:10px" onclick="backupToGoogle()"><i class="fas fa-cloud-arrow-up"></i> رفع النسخة إلى Google</button>
-      <button class="btn btn-outline btn-block" style="margin-top:10px" onclick="signInWithGoogleBackup()"><i class="fab fa-google"></i> ربط أو تغيير حساب Google</button>
-      <button class="btn btn-outline btn-block" style="margin-top:10px" onclick="document.getElementById('settingsImportFile').click()"><i class="fas fa-upload"></i> استعادة نسخة من الجهاز</button>
-      <input type="file" id="settingsImportFile" style="display:none" accept=".json" onchange="importData(this)">
-      <button class="btn btn-outline btn-block" style="margin-top:10px" onclick="restoreFromGoogle()"><i class="fas fa-cloud-arrow-down"></i> استعادة النسخة من Google</button>
+
+      <div class="backup-body">
+        <div class="backup-account">
+          <div class="backup-google-icon"><i class="fab fa-google"></i></div>
+          <div class="backup-account-main">
+            <strong id="backupAccountTitle">${cloudBackupStatus()}</strong>
+            <span id="googleBackupAccountHint">${localStorage.getItem('bm_google_connected')==='1'?'حساب Google مرتبط وجاهز للنسخ السحابي':'اربط حساب Google لحفظ نسخة سحابية'}</span>
+          </div>
+          <span class="backup-account-badge" id="backupAccountBadge">${localStorage.getItem('bm_google_connected')==='1'?'مرتبط':'غير مرتبط'}</span>
+        </div>
+
+        <div class="backup-status-grid">
+          <div class="backup-status-card local">
+            <div class="top"><i class="fas fa-mobile-screen-button"></i><span>النسخة المحلية</span></div>
+            <strong id="localBackupStatusValue">${last}</strong>
+            <small>محفوظة على هذا الجهاز</small>
+          </div>
+          <div class="backup-status-card cloud">
+            <div class="top"><i class="fas fa-cloud"></i><span>Google Drive</span></div>
+            <strong id="googleBackupStatusBox">جاري فحص حالة النسخة...</strong>
+            <small>آخر نسخة سحابية ناجحة</small>
+          </div>
+        </div>
+
+        <div class="backup-data-strip">
+          <div class="backup-data-item"><strong>${c.products}</strong><span>أصناف</span></div>
+          <div class="backup-data-item"><strong>${c.sales}</strong><span>مبيعات</span></div>
+          <div class="backup-data-item"><strong>${c.purchases}</strong><span>مشتريات</span></div>
+          <div class="backup-data-item"><strong>${c.customers}</strong><span>عملاء</span></div>
+        </div>
+
+        <div class="backup-section-label"><i class="fas fa-bolt"></i> إجراءات النسخ والحفظ</div>
+        <div class="backup-actions">
+          <button class="backup-action primary" onclick="createSettingsBackup()"><i class="fas fa-shield-halved"></i><span>حفظ نسخة على الجهاز</span></button>
+          <button class="backup-action cloud" onclick="backupToGoogle()"><i class="fas fa-cloud-arrow-up"></i><span>رفع النسخة إلى Google</span></button>
+          <button class="backup-action google" onclick="signInWithGoogleBackup()"><i class="fab fa-google"></i><span>ربط أو تغيير حساب Google</span></button>
+          <button class="backup-action outline" onclick="document.getElementById('settingsImportFile').click()"><i class="fas fa-file-import"></i><span>استعادة نسخة من الجهاز</span></button>
+        </div>
+        <input type="file" id="settingsImportFile" style="display:none" accept=".json" onchange="importData(this)">
+
+        <div class="backup-divider"></div>
+        <div class="backup-section-label"><i class="fas fa-rotate"></i> استعادة النسخة السحابية</div>
+        <button class="backup-action outline" style="width:100%;min-height:58px;flex-direction:row" onclick="restoreFromGoogle()"><i class="fas fa-cloud-arrow-down"></i><span>استعادة النسخة من Google Drive</span></button>
+        <div class="backup-restore-note"><i class="fas fa-triangle-exclamation"></i><span>الاستعادة من Google Drive تستبدل البيانات المحلية الحالية بالنسخة الموجودة على السحابة. تأكد من أن النسخة السحابية هي النسخة المطلوبة قبل المتابعة.</span></div>
+
+        <div class="backup-note"><i class="fas fa-circle-info"></i><span>البيانات الأساسية تظل محفوظة محليًا وتعمل بدون إنترنت. عند اتصال Google، يقوم البرنامج بتحديث النسخة السحابية تلقائيًا بعد التعديلات على البيانات.</span></div>
+      </div>
     </div>
 
     <div class="card">
@@ -4518,4 +4576,52 @@ html,body{width:100%;max-width:100%;overflow-x:hidden}
 .sp-offer-badge{display:inline-block;margin:4px 0;padding:3px 8px;border-radius:12px;background:#fff3cd;color:#8a5a00;font-size:.68rem;font-weight:800}
 .sp-price-offer{color:var(--success)!important}.sp-price-offer del{color:var(--text-muted);font-size:.72em;margin-left:4px}
 .pos-cart-offer{display:inline-block;margin-top:4px;padding:3px 8px;border-radius:10px;background:#fff3cd;color:#8a5a00;font-size:.68rem;font-weight:800}
+
+/* ==================== مركز النسخ الاحتياطي — v1.5.6 ==================== */
+.backup-center{position:relative;overflow:hidden;border-radius:22px;padding:0;background:linear-gradient(180deg,#ffffff 0%,#f8fbfa 100%);border:1px solid #dfe9e5;box-shadow:0 10px 30px rgba(15,118,110,.10)}
+.backup-center::before{content:'';position:absolute;top:-90px;left:-70px;width:220px;height:220px;border-radius:50%;background:radial-gradient(circle,rgba(20,184,166,.16),transparent 68%);pointer-events:none}
+.backup-head{position:relative;padding:20px 18px 18px;background:linear-gradient(135deg,#0f766e,#0b5f58);color:#fff}
+.backup-head-top{display:flex;align-items:center;justify-content:space-between;gap:12px}
+.backup-head-icon{width:50px;height:50px;min-width:50px;border-radius:16px;background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.18);display:grid;place-items:center;font-size:1.35rem;box-shadow:0 6px 18px rgba(0,0,0,.10)}
+.backup-head h3{font-size:1.08rem;font-weight:900;margin:0}
+.backup-head p{font-size:.72rem;color:rgba(255,255,255,.82);margin:4px 0 0;line-height:1.6}
+.backup-head-status{display:inline-flex;align-items:center;gap:6px;padding:7px 10px;border-radius:999px;background:rgba(255,255,255,.13);border:1px solid rgba(255,255,255,.18);font-size:.66rem;font-weight:800;white-space:nowrap}
+.backup-head-status i{font-size:.55rem}
+.backup-body{padding:16px}
+.backup-account{display:flex;align-items:center;gap:12px;padding:13px;background:#fff;border:1px solid var(--border);border-radius:16px;box-shadow:0 4px 14px rgba(31,55,48,.05);margin-bottom:12px}
+.backup-google-icon{width:44px;height:44px;min-width:44px;border-radius:14px;background:#fff;border:1px solid #dfe5e2;display:grid;place-items:center;color:#4285f4;font-size:1.15rem;box-shadow:0 3px 10px rgba(31,55,48,.06)}
+.backup-account-main{flex:1;min-width:0}
+.backup-account-main strong{display:block;font-size:.84rem;font-weight:900;color:var(--text);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.backup-account-main span{display:block;font-size:.68rem;color:var(--text-muted);margin-top:3px;line-height:1.45}
+.backup-account-badge{padding:6px 9px;border-radius:999px;font-size:.62rem;font-weight:900;background:rgba(21,154,114,.11);color:var(--success);white-space:nowrap}
+.backup-status-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px}
+.backup-status-card{position:relative;min-width:0;padding:14px 12px;background:var(--bg-elevated);border:1px solid var(--border);border-radius:15px;overflow:hidden}
+.backup-status-card.local{border-color:rgba(15,118,110,.18)}
+.backup-status-card.cloud{border-color:rgba(66,133,244,.16)}
+.backup-status-card .top{display:flex;align-items:center;gap:7px;font-size:.67rem;color:var(--text-muted);font-weight:800}
+.backup-status-card .top i{width:28px;height:28px;border-radius:9px;display:grid;place-items:center;font-size:.75rem;background:#e8f6f1;color:var(--primary)}
+.backup-status-card.cloud .top i{background:#eef4ff;color:#4285f4}
+.backup-status-card strong{display:block;margin-top:8px;font-size:.76rem;color:var(--text);line-height:1.55;word-break:break-word}
+.backup-status-card small{display:block;margin-top:3px;font-size:.61rem;color:var(--text-muted)}
+.backup-data-strip{display:grid;grid-template-columns:repeat(4,1fr);gap:7px;margin-bottom:14px}
+.backup-data-item{text-align:center;padding:10px 4px;border-radius:12px;background:#fff;border:1px solid var(--border)}
+.backup-data-item strong{display:block;color:var(--primary);font-size:.9rem;font-weight:900}
+.backup-data-item span{display:block;color:var(--text-muted);font-size:.57rem;margin-top:2px}
+.backup-section-label{display:flex;align-items:center;gap:7px;margin:14px 0 9px;font-size:.76rem;font-weight:900;color:var(--text)}
+.backup-section-label i{color:var(--primary)}
+.backup-actions{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.backup-action{min-height:76px;border:0;border-radius:15px;padding:12px 9px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;font-family:inherit;font-weight:900;font-size:.72rem;cursor:pointer;transition:transform .2s,box-shadow .2s,opacity .2s}
+.backup-action:active{transform:scale(.98)}
+.backup-action i{font-size:1.15rem}
+.backup-action.primary{color:#fff;background:linear-gradient(135deg,var(--primary),var(--primary-dark));box-shadow:0 7px 18px rgba(15,118,110,.22)}
+.backup-action.cloud{color:#fff;background:linear-gradient(135deg,#159a72,#0b8f67);box-shadow:0 7px 18px rgba(21,154,114,.18)}
+.backup-action.outline{color:var(--primary);background:#fff;border:1.5px solid rgba(15,118,110,.28);box-shadow:0 4px 12px rgba(31,55,48,.04)}
+.backup-action.google{color:#2768c7;background:#fff;border:1.5px solid rgba(66,133,244,.24);box-shadow:0 4px 12px rgba(66,133,244,.06)}
+.backup-note{display:flex;gap:9px;align-items:flex-start;margin-top:13px;padding:12px;border-radius:14px;background:rgba(245,158,11,.075);border:1px solid rgba(217,145,30,.18);color:var(--text-light);font-size:.66rem;line-height:1.75}
+.backup-note i{color:var(--warning);font-size:.85rem;margin-top:3px}
+.backup-restore-note{display:flex;align-items:center;gap:8px;padding:10px 11px;border-radius:12px;background:rgba(239,68,68,.055);border:1px solid rgba(220,75,75,.14);color:#9b4b4b;font-size:.63rem;line-height:1.55;margin-top:10px}
+.backup-restore-note i{font-size:.78rem}
+.backup-divider{height:1px;background:var(--border);margin:15px 0 2px}
+@media(max-width:390px){.backup-body{padding:13px}.backup-status-grid{gap:8px}.backup-status-card{padding:12px 9px}.backup-data-strip{gap:5px}.backup-data-item{padding:9px 2px}.backup-action{min-height:72px;font-size:.67rem}}
+@media(min-width:600px){.backup-actions{grid-template-columns:repeat(4,1fr)}.backup-action{min-height:88px}.backup-data-strip{gap:10px}}
 </style>
