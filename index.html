@@ -1012,7 +1012,7 @@ tr:hover td{background:rgba(15,118,110,.045)}
 </div>
 <script>
 // ==================== معلومات الإصدار ====================
-const APP_VERSION = "v1.5.2";
+const APP_VERSION = "v1.5.3";
 const APP_NAME = "كنوز الطبيعة";
 const APP_BUILD_DATE = "20 أغسطس 2026";
 
@@ -1021,7 +1021,7 @@ const APP_BUILD_DATE = "20 أغسطس 2026";
 // =====================================================
 const firebaseConfig = {
   apiKey: "AIzaSyC_vf-kBcGNSO84x-gCkhfzBWEDISnotbo",
-  authDomain: "kenoz-eltabeea.firebaseapp.com",
+  authDomain: "kenoz-eltabeea.web.app",
   projectId: "kenoz-eltabeea",
   storageBucket: "kenoz-eltabeea.firebasestorage.app",
   messagingSenderId: "795977355730",
@@ -1353,30 +1353,54 @@ async function signInWithGoogleBackup(){
 
 async function handleGoogleRedirectResult(){
   const auth=getFirebaseAuth();
-  if(!auth)return;
+  if(!auth)return null;
 
   try{
     const result=await auth.getRedirectResult();
-    if(result && result.user){
-      googleAuthUser=result.user;
-      showToast('✅ تم ربط حساب Google: '+(result.user.email||''),'success');
+    const user=result?.user || auth.currentUser || null;
+    if(user){
+      googleAuthUser=user;
+      localStorage.setItem('bm_google_uid',user.uid||'');
+      localStorage.setItem('bm_google_email',user.email||'');
+      localStorage.setItem('bm_google_name',user.displayName||'');
+      showToast('✅ تم ربط حساب Google: '+(user.email||''),'success');
       if(typeof navigateTo==='function') navigateTo('settings');
+      return user;
     }
+    return null;
   }catch(e){
     console.error('Google Redirect Result error:',e);
     let msg='❌ تعذر إكمال تسجيل الدخول بحساب Google';
     const code=e?.code||'';
-    if(code==='auth/unauthorized-domain') msg='⚠️ نطاق تشغيل البرنامج غير مضاف في Firebase Authorized domains.';
+    if(code==='auth/unauthorized-domain') msg='⚠️ نطاق البرنامج غير مضاف في Firebase Authorized domains. أضف kenoz-eltabeea.web.app.';
     else if(code==='auth/account-exists-with-different-credential') msg='⚠️ هذا البريد مرتبط بطريقة تسجيل أخرى في Firebase.';
     else if(code==='auth/popup-closed-by-user') msg='ℹ️ تم إغلاق تسجيل Google قبل الإكمال.';
     else if(code==='auth/network-request-failed') msg='⚠️ تعذر الاتصال بخدمة Google. تأكد من الإنترنت وحاول مرة أخرى.';
     showToast(msg,'error');
+    return null;
   }
 }
 async function ensureGoogleBackupUser(){
   const auth=getFirebaseAuth();
   if(!auth)return null;
-  if(auth.currentUser){googleAuthUser=auth.currentUser;return auth.currentUser;}
+  if(auth.currentUser){
+    googleAuthUser=auth.currentUser;
+    localStorage.setItem('bm_google_uid',auth.currentUser.uid||'');
+    localStorage.setItem('bm_google_email',auth.currentUser.email||'');
+    localStorage.setItem('bm_google_name',auth.currentUser.displayName||'');
+    return auth.currentUser;
+  }
+  // بعد العودة من Google قد يحتاج Firebase لحظات لإعادة الجلسة.
+  for(let i=0;i<12;i++){
+    await new Promise(r=>setTimeout(r,250));
+    if(auth.currentUser){
+      googleAuthUser=auth.currentUser;
+      localStorage.setItem('bm_google_uid',auth.currentUser.uid||'');
+      localStorage.setItem('bm_google_email',auth.currentUser.email||'');
+      localStorage.setItem('bm_google_name',auth.currentUser.displayName||'');
+      return auth.currentUser;
+    }
+  }
   return null;
 }
 function getBackupCollections(){return ['products','sales','purchases','expenses','withdrawals','debts','customers','suppliers','offers','auditLog'];}
@@ -1422,7 +1446,8 @@ async function restoreFromGoogle(){
 }
 function cloudBackupStatus(){
   const auth=getFirebaseAuth();
-  return auth?.currentUser?.email||'غير مرتبط بحساب Google';
+  const email=auth?.currentUser?.email || googleAuthUser?.email || localStorage.getItem('bm_google_email');
+  return email || 'غير مرتبط بحساب Google';
 }
 
 // ==================== المصادقة ====================
@@ -4153,9 +4178,17 @@ window.addEventListener('DOMContentLoaded', () => {
   }
   const auth=getFirebaseAuth();
   if(auth) {
-    auth.onAuthStateChanged(u=>{googleAuthUser=u||null;});
+    auth.onAuthStateChanged(u=>{
+      googleAuthUser=u||null;
+      if(u){
+        localStorage.setItem('bm_google_uid',u.uid||'');
+        localStorage.setItem('bm_google_email',u.email||'');
+        localStorage.setItem('bm_google_name',u.displayName||'');
+        if(currentTab==='settings') setTimeout(()=>navigateTo('settings'),50);
+      }
+    });
     // استلام نتيجة Google بعد العودة من صفحة Google على الموبايل.
-    setTimeout(()=>handleGoogleRedirectResult(),100);
+    setTimeout(()=>handleGoogleRedirectResult(),150);
   }
 });
 async function replaceCloudDataWithLocal() {
@@ -4196,7 +4229,7 @@ async function replaceCloudDataWithLocal() {
 <script>
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', function() {
-    navigator.serviceWorker.register('sw.js?v=7')
+    navigator.serviceWorker.register('sw.js?v=8')
       .then(function(registration) { console.log('SW registered: ', registration.scope); })
       .catch(function(error) { console.log('SW registration failed: ', error); });
   });
