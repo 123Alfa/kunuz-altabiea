@@ -24,7 +24,12 @@
       "purpose": "any maskable"
     }
   ],
-  "categories": ["business", "finance", "productivity"],
+  "categories": [
+    "business",
+    "finance",
+    "productivity"
+  ],
   "screenshots": [],
-  "prefer_related_applications": false
+  "prefer_related_applications": false,
+  "id": "./"
 }
