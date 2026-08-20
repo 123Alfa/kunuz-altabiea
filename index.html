@@ -1010,7 +1010,7 @@ tr:hover td{background:rgba(15,118,110,.045)}
 </div>
 <script>
 // ==================== معلومات الإصدار ====================
-const APP_VERSION='v1.5.7';
+const APP_VERSION = "v1.5.6";
 const APP_NAME = "كنوز الطبيعة";
 const APP_BUILD_DATE = "20 أغسطس 2026 — تطوير مركز النسخ الاحتياطي وتصميمه";
 
@@ -1077,10 +1077,10 @@ function initGoogleDriveClient(){
           console.error('Google Drive file check failed:', driveError);
           showToast('⚠️ تم ربط الحساب، لكن يحتاج Google Drive API إلى التفعيل في Google Cloud','warning');
         }
+
         // لا نرفع أي بيانات تلقائيًا بعد ربط الحساب.
         // الرفع يتم فقط بعد ضغط المستخدم على «رفع النسخة إلى Google»،
         // مع حماية تمنع رفع نسخة فارغة.
-        if(!googleDriveFileId) showToast('ℹ️ الحساب مرتبط. اضغط «رفع النسخة إلى Google» عند الحاجة.','info');
 
       }catch(e){
         console.error('Google account initialization error:',e);
@@ -1176,7 +1176,6 @@ function buildBackupPayload(){
     auditLog:Store.get('auditLog')
   };
 }
-
 
 function backupRecordCounts(data){
   const keys=getBackupCollections();
@@ -4144,7 +4143,7 @@ function importData(input){
   const file=input.files[0];if(!file)return;
   const reader=new FileReader();
   reader.onload=e=>{
-  const data=JSON.parse(e.target.result);
+    const data=JSON.parse(e.target.result);
     if(!isUsableBackup(data)){
       showToast('🛡️ ملف النسخة الاحتياطية فارغ أو غير صالح، ولم يتم تغيير أي بيانات','error');
       return;
