@@ -947,6 +947,15 @@ tr:hover td{background:rgba(15,118,110,.045)}
 @media(min-width:600px){.menu-grid-v3{grid-template-columns:1fr 1fr}.menu-grid-v3.compact{grid-template-columns:repeat(4,1fr)}}
 @media(max-width:420px){.menu-grid-v3.compact{grid-template-columns:1fr}.more-hero{padding:17px}.more-hero-icon{width:50px;height:50px}}
 </style>
+<style id="v1-5-11-invoice-whatsapp-fix">
+/* ===== v1.5.11 — إصلاح نهائي لزر واتساب وسطر الوقت في واتساب ===== */
+.invoice-pro-actions{display:flex!important;flex-direction:row-reverse!important;align-items:stretch!important;gap:6px!important;width:100%!important;max-width:100%!important;min-width:0!important;margin-top:9px!important;overflow:visible!important;box-sizing:border-box!important}
+.invoice-pro-actions button{flex:0 0 40px!important;width:40px!important;min-width:40px!important;max-width:40px!important;height:40px!important;padding:0!important;margin:0!important;display:flex!important;align-items:center!important;justify-content:center!important;overflow:hidden!important;box-sizing:border-box!important;border-radius:11px!important}
+.invoice-pro-actions button:first-child{flex:1 1 auto!important;width:auto!important;min-width:0!important;max-width:none!important;padding:0 10px!important}
+.invoice-pro-actions button:nth-child(3){background:#e8f8ef!important;color:#118447!important;border:1px solid #c7ead7!important}
+.invoice-pro-actions button:nth-child(3) i{font-size:1.05rem!important}
+@media(max-width:430px){.invoice-pro-actions{gap:5px!important}.invoice-pro-actions button{flex-basis:38px!important;width:38px!important;min-width:38px!important;max-width:38px!important;height:38px!important;border-radius:10px!important}.invoice-pro-actions button:first-child{flex:1 1 auto!important;width:auto!important;min-width:0!important;max-width:none!important;padding:0 8px!important;font-size:.62rem!important}.invoice-pro-actions button i{font-size:.82rem!important}.invoice-pro-actions button:nth-child(3) i{font-size:1rem!important}}
+</style>
 </head>
 <body>
 <div id="loading-screen">
@@ -1018,7 +1027,7 @@ tr:hover td{background:rgba(15,118,110,.045)}
 </div>
 <script>
 // ==================== معلومات الإصدار ====================
-const APP_VERSION='v1.5.10';
+const APP_VERSION='v1.5.11';
 const APP_NAME = "كنوز الطبيعة";
 const APP_BUILD_DATE = "21 أغسطس 2026 — تنقل بالسحب وتحسين فاتورة المبيعات والعروض";
 
@@ -2617,7 +2626,9 @@ function invoiceTextPro(inv,sales){
 `;
   t+=`🔢 رقم الفاتورة: *${inv.invoiceSeq||inv.invoiceNo}*
 `;
-  t+=`📅 التاريخ: *${date}${inv.time?' — '+inv.time:''}*
+  t+=`📅 التاريخ: *${date}*
+`;
+  t+=`⏰ الوقت: *${inv.time||'غير مسجل في الفاتورة القديمة'}*
 `;
   t+=`👤 العميل: *${inv.customerName||'عميل عادي'}*
 `;
@@ -4561,7 +4572,8 @@ if ('serviceWorker' in navigator) {
     let t=`🧾 *كنوز الطبيعة — فاتورة بيع*\n`;
     t+=`━━━━━━━━━━━━━━\n`;
     t+=`🔢 رقم الفاتورة: *${inv.invoiceSeq||inv.invoiceNo}*\n`;
-    t+=`📅 التاريخ: *${formatInvoiceDate(inv.date)}${inv.time?' — '+inv.time:''}*\n`;
+    t+=`📅 التاريخ: *${formatInvoiceDate(inv.date)}*\n`;
+    t+=`⏰ الوقت: *${inv.time||'غير مسجل في الفاتورة القديمة'}*\n`;
     t+=`👤 العميل: *${inv.customerName||'عميل عادي'}*\n`;
     t+=`🛍️ نوع البيع: *${inv.type==='wholesale'?'جملة':'قطاعي'}*\n`;
     t+=`━━━━━━━━━━━━━━\n`;
@@ -4571,15 +4583,15 @@ if ('serviceWorker' in navigator) {
       const cashierLabel=`بيع من الكاشير — ${qty}`;
       t+=`${i+1}. *${s.productName||'صنف'}*\n`;
       t+=`   📦 ${cashierLabel}\n`;
-      t+=`   💰 ${fmt(s.total)} ج.م\n`;
+      t+=`   💰 ${fmt(s.total)}\n`;
     });
     t+=`━━━━━━━━━━━━━━\n`;
     if(money(inv.subtotal)!==money(inv.total)||money(inv.discount)>0)t+=`الإجمالي قبل الخصم: ${fmt(inv.subtotal)}\n`;
     if(money(inv.discount)>0)t+=`🏷️ الخصم: ${fmt(inv.discount)}\n`;
     if(money(inv.tax)>0)t+=`🧾 الضريبة: ${fmt(inv.tax)}\n`;
-    t+=`💰 *الإجمالي النهائي: ${fmt(inv.total)} ج.م*\n`;
-    t+=`💵 المدفوع: ${fmt(inv.paid)} ج.م\n`;
-    t+=`${inv.paymentMethod==='cash'?'💸 الباقي':'📌 المتبقي'}: *${fmt(inv.paymentMethod==='cash'?Math.max(0,inv.paid-inv.total):inv.remaining)} ج.م*\n`;
+    t+=`💰 *الإجمالي النهائي: ${fmt(inv.total)}*\n`;
+    t+=`💵 المدفوع: ${fmt(inv.paid)}\n`;
+    t+=`${inv.paymentMethod==='cash'?'💸 الباقي':'📌 المتبقي'}: *${fmt(inv.paymentMethod==='cash'?Math.max(0,inv.paid-inv.total):inv.remaining)}*\n`;
     t+=`💳 السداد: *${paymentLabel(inv.paymentMethod)}*`;
     if(inv.note)t+=`\n📝 ملاحظة: ${inv.note}`;
     t+=`\n━━━━━━━━━━━━━━\n❤️ *شكرًا لتعاملكم معنا*`;
