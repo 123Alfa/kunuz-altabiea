@@ -946,25 +946,19 @@ tr:hover td{background:rgba(15,118,110,.045)}
 .more-v3{padding-bottom:18px}.more-hero{background:linear-gradient(135deg,#0f766e,#0b5f58 58%,#c99a22);color:#fff;border-radius:22px;padding:20px;display:flex;align-items:center;justify-content:space-between;gap:14px;margin-bottom:18px;box-shadow:0 12px 30px rgba(15,118,110,.18)}.more-hero span{font-size:.7rem;opacity:.78;font-weight:800}.more-hero h2{font-size:1.35rem;margin:3px 0}.more-hero p{font-size:.72rem;opacity:.86}.more-hero-icon{width:58px;height:58px;border-radius:18px;background:rgba(255,255,255,.15);display:grid;place-items:center;font-size:1.5rem}.more-section-title{display:flex;align-items:center;justify-content:space-between;margin:18px 2px 10px}.more-section-title span{font-weight:900;color:var(--text);font-size:.92rem}.more-section-title span i{color:var(--primary);margin-left:5px}.more-section-title small{color:var(--text-muted);font-size:.65rem}.menu-grid-v3{display:grid;grid-template-columns:1fr;gap:10px}.menu-item-v3,.more-settings-card{display:flex;align-items:center;gap:11px;background:#fff;border:1px solid var(--border);border-radius:17px;padding:13px;box-shadow:0 4px 15px rgba(31,55,48,.055);cursor:pointer;transition:.2s}.menu-item-v3:hover,.more-settings-card:hover{transform:translateY(-2px);border-color:rgba(15,118,110,.35);box-shadow:0 9px 24px rgba(15,118,110,.10)}.menu-item-v3 .menu-icon,.more-settings-card .menu-icon{width:44px;height:44px;min-width:44px;border-radius:14px;background:linear-gradient(135deg,#e9f7f3,#fff7e7);color:var(--primary);display:grid;place-items:center;font-size:1.05rem}.menu-item-v3 b,.more-settings-card b{display:block;font-size:.82rem;color:var(--text)}.menu-item-v3 small,.more-settings-card small{display:block;color:var(--text-muted);font-size:.64rem;margin-top:2px}.menu-item-v3 .arrow,.more-settings-card .arrow{margin-right:auto;color:var(--text-muted);font-size:.7rem}.menu-grid-v3.compact{grid-template-columns:1fr 1fr}.menu-grid-v3.compact .menu-item-v3{padding:11px}.menu-grid-v3.compact .menu-item-v3 .menu-icon{width:40px;height:40px;min-width:40px}.more-settings-card{margin-top:2px}.cloud-backup-card .card-title i{color:#4285f4}.cloud-backup-card .settings-profile-avatar{background:#fff;border:1px solid var(--border);color:#4285f4}.logout-btn{margin-right:4px}.settings-row-title{font-size:.86rem}.card-title>i,.section-header h2>i{width:34px;height:34px;border-radius:11px;display:inline-grid;place-items:center;background:linear-gradient(135deg,#e8f6f1,#fff7e7);color:var(--primary)!important;font-size:.9rem;box-shadow:0 4px 10px rgba(15,118,110,.08)}.settings-icon{background:linear-gradient(135deg,#e8f6f1,#fff7e7)!important;box-shadow:0 3px 9px rgba(15,118,110,.07)}.bottom-nav-item i{width:34px;height:34px;display:grid;place-items:center;border-radius:11px;background:rgba(15,118,110,.06)}.bottom-nav-item.active i{background:rgba(15,118,110,.13)}.pos-panel-head h3 i,.dash-card-head h3 i{width:30px;height:30px;border-radius:10px;display:inline-grid;place-items:center;background:#edf8f4;color:var(--primary);margin-left:4px}
 @media(min-width:600px){.menu-grid-v3{grid-template-columns:1fr 1fr}.menu-grid-v3.compact{grid-template-columns:repeat(4,1fr)}}
 @media(max-width:420px){.menu-grid-v3.compact{grid-template-columns:1fr}.more-hero{padding:17px}.more-hero-icon{width:50px;height:50px}}
+@media(max-width:430px){.invoice-pro-actions{gap:5px!important}}
+@media(max-width:430px){.invoice-pro-actions{grid-template-columns:minmax(0,1fr) 38px 38px 38px!important;gap:5px!important}}
 </style>
-<style id="v1-5-11-invoice-whatsapp-fix">
-/* ===== v1.5.11 — إصلاح نهائي لزر واتساب وسطر الوقت في واتساب ===== */
-.invoice-pro-actions{display:flex!important;flex-direction:row-reverse!important;align-items:stretch!important;gap:6px!important;width:100%!important;max-width:100%!important;min-width:0!important;margin-top:9px!important;overflow:visible!important;box-sizing:border-box!important}
-.invoice-pro-actions button{flex:0 0 40px!important;width:40px!important;min-width:40px!important;max-width:40px!important;height:40px!important;padding:0!important;margin:0!important;display:flex!important;align-items:center!important;justify-content:center!important;overflow:hidden!important;box-sizing:border-box!important;border-radius:11px!important}
-.invoice-pro-actions button:first-child{flex:1 1 auto!important;width:auto!important;min-width:0!important;max-width:none!important;padding:0 10px!important}
-.invoice-pro-actions button:nth-child(3){background:#e8f8ef!important;color:#118447!important;border:1px solid #c7ead7!important}
-.invoice-pro-actions button:nth-child(3) i{font-size:1.05rem!important}
-@media(max-width:430px){.invoice-pro-actions{gap:5px!important}.invoice-pro-actions button{flex-basis:38px!important;width:38px!important;min-width:38px!important;max-width:38px!important;height:38px!important;border-radius:10px!important}.invoice-pro-actions button:first-child{flex:1 1 auto!important;width:auto!important;min-width:0!important;max-width:none!important;padding:0 8px!important;font-size:.62rem!important}.invoice-pro-actions button i{font-size:.82rem!important}.invoice-pro-actions button:nth-child(3) i{font-size:1rem!important}}
-</style>
-<style id="v1-5-12-whatsapp-button-final">
-/* v1.5.12 — إصلاح قص زر واتساب في سجل المبيعات */
-.invoice-pro-actions{display:grid!important;grid-template-columns:minmax(0,1fr) 42px 42px 42px!important;grid-auto-flow:row!important;direction:ltr!important;flex-direction:initial!important;align-items:stretch!important;justify-content:initial!important;gap:6px!important;width:100%!important;max-width:100%!important;min-width:0!important;margin-top:9px!important;padding:0!important;overflow:visible!important;box-sizing:border-box!important}
-.invoice-pro-actions button{position:relative!important;float:none!important;flex:none!important;width:100%!important;min-width:0!important;max-width:100%!important;height:40px!important;margin:0!important;padding:0!important;box-sizing:border-box!important;display:flex!important;align-items:center!important;justify-content:center!important;gap:4px!important;overflow:hidden!important;white-space:nowrap!important}
-.invoice-pro-actions button:first-child{grid-column:auto!important;width:100%!important;min-width:0!important;max-width:none!important;padding:0 8px!important}
+
+<style id="v1-5-13-invoice-actions-clean">
+/* v1.5.14 — clean responsive invoice action bar */
+.invoice-pro-actions{display:grid!important;grid-template-columns:minmax(0,1fr) 42px 42px 42px!important;gap:6px!important;width:100%!important;max-width:100%!important;min-width:0!important;margin-top:9px!important;padding:0!important;box-sizing:border-box!important;direction:ltr!important;overflow:visible!important}
+.invoice-pro-actions button{min-width:0!important;width:100%!important;max-width:100%!important;height:40px!important;margin:0!important;padding:0!important;border-radius:11px!important;box-sizing:border-box!important;display:flex!important;align-items:center!important;justify-content:center!important;gap:4px!important;overflow:hidden!important;white-space:nowrap!important;flex:none!important}
+.invoice-pro-actions button:first-child{min-width:0!important;width:100%!important;max-width:none!important;padding:0 8px!important}
 .invoice-pro-actions button:nth-child(2),.invoice-pro-actions button:nth-child(3),.invoice-pro-actions button:nth-child(4){width:42px!important;min-width:42px!important;max-width:42px!important}
 .invoice-pro-actions button:nth-child(3){background:#e8f8ef!important;color:#118447!important;border:1px solid #c7ead7!important}
-.invoice-pro-actions button i{flex:0 0 auto!important;margin:0!important}
-@media(max-width:430px){.invoice-pro-actions{grid-template-columns:minmax(0,1fr) 38px 38px 38px!important;gap:5px!important}.invoice-pro-actions button{height:38px!important;border-radius:10px!important}.invoice-pro-actions button:first-child{padding:0 6px!important;font-size:.62rem!important}.invoice-pro-actions button:nth-child(2),.invoice-pro-actions button:nth-child(3),.invoice-pro-actions button:nth-child(4){width:38px!important;min-width:38px!important;max-width:38px!important}.invoice-pro-actions button:nth-child(3) i{font-size:1rem!important}}
+.invoice-pro-actions button i{margin:0!important;flex:0 0 auto!important}
+@media(max-width:430px){.invoice-pro-actions{grid-template-columns:minmax(0,1fr) 38px 38px 38px!important;gap:5px!important}.invoice-pro-actions button{height:38px!important;border-radius:10px!important}.invoice-pro-actions button:first-child{padding:0 6px!important;font-size:.62rem!important}.invoice-pro-actions button:nth-child(2),.invoice-pro-actions button:nth-child(3),.invoice-pro-actions button:nth-child(4){width:38px!important;min-width:38px!important;max-width:38px!important}.invoice-pro-actions button i{font-size:.8rem!important}.invoice-pro-actions button:nth-child(3) i{font-size:1rem!important}}
 </style>
 </head>
 <body>
@@ -4428,14 +4422,40 @@ async function replaceCloudDataWithLocal() {
 
 </script>
 <script>
+/* v1.5.14 — startup failsafe: لا تترك شاشة التحميل معلقة */
+window.addEventListener('DOMContentLoaded', function(){
+  setTimeout(function(){
+    var loading=document.getElementById('loading-screen');
+    if(loading && !loading.classList.contains('hidden')){
+      try{
+        var user=(typeof Store!=='undefined' && Store.getUser)?Store.getUser():null;
+        if(user && typeof isLockEnabled==='function' && !isLockEnabled()){
+          currentUser=user;
+          showApp();
+        } else if(typeof showAuthScreen==='function'){
+          showAuthScreen();
+        }
+      }catch(e){
+        console.error('Startup failsafe:',e);
+        if(typeof showAuthScreen==='function') showAuthScreen();
+      }
+    }
+  }, 1500);
+});
+</script>
+<script>
+/* v1.5.14 — لا تجعل Service Worker يبطئ بداية البرنامج */
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', function() {
-    navigator.serviceWorker.register('sw.js?v=10')
-      .then(function(registration) {
-        registration.update().catch(function(){});
-        console.log('SW registered: ', registration.scope);
-      })
-      .catch(function(error) { console.log('SW registration failed: ', error); });
+    setTimeout(function() {
+      navigator.serviceWorker.register('sw.js?v=11', {updateViaCache:'none'})
+        .then(function(registration) {
+          console.log('SW registered in background: ', registration.scope);
+        })
+        .catch(function(error) {
+          console.log('SW background registration skipped: ', error);
+        });
+    }, 8000);
   });
 }
 </script>
@@ -4501,9 +4521,9 @@ if ('serviceWorker' in navigator) {
 
 <style id="sales-history-v142">
 .invoice-pro-card{background:#fff;border:1px solid #dfeae5;border-radius:18px;padding:12px;box-shadow:0 5px 16px rgba(20,70,55,.045);cursor:pointer;transition:.16s}.invoice-pro-card:hover{border-color:#9cc9b9;transform:translateY(-1px)}
-.invoice-pro-top,.invoice-pro-main,.invoice-pro-meta{display:flex;align-items:center;justify-content:space-between;gap:8px}.invoice-pro-top small{display:block;color:var(--text-muted);font-size:.6rem;margin-top:3px}.invoice-pro-number{font-weight:950;color:var(--primary);font-size:.78rem}.invoice-pro-status{padding:5px 9px;border-radius:999px;font-size:.6rem;font-weight:950}.invoice-pro-status.paid{background:#eaf8f1;color:#087443}.invoice-pro-status.due{background:#fff5df;color:#9a6200}.invoice-pro-main{justify-content:flex-start;margin-top:11px}.invoice-pro-icon{width:42px;height:42px;border-radius:13px;background:#e8f6f1;color:var(--primary);display:grid;place-items:center}.invoice-pro-info{flex:1;min-width:0}.invoice-pro-info strong{display:block;font-size:.8rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.invoice-pro-info span{display:block;color:var(--text-muted);font-size:.61rem;margin-top:3px}.invoice-pro-total{text-align:left}.invoice-pro-total small{display:block;color:var(--text-muted);font-size:.56rem}.invoice-pro-total b{display:block;color:var(--primary);font-size:.95rem;margin-top:2px}.invoice-pro-meta{justify-content:flex-start;flex-wrap:wrap;border-top:1px dashed #e5ece9;margin-top:10px;padding-top:9px;font-size:.6rem;color:var(--text-light)}.invoice-pro-meta span{padding:5px 7px;background:#f7faf9;border-radius:999px}.invoice-pro-actions{display:grid;grid-template-columns:1fr 40px 40px 40px;gap:6px;margin-top:9px}.invoice-pro-actions button{border:0;border-radius:9px;padding:8px;background:#eef7f3;color:var(--primary);font-family:inherit;font-weight:900;cursor:pointer}.invoice-pro-actions button:nth-child(2){background:#eef3ff;color:#315db7}.invoice-pro-actions button:nth-child(3){background:#eaf8f1;color:#087443}.invoice-pro-actions button:nth-child(4){background:#fff7e7;color:#9a6200}
+.invoice-pro-top,.invoice-pro-main,.invoice-pro-meta{display:flex;align-items:center;justify-content:space-between;gap:8px}.invoice-pro-top small{display:block;color:var(--text-muted);font-size:.6rem;margin-top:3px}.invoice-pro-number{font-weight:950;color:var(--primary);font-size:.78rem}.invoice-pro-status{padding:5px 9px;border-radius:999px;font-size:.6rem;font-weight:950}.invoice-pro-status.paid{background:#eaf8f1;color:#087443}.invoice-pro-status.due{background:#fff5df;color:#9a6200}.invoice-pro-main{justify-content:flex-start;margin-top:11px}.invoice-pro-icon{width:42px;height:42px;border-radius:13px;background:#e8f6f1;color:var(--primary);display:grid;place-items:center}.invoice-pro-info{flex:1;min-width:0}.invoice-pro-info strong{display:block;font-size:.8rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.invoice-pro-info span{display:block;color:var(--text-muted);font-size:.61rem;margin-top:3px}.invoice-pro-total{text-align:left}.invoice-pro-total small{display:block;color:var(--text-muted);font-size:.56rem}.invoice-pro-total b{display:block;color:var(--primary);font-size:.95rem;margin-top:2px}.invoice-pro-meta{justify-content:flex-start;flex-wrap:wrap;border-top:1px dashed #e5ece9;margin-top:10px;padding-top:9px;font-size:.6rem;color:var(--text-light)}.invoice-pro-meta span{padding:5px 7px;background:#f7faf9;border-radius:999px}
 .invoice-modal-pro{max-height:78vh;overflow:auto}.invoice-pro-banner{display:grid;grid-template-columns:repeat(3,1fr);gap:7px;margin-bottom:10px}.invoice-pro-banner>div{background:#f7faf9;border:1px solid #e4eee9;border-radius:11px;padding:8px}.invoice-pro-banner span{display:block;color:var(--text-muted);font-size:.56rem}.invoice-pro-banner strong{display:block;font-size:.68rem;margin-top:3px}.invoice-lines-pro{border:1px solid #e3ece8;border-radius:13px;overflow:hidden}.invoice-line-pro{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:10px;border-bottom:1px solid #edf2ef}.invoice-line-pro:last-child{border-bottom:0}.invoice-line-pro strong{display:block;font-size:.73rem}.invoice-line-pro small{display:block;color:var(--text-muted);font-size:.59rem;margin-top:3px}.invoice-line-pro>b{color:var(--primary);font-size:.75rem}.invoice-totals-pro{margin-top:10px;background:#f7faf9;border-radius:13px;padding:9px}.invoice-totals-pro>div{display:flex;justify-content:space-between;padding:5px;font-size:.68rem}.invoice-totals-pro .due-row{color:#a56400}.invoice-note-pro{margin-top:9px;padding:9px;border-radius:10px;background:#fffaf0;color:#8a620d;font-size:.65rem}.invoice-actions-pro{display:grid;grid-template-columns:repeat(3,1fr);gap:7px;margin-top:11px}.invoice-actions-pro button{border:0;border-radius:10px;padding:10px 5px;background:#e8f6f1;color:var(--primary);font-family:inherit;font-weight:900;font-size:.65rem;cursor:pointer}.invoice-actions-pro button:nth-child(2){background:#eaf8f1;color:#087443}.invoice-actions-pro button:nth-child(3){background:#eef3ff;color:#315db7}.invoice-actions-pro button:nth-child(4){background:#fff7e7;color:#9a6200}.invoice-actions-pro button:nth-child(5){background:#eaf8f1;color:#087443}.invoice-actions-pro .danger{background:#fff0f0;color:#b42318}.edit-invoice-head,.edit-invoice-line{display:grid;grid-template-columns:minmax(0,1.5fr) .75fr .75fr .7fr;gap:6px;align-items:center}.edit-invoice-head{padding:7px 4px;color:var(--text-muted);font-size:.58rem;font-weight:900}.edit-invoice-line{padding:7px 0;border-top:1px solid #edf2ef}.edit-invoice-line input{width:100%;padding:8px;border:1px solid #dce8e3;border-radius:9px;font-family:inherit;font-weight:800;font-size:.68rem}.edit-invoice-name strong{display:block;font-size:.68rem}.edit-invoice-name small{display:block;color:var(--text-muted);font-size:.55rem;margin-top:2px}.return-invoice-list{border:1px solid #f0dfbf;background:#fffaf0;border-radius:13px;padding:7px}.return-invoice-line{display:grid;grid-template-columns:minmax(0,1fr) 90px;gap:8px;align-items:center;padding:9px 3px;border-bottom:1px dashed #ead8b8}.return-invoice-line:last-child{border-bottom:0}.return-invoice-line strong{display:block;font-size:.7rem}.return-invoice-line small{display:block;color:#9a7a42;font-size:.55rem;margin-top:2px}.return-invoice-line input{width:100%;padding:8px;border:1px solid #e6c98f;border-radius:9px;text-align:center;font-weight:900}.collection-pro-box{background:#effaf5;border:1px solid #ccefe0;border-radius:14px;padding:14px;margin-bottom:10px;text-align:center}.collection-pro-box small{display:block;color:var(--text-muted);font-size:.62rem}.collection-pro-box strong{display:block;color:var(--success);font-size:1.35rem;margin:4px 0 10px}.collection-pro-box input{width:100%;padding:10px;border:1px solid #a8dec8;border-radius:10px;text-align:center;font-weight:900}
-@media(max-width:520px){.invoice-pro-banner{grid-template-columns:1fr 1fr}.invoice-pro-banner>div:last-child{grid-column:1/-1}.invoice-actions-pro{grid-template-columns:repeat(2,1fr)}.invoice-pro-actions{grid-template-columns:1fr 40px 40px 40px}.edit-invoice-head,.edit-invoice-line{grid-template-columns:minmax(0,1.2fr) .72fr .72fr .68fr}.edit-invoice-line input{padding:7px 4px;font-size:.62rem}}
+@media(max-width:520px){.invoice-pro-banner{grid-template-columns:1fr 1fr}.invoice-pro-banner>div:last-child{grid-column:1/-1}.invoice-actions-pro{grid-template-columns:repeat(2,1fr)}.edit-invoice-head,.edit-invoice-line{grid-template-columns:minmax(0,1.2fr) .72fr .72fr .68fr}.edit-invoice-line input{padding:7px 4px;font-size:.62rem}}
 </style>
 
 <script id="sales-history-v142-js">
@@ -4922,31 +4942,8 @@ html,body{width:100%;max-width:100%;overflow-x:hidden}
 .backup-divider{height:1px;background:var(--border);margin:15px 0 2px}
 @media(max-width:390px){.backup-body{padding:13px}.backup-status-grid{gap:8px}.backup-status-card{padding:12px 9px}.backup-data-strip{gap:5px}.backup-data-item{padding:9px 2px}.backup-action{min-height:72px;font-size:.67rem}}
 @media(min-width:600px){.backup-actions{grid-template-columns:repeat(4,1fr)}.backup-action{min-height:88px}.backup-data-strip{gap:10px}}
-</style>
-
-
-<style id="v1-5-9-mobile-ux-fixes">
-/* ===== v1.5.9 — إصلاح أزرار سجل المبيعات ===== */
-.invoice-pro-actions{
-  width:100%!important;
-  min-width:0!important;
-  box-sizing:border-box!important;
-  grid-template-columns:minmax(0,1fr) repeat(3,minmax(40px,44px))!important;
-  gap:6px!important;
-  direction:rtl!important;
-  overflow:visible!important;
-}
-.invoice-pro-actions button{
-  min-width:0!important;
-  width:100%!important;
-  box-sizing:border-box!important;
-  overflow:hidden!important;
-  white-space:nowrap!important;
-}
-.invoice-pro-actions button:first-child{min-width:0!important;overflow:hidden!important;text-overflow:ellipsis!important}
 @media(max-width:430px){
-  .invoice-pro-actions{grid-template-columns:minmax(0,1fr) repeat(3,minmax(38px,42px))!important;gap:5px!important}
-  .invoice-pro-actions button{padding:8px 5px!important}
+
 }
 
 /* ===== v1.5.9 — خانة العروض في المزيد ===== */
@@ -4994,16 +4991,8 @@ html,body{width:100%;max-width:100%;overflow-x:hidden}
 
 /* ===== v1.5.10 — إصلاح واتساب + أيقونات حديثة + تنقل أنعم ===== */
 html,body{overscroll-behavior-x:none}
-.invoice-pro-actions{display:grid!important;grid-template-columns:minmax(0,1fr) repeat(3,42px)!important;gap:6px!important;width:100%!important;max-width:100%!important;min-width:0!important;overflow:hidden!important;direction:rtl!important}
-.invoice-pro-actions button{min-width:0!important;width:100%!important;max-width:100%!important;overflow:hidden!important;white-space:nowrap!important;display:flex!important;align-items:center!important;justify-content:center!important;gap:5px!important;box-sizing:border-box!important}
-.invoice-pro-actions button i{font-size:.82rem!important;flex:0 0 auto!important}
-.invoice-pro-actions button:nth-child(3){background:#e8f8ef!important;color:#118447!important;border:1px solid #c7ead7!important}
-.invoice-pro-actions button:nth-child(3) i{font-size:1rem!important}
 @media(max-width:520px){
-  .invoice-pro-actions{grid-template-columns:minmax(0,1fr) repeat(3,39px)!important;gap:5px!important}
-  .invoice-pro-actions button{padding:7px 3px!important;border-radius:11px!important;font-size:.61rem!important}
-  .invoice-pro-actions button i{font-size:.8rem!important}
-  .invoice-pro-actions button:nth-child(3) i{font-size:1rem!important}
+
 }
 /* نظام أيقونات موحّد وأجمل */
 .menu-item-v3 .menu-icon,.more-settings-card .menu-icon,.settings-icon,.card-title>i,.section-header h2>i,.dash-card-head h3 i,.pos-panel-head h3 i{
