@@ -4764,6 +4764,45 @@ if ('serviceWorker' in navigator) {
 
   window.saveInvoiceEditPro=function(key){
     const inv=findInvoice(key);if(!inv)return;
+
+    // حماية خاصة لتعديل التاريخ فقط:
+    // إذا لم تتغير الكمية أو السعر أو الخصم أو الملاحظات، نغيّر التاريخ
+    // فقط بدون إعادة حساب الفاتورة وبدون لمس المخزون أو الربح أو الكمية.
+    const dateInput=document.getElementById('editInvoiceDate');
+    const noteInput=document.getElementById('editInvoiceNote');
+    const newDateOnly=dateInput?.value||inv.date||'';
+    const newNoteOnly=noteInput?.value||'';
+    let linesUnchanged=true;
+
+    inv.lines.forEach((s,i)=>{
+      const q=money(document.querySelector(`[data-edit-line="${i}"][data-field="qty"]`)?.value);
+      const p=money(document.querySelector(`[data-edit-line="${i}"][data-field="price"]`)?.value);
+      const d=Math.min(100,Math.max(0,money(document.querySelector(`[data-edit-line="${i}"][data-field="discount"]`)?.value)));
+      if(Math.abs(q-money(s.qty))>=0.000001 ||
+         Math.abs(p-money(s.price))>=0.000001 ||
+         Math.abs(d-money(s.discount))>=0.000001){
+        linesUnchanged=false;
+      }
+    });
+
+    if(linesUnchanged && newNoteOnly===String(inv.note||'')){
+      if(newDateOnly!==String(inv.date||'')){
+        inv.lines.forEach(s=>Store.update('sales',s.id,{date:newDateOnly}));
+        if(inv.saleBatchId){
+          (Store.get('debts')||[])
+            .filter(d=>d.saleBatchId===inv.saleBatchId&&d.source==='sale')
+            .forEach(d=>Store.update('debts',d.id,{date:newDateOnly}));
+        }
+        closeIfOpen();
+        showToast('✅ تم تغيير تاريخ الفاتورة فقط بدون تغيير الكمية أو الحساب','success');
+        renderSalesTable();
+        return;
+      }
+      closeIfOpen();
+      showToast('لم يتم إجراء أي تغيير','warning');
+      return;
+    }
+
     const originalTotal=inv.total;
     let newTotal=0,newProfit=0,valid=true;
     const newVals=inv.lines.map((s,i)=>{
@@ -4796,8 +4835,8 @@ if ('serviceWorker' in navigator) {
     // Inventory adjustment per line: return old qty, then deduct new qty.
     newVals.forEach(v=>{const p=Store.get('products').find(x=>String(x.id)===String(v.s.productId));if(p){const restored=money(p.qty)+money(v.s.qty);Store.update('products',p.id,{qty:restored-v.q});}});
     const oldCustomer=inv.customerId,oldCustomerName=inv.customerName;
-    const note=document.getElementById('editInvoiceNote')?.value||'';
-    const newDate=document.getElementById('editInvoiceDate')?.value||inv.date||'';
+    const note=newNoteOnly;
+    const newDate=newDateOnly;
     const delta=newTotal-originalTotal;
     newVals.forEach(v=>Store.update('sales',v.s.id,{qty:v.q,packages:v.packages,price:v.p,discount:v.d,total:v.total,profit:v.profit,note,date:newDate}));
     const paid=Math.min(inv.paid,newTotal),remaining=Math.max(0,newTotal-paid);
