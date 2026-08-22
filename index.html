@@ -958,8 +958,56 @@ tr:hover td{background:rgba(15,118,110,.045)}
 .invoice-pro-actions button:nth-child(2),.invoice-pro-actions button:nth-child(3),.invoice-pro-actions button:nth-child(4){width:42px!important;min-width:42px!important;max-width:42px!important}
 .invoice-pro-actions button:nth-child(3){background:#e8f8ef!important;color:#118447!important;border:1px solid #c7ead7!important}
 .invoice-pro-actions button i{margin:0!important;flex:0 0 auto!important}
-@media(max-width:430px){.invoice-pro-actions{grid-template-columns:minmax(0,1fr) 38px 38px 38px!important;gap:5px!important}.invoice-pro-actions button{height:38px!important;border-radius:10px!important}.invoice-pro-actions button:first-child{padding:0 6px!important;font-size:.62rem!important}.invoice-pro-actions button:nth-child(2),.invoice-pro-actions button:nth-child(3),.invoice-pro-actions button:nth-child(4){width:38px!important;min-width:38px!important;max-width:38px!important}.invoice-pro-actions button i{font-size:.8rem!important}.invoice-pro-actions button:nth-child(3) i{font-size:1rem!important}}
+@media(max-width:430px){
+.invoice-pro-actions{
+  display:grid!important;
+  grid-template-columns:minmax(0,1fr) 38px 38px 38px!important;
+  gap:5px!important;
+  width:100%!important;
+  max-width:100%!important;
+  min-width:0!important;
+  overflow:hidden!important;
+  box-sizing:border-box!important;
+  direction:ltr!important;
+}
+.invoice-pro-actions button{
+  width:100%!important;
+  min-width:0!important;
+  max-width:100%!important;
+  height:38px!important;
+  margin:0!important;
+  padding:0!important;
+  border-radius:10px!important;
+  box-sizing:border-box!important;
+  overflow:hidden!important;
+}
+.invoice-pro-actions button:first-child{
+  width:100%!important;
+  min-width:0!important;
+  max-width:none!important;
+  padding:0 6px!important;
+  font-size:.62rem!important;
+}
+.invoice-pro-actions button:nth-child(2),
+.invoice-pro-actions button:nth-child(3),
+.invoice-pro-actions button:nth-child(4){
+  width:38px!important;
+  min-width:38px!important;
+  max-width:38px!important;
+  flex:none!important;
+}
+.invoice-pro-actions button i{font-size:.8rem!important}
+.invoice-pro-actions button:nth-child(3) i{font-size:1rem!important}
+}
 </style>
+
+<style id="invoice-actions-final-mobile-fix">
+@media (max-width:430px){
+  .invoice-pro-card{width:100%;max-width:100%;min-width:0;overflow:hidden;box-sizing:border-box}
+  .invoice-pro-actions{width:100%!important;max-width:100%!important;min-width:0!important;margin-left:0!important;margin-right:0!important}
+}
+</style>
+
 </head>
 <body>
 <div id="loading-screen">
