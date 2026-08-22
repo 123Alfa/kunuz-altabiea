@@ -12,7 +12,7 @@
 
 <!-- لون شريط المتصفح العلوي في الموبايل -->
 <meta name="theme-color" content="#0f766e">
-<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800;900&display=swap" rel="stylesheet">
 
@@ -947,6 +947,48 @@ tr:hover td{background:rgba(15,118,110,.045)}
 @media(min-width:600px){.menu-grid-v3{grid-template-columns:1fr 1fr}.menu-grid-v3.compact{grid-template-columns:repeat(4,1fr)}}
 @media(max-width:420px){.menu-grid-v3.compact{grid-template-columns:1fr}.more-hero{padding:17px}.more-hero-icon{width:50px;height:50px}}
 </style>
+
+<style id="mobile-whatsapp-and-loading-fix">
+/* إصلاح أزرار الفاتورة على الموبايل: منع قص زر واتساب */
+.invoice-pro-actions{
+  width:100%!important;
+  min-width:0!important;
+  grid-template-columns:minmax(0,1fr) repeat(3,minmax(38px,40px))!important;
+  gap:6px!important;
+  overflow:visible!important;
+}
+.invoice-pro-actions button{
+  min-width:0!important;
+  width:100%!important;
+  max-width:100%!important;
+  overflow:hidden!important;
+}
+.invoice-pro-actions button i{
+  display:inline-block;
+  max-width:100%;
+}
+
+/* على الشاشات الضيقة جدًا: الأزرار ثابتة داخل عرض الكارت */
+@media(max-width:430px){
+  .invoice-pro-actions{
+    grid-template-columns:minmax(0,1fr) repeat(3,40px)!important;
+    gap:5px!important;
+  }
+  .invoice-pro-actions button{
+    padding-left:6px!important;
+    padding-right:6px!important;
+  }
+}
+
+/* تقليل زمن شاشة التحميل الوهمي مع الحفاظ على انتقال ناعم */
+.loading-bar-inner{
+  animation-duration:.8s!important;
+}
+#loading-screen{
+  transition:opacity .28s ease!important;
+}
+</style>
+
 </head>
 <body>
 <div id="loading-screen">
