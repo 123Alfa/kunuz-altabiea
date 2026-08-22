@@ -4766,7 +4766,32 @@ if ('serviceWorker' in navigator) {
     const inv=findInvoice(key);if(!inv)return;
     const originalTotal=inv.total;
     let newTotal=0,newProfit=0,valid=true;
-    const newVals=inv.lines.map((s,i)=>{const q=money(document.querySelector(`[data-edit-line="${i}"][data-field="qty"]`)?.value),p=money(document.querySelector(`[data-edit-line="${i}"][data-field="price"]`)?.value),d=Math.min(100,Math.max(0,money(document.querySelector(`[data-edit-line="${i}"][data-field="discount"]`)?.value)));if(q<0||p<0)valid=false;const gross=p*(s.weight?money(s.weight):1)* (s.packages!=null? (q/(money(s.weight)||1)):q);const total=Math.max(0,gross*(1-d/100));const cost=money(s.cost)*(s.weight?money(s.weight):1);const profit=(q>0?Math.max(0,total-cost*q):0);newTotal+=total;newProfit+=profit;return {s,q,p,d,total,profit};});
+    const newVals=inv.lines.map((s,i)=>{
+      const qtyInput=document.querySelector(`[data-edit-line="${i}"][data-field="qty"]`);
+      const qInput=money(qtyInput?.value);
+      const p=money(document.querySelector(`[data-edit-line="${i}"][data-field="price"]`)?.value);
+      const d=Math.min(100,Math.max(0,money(document.querySelector(`[data-edit-line="${i}"][data-field="discount"]`)?.value)));
+      if(qInput<0||p<0)valid=false;
+
+      // مهم: لو المستخدم غيّر التاريخ فقط، لا نعيد تفسير كمية البيع بالوزن.
+      // الفاتورة قد تكون 6 أنصاف × 500 جم = 3 كجم، والـ qty المخزنة هي 3 كجم
+      // بينما packages المخزنة هي 6. عند تعديل التاريخ فقط يجب الحفاظ على الاثنين كما هما.
+      const oldQty=money(s.qty);
+      const oldPackages=s.packages!=null?money(s.packages):oldQty;
+      const weight=money(s.weight||1);
+      const isWeightSale=Boolean(s.isWeightSale||s.weight);
+      const quantityUnchanged=Math.abs(qInput-oldQty)<0.000001;
+      const q=isWeightSale&&quantityUnchanged?oldQty:qInput;
+      const packages=isWeightSale
+        ? (quantityUnchanged?oldPackages:Math.max(0,q/(weight||1)))
+        : q;
+      const gross=p*(isWeightSale?weight:1)*packages;
+      const total=Math.max(0,gross*(1-d/100));
+      const cost=money(s.cost)*(isWeightSale?weight:1);
+      const profit=(q>0?Math.max(0,total-cost*q):0);
+      newTotal+=total;newProfit+=profit;
+      return {s,q,packages,p,d,total,profit,weight,isWeightSale};
+    });
     if(!valid)return showToast('تحقق من الكميات والأسعار','warning');
     // Inventory adjustment per line: return old qty, then deduct new qty.
     newVals.forEach(v=>{const p=Store.get('products').find(x=>String(x.id)===String(v.s.productId));if(p){const restored=money(p.qty)+money(v.s.qty);Store.update('products',p.id,{qty:restored-v.q});}});
@@ -4774,7 +4799,7 @@ if ('serviceWorker' in navigator) {
     const note=document.getElementById('editInvoiceNote')?.value||'';
     const newDate=document.getElementById('editInvoiceDate')?.value||inv.date||'';
     const delta=newTotal-originalTotal;
-    newVals.forEach(v=>Store.update('sales',v.s.id,{qty:v.q,packages:v.s.weight?Math.max(0,v.q/(money(v.s.weight)||1)):v.q,price:v.p,discount:v.d,total:v.total,profit:v.profit,note,date:newDate}));
+    newVals.forEach(v=>Store.update('sales',v.s.id,{qty:v.q,packages:v.packages,price:v.p,discount:v.d,total:v.total,profit:v.profit,note,date:newDate}));
     const paid=Math.min(inv.paid,newTotal),remaining=Math.max(0,newTotal-paid);
     if(inv.saleBatchId){
       newVals.forEach(v=>Store.update('sales',v.s.id,{paid,remaining}));
