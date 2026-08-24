@@ -1865,6 +1865,12 @@ html[data-theme="dark"] .stat-card{
 }
 </style>
 
+<style id="sales-history-delete-v1534">
+.invoice-pro-actions{grid-template-columns:1fr 36px 36px 36px 36px!important;gap:5px!important}
+.invoice-pro-actions .invoice-delete-mini{background:#fff0f0!important;color:#b42318!important}
+.invoice-pro-actions button{min-width:0!important;padding:7px 5px!important}
+@media(max-width:430px){.invoice-pro-actions{grid-template-columns:1fr 34px 34px 34px 34px!important;gap:4px!important}.invoice-pro-actions button{padding:6px 4px!important}}
+</style>
 </head>
 <body>
 <div id="loading-screen">
@@ -1936,7 +1942,7 @@ html[data-theme="dark"] .stat-card{
 </div>
 <script>
 // ==================== معلومات الإصدار ====================
-const APP_VERSION='v1.5.33';
+const APP_VERSION='v1.5.34';
 const APP_NAME = "كنوز الطبيعة";
 const APP_BUILD_DATE = "24 أغسطس 2026 — تطوير لوحة التحكم الاحترافية";
 
@@ -6575,7 +6581,7 @@ if ('serviceWorker' in navigator) {
       <div class="invoice-pro-top"><div><span class="invoice-pro-number">رقم ${esc(inv.invoiceSeq||inv.invoiceNo)}</span><small>${esc(inv.date)} ${esc(inv.time)}</small></div><span class="invoice-pro-status ${inv.remaining>0?'due':'paid'}">${inv.remaining>0?'آجل':'مدفوع'}</span></div>
       <div class="invoice-pro-main"><div class="invoice-pro-icon"><i class="fas fa-file-invoice"></i></div><div class="invoice-pro-info"><strong>${esc(inv.customerName)}</strong><span class="invoice-pro-product-name"><i class="fas fa-box-open"></i> ${esc(inv.lines.slice(0,2).map(s=>s.productName||'صنف').join(' + '))}${lineCount>2?' + '+(lineCount-2)+' أصناف أخرى':''}</span><small>${lineCount} ${lineCount===1?'صنف':'أصناف'} • ${qtyText} كمية</small></div><div class="invoice-pro-total"><small>الإجمالي</small><b>${invoiceTotalText(inv)}</b></div></div>
       <div class="invoice-pro-meta"><span><i class="fas fa-${paymentIcon(inv.paymentMethod)}"></i> ${paymentLabel(inv.paymentMethod)}</span><span><i class="fas fa-hand-holding-dollar"></i> ${fmt(inv.paid)}</span><span class="${inv.remaining>0?'due-text':'profit-text'}">${inv.remaining>0?'متبقي '+fmt(inv.remaining):'ربح '+fmt(inv.profit)}</span></div>
-      <div class="invoice-pro-actions" onclick="event.stopPropagation()"><button onclick="openInvoicePro('${esc(inv.key)}')"><i class="fas fa-eye"></i> الفاتورة</button><button onclick="printInvoicePro('${esc(inv.key)}')"><i class="fas fa-print"></i></button><button onclick="shareInvoicePro('${esc(inv.key)}')"><i class="fab fa-whatsapp"></i></button><button onclick="editInvoicePro('${esc(inv.key)}')"><i class="fas fa-pen"></i></button></div>
+      <div class="invoice-pro-actions" onclick="event.stopPropagation()"><button onclick="openInvoicePro('${esc(inv.key)}')"><i class="fas fa-eye"></i> الفاتورة</button><button onclick="printInvoicePro('${esc(inv.key)}')"><i class="fas fa-print"></i></button><button onclick="shareInvoicePro('${esc(inv.key)}')"><i class="fab fa-whatsapp"></i></button><button onclick="editInvoicePro('${esc(inv.key)}')"><i class="fas fa-pen"></i></button><button class="invoice-delete-mini" onclick="deleteInvoicePro('${esc(inv.key)}')" title="حذف الفاتورة"><i class="fas fa-trash"></i></button></div>
     </article>`;
   }
 
