@@ -1932,6 +1932,58 @@ input[type="date"].sales-date-filter:focus{
 }
 </style>
 
+
+<style id="sales-cards-compact-v1536">
+@media (max-width: 600px){
+  /* الكارت نفسه */
+  .sales-invoice-card,
+  .sale-card,
+  .invoice-card{
+    padding:12px 12px 10px!important;
+    margin-bottom:10px!important;
+    min-height:0!important;
+  }
+
+  /* تقليل المسافات بين رأس الفاتورة والتفاصيل */
+  .sales-invoice-card .invoice-header,
+  .sale-card .invoice-header,
+  .invoice-card .invoice-header{
+    margin-bottom:5px!important;
+    padding-bottom:3px!important;
+  }
+
+  .sales-invoice-card .invoice-details,
+  .sale-card .invoice-details,
+  .invoice-card .invoice-details{
+    gap:4px!important;
+    margin:4px 0!important;
+  }
+
+  .sales-invoice-card .invoice-summary,
+  .sale-card .invoice-summary,
+  .invoice-card .invoice-summary{
+    margin-top:5px!important;
+    padding-top:5px!important;
+  }
+
+  /* شريط أزرار الفاتورة */
+  .sales-invoice-card .invoice-actions,
+  .sale-card .invoice-actions,
+  .invoice-card .invoice-actions{
+    margin-top:7px!important;
+    gap:7px!important;
+  }
+
+  /* منع العناصر الصغيرة من خلق فراغ رأسي كبير */
+  .sales-invoice-card p,
+  .sale-card p,
+  .invoice-card p{
+    margin-top:2px!important;
+    margin-bottom:2px!important;
+  }
+}
+</style>
+
 </head>
 <body>
 <div id="loading-screen">
@@ -2003,7 +2055,7 @@ input[type="date"].sales-date-filter:focus{
 </div>
 <script>
 // ==================== معلومات الإصدار ====================
-const APP_VERSION='v1.5.35';
+const APP_VERSION='v1.5.36';
 const APP_NAME = "كنوز الطبيعة";
 const APP_BUILD_DATE = "24 أغسطس 2026 — تطوير لوحة التحكم الاحترافية";
 
