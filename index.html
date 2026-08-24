@@ -1537,22 +1537,24 @@ html[data-theme="dark"] .stat-card{
 .customers-pro-tools{display:grid;grid-template-columns:1fr auto;gap:8px;margin-bottom:10px}
 .customers-pro-tools select,.customers-pro-tools input{width:100%;min-height:43px}
 .customer-pro-card{
-  position:relative;display:grid;grid-template-columns:auto 1fr auto;gap:11px;align-items:center;
-  padding:13px;border:1px solid var(--border);border-radius:16px;background:var(--bg-card);
-  margin-bottom:8px;box-shadow:0 5px 18px rgba(0,0,0,.035);
+  position:relative;display:grid;grid-template-columns:auto 1fr auto;gap:9px;align-items:center;
+  padding:10px 11px;border:1px solid var(--border);border-radius:15px;background:var(--bg-card);
+  margin-bottom:7px;box-shadow:0 4px 15px rgba(0,0,0,.035);
 }
 .customer-pro-avatar{
-  width:43px;height:43px;border-radius:13px;display:flex;align-items:center;justify-content:center;
+  width:40px;height:40px;border-radius:12px;display:flex;align-items:center;justify-content:center;
   background:linear-gradient(135deg,var(--primary),var(--accent));color:#fff;font-weight:950;
+  box-shadow:0 4px 10px color-mix(in srgb,var(--primary) 15%,transparent);
 }
-.customer-pro-name{font-weight:950;font-size:.84rem}
-.customer-pro-meta{font-size:.66rem;color:var(--text-muted);margin-top:4px;line-height:1.7}
-.customer-pro-money{text-align:left}
-.customer-pro-money strong{display:block;color:var(--primary);font-size:.78rem}
-.customer-pro-money small{display:block;margin-top:4px;font-size:.62rem}
+.customer-pro-name{font-weight:950;font-size:.82rem;line-height:1.4}
+.customer-pro-meta{font-size:.62rem;color:var(--text-muted);margin-top:2px;line-height:1.45}
+.customer-pro-money{text-align:left;white-space:nowrap}
+.customer-pro-money strong{display:block;color:var(--primary);font-size:.72rem}
+.customer-pro-money small{display:block;margin-top:2px;font-size:.59rem}
 .customer-pro-debt{color:#b47700}
-.customer-pro-actions{grid-column:2/-1;display:flex;gap:6px;margin-top:1px}
-.customer-pro-actions .btn{flex:1}
+.customer-pro-actions{grid-column:1/-1;display:grid;grid-template-columns:1.15fr 1fr .7fr;gap:5px;margin-top:1px}
+.customer-pro-actions .btn{min-height:39px;padding:7px 6px;font-size:.68rem}
+.customer-pro-actions .btn-danger{min-width:0}
 .customer-statement-head{
   background:linear-gradient(135deg,var(--primary-dark),var(--primary),var(--accent));
   color:#fff;border-radius:16px;padding:16px;margin-bottom:12px;
@@ -1566,9 +1568,11 @@ html[data-theme="dark"] .stat-card{
 .customer-statement-line small{display:block;color:var(--text-muted);margin-top:3px;font-size:.61rem}
 .customer-statement-line strong{font-size:.75rem}
 @media(max-width:430px){
-  .customer-pro-card{grid-template-columns:auto 1fr}
-  .customer-pro-money{grid-column:2;text-align:right}
+  .customer-pro-card{grid-template-columns:auto 1fr auto}
+  .customer-pro-money{grid-column:auto;text-align:left}
   .customer-pro-actions{grid-column:1/-1}
+  .customer-pro-name{font-size:.78rem}
+  .customer-pro-meta{max-width:190px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 }
 </style>
 
@@ -1643,7 +1647,7 @@ html[data-theme="dark"] .stat-card{
 </div>
 <script>
 // ==================== معلومات الإصدار ====================
-const APP_VERSION='v1.5.19';
+const APP_VERSION='v1.5.20';
 const APP_NAME = "كنوز الطبيعة";
 const APP_BUILD_DATE = "24 أغسطس 2026 — تطوير لوحة التحكم الاحترافية";
 
@@ -4430,14 +4434,18 @@ function filterCustomers(){
     const typeIcon=c.type==='wholesale'?'📦':'🛍️';
     const typeLabel=c.type==='wholesale'?'جملة':'قطاعي';
     const first=String(c.name||'م')[0];
+    const contactParts=[];
+    if(String(c.phone||'').trim()) contactParts.push('📞 '+c.phone);
+    if(String(c.address||'').trim()) contactParts.push('📍 '+c.address);
+    const meta=contactParts.length?contactParts.join(' • '):'بيانات الاتصال غير مضافة';
     return `<div class="customer-pro-card">
       <div class="customer-pro-avatar">${first}</div>
       <div>
-        <div class="customer-pro-name">${c.name} <span style="font-size:.65rem;background:color-mix(in srgb,var(--primary) 10%,transparent);color:var(--primary);padding:3px 7px;border-radius:999px">${typeIcon} ${typeLabel}</span></div>
-        <div class="customer-pro-meta">📞 ${c.phone||'-'}<br>📍 ${c.address||'-'}</div>
+        <div class="customer-pro-name">${c.name} <span style="font-size:.6rem;background:color-mix(in srgb,var(--primary) 10%,transparent);color:var(--primary);padding:2px 6px;border-radius:999px">${typeIcon} ${typeLabel}</span></div>
+        <div class="customer-pro-meta">${meta}</div>
       </div>
       <div class="customer-pro-money">
-        <strong>مبيعات ${fmt(f.totalSpent)}</strong>
+        <strong>${fmt(f.totalSpent)} ج.م</strong>
         <small class="${f.remaining>0?'customer-pro-debt':''}">${f.remaining>0?'متبقي '+fmt(f.remaining):'لا يوجد متبقي'}</small>
       </div>
       <div class="customer-pro-actions">
