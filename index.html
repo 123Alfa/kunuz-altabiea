@@ -1184,6 +1184,65 @@ tr:hover td{background:rgba(15,118,110,.045)}
 }
 </style>
 
+
+<style id="theme-polish-v1514">
+/* ==================== لمسة الألوان الفاخرة v1.5.14 ==================== */
+:root{
+  --theme-gradient:linear-gradient(135deg,var(--primary),var(--primary-dark));
+  --theme-gold-gradient:linear-gradient(135deg,var(--accent),var(--accent-light));
+  --theme-soft:color-mix(in srgb,var(--primary) 9%,white);
+}
+.app-header{
+  background:
+    radial-gradient(circle at 12% 20%,color-mix(in srgb,var(--accent) 13%,transparent),transparent 28%),
+    linear-gradient(135deg,var(--bg-card),color-mix(in srgb,var(--primary) 4%,var(--bg-card)));
+}
+.app-header .logo-icon{
+  background:linear-gradient(135deg,var(--primary) 0%,var(--primary-light) 55%,var(--accent) 100%);
+  box-shadow:0 7px 22px color-mix(in srgb,var(--primary) 28%,transparent);
+}
+.user-avatar{
+  background:linear-gradient(135deg,var(--primary-dark),var(--primary-light));
+  box-shadow:0 5px 18px color-mix(in srgb,var(--primary) 25%,transparent);
+}
+.bottom-nav-item.active{
+  color:var(--primary);
+  background:linear-gradient(135deg,color-mix(in srgb,var(--primary) 14%,transparent),color-mix(in srgb,var(--accent) 10%,transparent));
+}
+.btn-primary{
+  background:linear-gradient(135deg,var(--primary),var(--primary-dark) 65%,var(--accent));
+  box-shadow:0 7px 24px color-mix(in srgb,var(--primary) 28%,transparent);
+}
+.btn-accent{
+  background:var(--theme-gold-gradient);
+  color:#fff;
+}
+.card:hover{
+  box-shadow:0 12px 32px color-mix(in srgb,var(--primary) 13%,transparent);
+}
+.dashboard-v2 .dash-welcome,
+.products-v2 .products-hero{
+  background:
+    radial-gradient(circle at 85% 15%,color-mix(in srgb,var(--accent) 30%,transparent),transparent 28%),
+    linear-gradient(135deg,var(--primary-dark),var(--primary) 55%,var(--accent));
+  box-shadow:0 14px 34px color-mix(in srgb,var(--primary) 22%,transparent);
+}
+.dash-kpi-icon,.products-kpis i,.sales-today-strip i{
+  background:linear-gradient(135deg,color-mix(in srgb,var(--primary) 12%,white),color-mix(in srgb,var(--accent) 12%,white));
+}
+.settings-icon{
+  background:linear-gradient(135deg,color-mix(in srgb,var(--primary) 12%,white),color-mix(in srgb,var(--accent) 13%,white)) !important;
+  color:var(--primary) !important;
+}
+.theme-choice.active{
+  background:linear-gradient(135deg,color-mix(in srgb,var(--primary) 10%,var(--bg-input)),color-mix(in srgb,var(--accent) 8%,var(--bg-input)));
+  border-color:var(--primary);
+}
+.theme-swatch{
+  box-shadow:0 4px 12px color-mix(in srgb,var(--primary) 25%,transparent);
+}
+</style>
+
 <style id="theme-system-v1510">
 /* ==================== نظام المظهر والثيمات v1.5.10 ==================== */
 html[data-theme="dark"]{
@@ -1294,6 +1353,19 @@ html[data-theme="dark"] .receipt-pro-new th{background:var(--primary-dark)!impor
 @media(max-width:420px){.theme-palette{grid-template-columns:repeat(2,1fr)}}
 </style>
 
+
+<style id="theme-modal-polish-v1514">
+.theme-current-preview{
+  border:1px solid color-mix(in srgb,var(--primary) 22%,var(--border));
+  background:linear-gradient(135deg,color-mix(in srgb,var(--primary) 7%,var(--bg-card)),color-mix(in srgb,var(--accent) 7%,var(--bg-card)));
+  box-shadow:0 8px 24px color-mix(in srgb,var(--primary) 8%,transparent);
+}
+.theme-preview-dot{
+  background:linear-gradient(135deg,var(--primary),var(--primary-light),var(--accent)) !important;
+  box-shadow:0 0 0 5px color-mix(in srgb,var(--primary) 10%,transparent),0 5px 14px color-mix(in srgb,var(--primary) 25%,transparent) !important;
+}
+</style>
+
 </head>
 <body>
 <div id="loading-screen">
@@ -1365,7 +1437,7 @@ html[data-theme="dark"] .receipt-pro-new th{background:var(--primary-dark)!impor
 </div>
 <script>
 // ==================== معلومات الإصدار ====================
-const APP_VERSION='v1.5.13';
+const APP_VERSION='v1.5.14';
 const APP_NAME = "كنوز الطبيعة";
 const APP_BUILD_DATE = "24 أغسطس 2026 — تطوير لوحة التحكم الاحترافية";
 
@@ -4442,12 +4514,12 @@ function getLastBackup(){
 
 /* ==================== نظام الثيمات والألوان ==================== */
 const THEME_PRESETS={
-  green:{name:'الأخضر الحالي',primary:'#0f766e',primaryDark:'#115e59',primaryLight:'#14b8a6',accent:'#c99a22',accentLight:'#e3b93f'},
-  blue:{name:'أزرق احترافي',primary:'#2563eb',primaryDark:'#1d4ed8',primaryLight:'#60a5fa',accent:'#f59e0b',accentLight:'#fbbf24'},
-  purple:{name:'بنفسجي أنيق',primary:'#7c3aed',primaryDark:'#5b21b6',primaryLight:'#a78bfa',accent:'#eab308',accentLight:'#facc15'},
-  orange:{name:'برتقالي دافئ',primary:'#ea580c',primaryDark:'#c2410c',primaryLight:'#fb923c',accent:'#0f766e',accentLight:'#14b8a6'},
-  red:{name:'أحمر عصري',primary:'#dc2626',primaryDark:'#991b1b',primaryLight:'#f87171',accent:'#d97706',accentLight:'#fbbf24'},
-  teal:{name:'تركواز هادئ',primary:'#0891b2',primaryDark:'#0e7490',primaryLight:'#22d3ee',accent:'#8b5cf6',accentLight:'#a78bfa'}
+  green:{name:'زمردي فاخر',primary:'#0b6b63',primaryDark:'#064e4a',primaryLight:'#14b8a6',accent:'#d4af37',accentLight:'#f4d35e'},
+  blue:{name:'أزرق ملكي',primary:'#1d4ed8',primaryDark:'#173ea5',primaryLight:'#60a5fa',accent:'#f59e0b',accentLight:'#fbbf24'},
+  purple:{name:'بنفسجي فاخر',primary:'#6d28d9',primaryDark:'#4c1d95',primaryLight:'#a78bfa',accent:'#f59e0b',accentLight:'#fbbf24'},
+  orange:{name:'برتقالي حيوي',primary:'#c2410c',primaryDark:'#9a3412',primaryLight:'#fb923c',accent:'#0f766e',accentLight:'#2dd4bf'},
+  red:{name:'أحمر ملكي',primary:'#b91c1c',primaryDark:'#7f1d1d',primaryLight:'#f87171',accent:'#d4af37',accentLight:'#f4d35e'},
+  teal:{name:'تركواز لامع',primary:'#087f8c',primaryDark:'#065f69',primaryLight:'#22d3ee',accent:'#7c3aed',accentLight:'#a78bfa'}
 };
 function getThemeSettings(){
   const s=getAppSettings();
