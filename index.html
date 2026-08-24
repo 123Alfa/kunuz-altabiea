@@ -1631,6 +1631,33 @@ html[data-theme="dark"] .stat-card{
 }
 </style>
 
+
+<style id="debts-payments-v1524">
+.debts-pro-hero{
+  background:radial-gradient(circle at 88% 15%,color-mix(in srgb,var(--accent) 24%,transparent),transparent 28%),
+  linear-gradient(135deg,var(--primary-dark),var(--primary) 65%,var(--accent));
+  color:#fff;border-radius:18px;padding:18px;margin-bottom:12px;
+}
+.debts-pro-hero h2{margin:3px 0;font-size:1.15rem}.debts-pro-hero small{opacity:.86}
+.debts-pro-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:12px}
+.debts-pro-stat{background:var(--bg-card);border:1px solid var(--border);border-radius:14px;padding:11px;text-align:center}
+.debts-pro-stat strong{display:block;color:var(--primary);font-size:.86rem}.debts-pro-stat span{font-size:.62rem;color:var(--text-muted)}
+.debts-pro-tools{display:grid;grid-template-columns:1fr auto;gap:8px;margin-bottom:10px}
+.debts-pro-tools input,.debts-pro-tools select{min-height:43px;width:100%}
+.debt-balance-line{font-size:.62rem;color:var(--text-muted);margin-top:5px}
+.debt-balance-line b{color:var(--primary)}
+.debt-actions-pro{display:flex;gap:5px;flex-wrap:wrap;justify-content:flex-end;margin-top:8px}
+.debt-actions-pro .btn{min-height:37px;font-size:.64rem}
+.btn-whatsapp{background:#16a34a!important;color:#fff!important;border-color:#16a34a!important}
+.customer-pro-actions,.supplier-pro-actions{grid-template-columns:1.15fr .85fr .9fr .55fr!important}
+@media(max-width:430px){
+  .debts-pro-stats{grid-template-columns:1fr 1fr}.debts-pro-stat:last-child{grid-column:1/-1}
+  .debts-pro-tools{grid-template-columns:1fr}
+  .debt-actions-pro{justify-content:stretch}.debt-actions-pro .btn{flex:1}
+  .customer-pro-actions,.supplier-pro-actions{grid-template-columns:1.1fr .8fr .8fr .55fr!important}
+}
+</style>
+
 </head>
 <body>
 <div id="loading-screen">
@@ -1702,7 +1729,7 @@ html[data-theme="dark"] .stat-card{
 </div>
 <script>
 // ==================== معلومات الإصدار ====================
-const APP_VERSION='v1.5.23';
+const APP_VERSION='v1.5.24';
 const APP_NAME = "كنوز الطبيعة";
 const APP_BUILD_DATE = "24 أغسطس 2026 — تطوير لوحة التحكم الاحترافية";
 
@@ -3627,7 +3654,7 @@ function checkoutPOS(){
     Store.add('sales',{saleBatchId,invoiceNo,invoiceSeq,date:invoiceDate,time:saleTime,productId:p.id,productName:p.name,customerId:customerId||null,customerName,type,qty:qtyKg,packages:packs,weight,unitPrice:price,price:effectivePackPrice,cost:costKg*weight,discount:price?((itemDiscount/gross)*100):0,discountAmount:itemDiscount,taxRate,taxAmount:itemTax,discountedPrice:effectivePackPrice,total:itemTotal,profit,paymentMethod:method,paid,remaining,isWeightSale:isKgProduct(p),sellUnit:isKgProduct(p)?'كجم':String(p.unit||'علبة'),note:note||`بيع من الكاشير — ${saleQuantityLabel(p,packs,weight)}${method==='credit'?' — آجل':''}`});
   });
   if(customerId){const customers=Store.get('customers');const i=customers.findIndex(c=>c.id===customerId);if(i>=0){customers[i].points=(customers[i].points||0)+Math.floor(total/10);customers[i].totalSpent=(customers[i].totalSpent||0)+total;Store.set('customers',customers);}}
-  if(method==='credit'&&remaining>0){Store.add('debts',{saleBatchId,invoiceNo,sourceSaleId:null,date:invoiceDate,person:customerName,type:'لنا',amount:remaining,due:document.getElementById('posDueDate')?.value||'',note:`آجل من الفاتورة ${invoiceNo}${customerId?' — عميل مسجل':''}`,paid:false,source:'sale',saleTotal:total,paidAmount:paid});}
+  if(method==='credit'&&remaining>0){Store.add('debts',{saleBatchId,invoiceNo,sourceSaleId:null,customerId:customerId||null,date:invoiceDate,person:customerName,type:'لنا',amount:remaining,paidAmount:0,paymentHistory:[],debtVersion:2,due:document.getElementById('posDueDate')?.value||'',note:`آجل من الفاتورة ${invoiceNo}${customerId?' — عميل مسجل':''}`,paid:false,source:'sale',saleTotal:total});}
   const invoice={invoiceNo,invoiceSeq,saleBatchId,date:invoiceDate,time:saleTime,customerName,type,method,subtotal,discount:safeDiscount,taxRate,tax, total,paid,remaining,change:method==='cash'?roundPOSMoney(paid-total):0,note};
   localStorage.setItem('bm_lastPOSInvoice',JSON.stringify(invoice));
   const invChip=document.getElementById('posInvoiceNo'); if(invChip)invChip.textContent=String(invoiceSeq);
@@ -4135,7 +4162,7 @@ function addPurchase(){
   const purchaseBatchId='PUR-'+Date.now()+'-'+Math.random().toString(36).slice(2,8);
   Store.add('purchases',{purchaseBatchId,date:document.getElementById('purDate').value||today(),productId:pid,productName:product.name,qty,price,total,paid,remaining,supplierId:supplierId||null,supplierName,note:document.getElementById('purNote').value,paymentMethod:remaining>0?'credit':'cash'});
   if(remaining>0){
-    Store.add('debts',{purchaseBatchId,sourcePurchaseId:null,date:document.getElementById('purDate').value||today(),person:supplierName,type:'علينا',amount:remaining,due:'',note:`آجل من شراء ${product.name}`,paid:false,source:'purchase',purchaseTotal:total,paidAmount:paid});
+    Store.add('debts',{purchaseBatchId,sourcePurchaseId:null,supplierId:supplierId||null,date:document.getElementById('purDate').value||today(),person:supplierName,type:'علينا',amount:remaining,paidAmount:0,paymentHistory:[],debtVersion:2,due:'',note:`آجل من شراء ${product.name}`,paid:false,source:'purchase',purchaseTotal:total});
   }
   showToast(remaining>0?'✅ تم الشراء وتسجيل المتبقي آجل: '+fmt(remaining):'✅ تم الشراء: '+fmt(total));
   renderPurchasesPage(document.getElementById('contentArea'));
@@ -4247,7 +4274,7 @@ function savePurchaseEdit(id){
     Store.get('debts').filter(d=>d.purchaseBatchId===batchId).forEach(d=>Store.delete('debts',d.id));
   }
   if(remaining>0){
-    Store.add('debts',{purchaseBatchId:original.purchaseBatchId||purchaseBatchId,date:document.getElementById('epurDate').value||today(),person:supplierName||'بائع/مورد',type:'علينا',amount:remaining,due:'',note:`آجل من شراء ${product.name}`,paid:false,source:'purchase',purchaseTotal:total,paidAmount:paid});
+    Store.add('debts',{purchaseBatchId:original.purchaseBatchId||purchaseBatchId,supplierId:supplierId||null,date:document.getElementById('epurDate').value||today(),person:supplierName||'بائع/مورد',type:'علينا',amount:remaining,paidAmount:0,paymentHistory:[],debtVersion:2,due:'',note:`آجل من شراء ${product.name}`,paid:false,source:'purchase',purchaseTotal:total});
   }
 
   closeModal();showToast('✅ تم التعديل');renderPurchasesPage(document.getElementById('contentArea'));
@@ -4343,56 +4370,211 @@ function deleteWithdrawal(id){if(!confirm('حذف؟'))return;Store.delete('withd
 
 // ==================== الديون ====================
 function renderDebtsPage(container){
-  container.innerHTML=`<div class="fade-in">
-    <div class="card"><div class="card-title"><i class="fas fa-clipboard-list"></i> تسجيل دين / آجل</div>
+  container.innerHTML=`<div class="fade-in debts-pro">
+    <div class="debts-pro-hero">
+      <small>إدارة الحسابات الآجلة والمدفوعات</small>
+      <h2><i class="fas fa-file-invoice-dollar"></i> سجل الديون</h2>
+      <small>سداد كامل أو جزء من الدين مع إمكانية التراجع عن آخر سداد</small>
+    </div>
+    <div class="debts-pro-stats" id="debtsStats"></div>
+
+    <div class="card">
+      <div class="card-title"><i class="fas fa-clipboard-list"></i> تسجيل دين / آجل</div>
       <div class="form-grid">
-        <div class="form-group"><label><i class="fas fa-calendar" style="margin-left:4px;color:var(--primary)"></i> التاريخ</label><input type="date" id="dDate" value="${today()}"></div>
-        <div class="form-group"><label><i class="fas fa-user" style="margin-left:4px;color:var(--primary)"></i> الشخص</label><input type="text" id="dPerson" placeholder="اسم العميل أو المورد"></div>
-        <div class="form-group"><label><i class="fas fa-exchange-alt" style="margin-left:4px;color:var(--accent)"></i> نوع الدين</label><select id="dType"><option value="علينا">📤 علينا (مدينون لهم)</option><option value="لنا">📥 لنا (مدين لنا)</option></select></div>
-        <div class="form-group"><label><i class="fas fa-money-bill-wave" style="margin-left:4px;color:var(--danger)"></i> المبلغ</label><input type="number" id="dAmount" placeholder="0.00" step="0.01"></div>
-        <div class="form-group"><label><i class="fas fa-calendar-check" style="margin-left:4px;color:var(--text-muted)"></i> تاريخ الاستحقاق</label><input type="date" id="dDue"></div>
-        <div class="form-group"><label><i class="fas fa-sticky-note" style="margin-left:4px;color:var(--text-muted)"></i> ملاحظات</label><input type="text" id="dNote" placeholder="اختياري"></div>
+        <div class="form-group"><label>التاريخ</label><input type="date" id="dDate" value="${today()}"></div>
+        <div class="form-group"><label>الشخص</label><input type="text" id="dPerson" placeholder="اسم العميل أو المورد"></div>
+        <div class="form-group"><label>نوع الدين</label><select id="dType"><option value="علينا">📤 علينا (مدينون لهم)</option><option value="لنا">📥 لنا (مدين لنا)</option></select></div>
+        <div class="form-group"><label>المبلغ</label><input type="number" id="dAmount" placeholder="0.00" step="0.01"></div>
+        <div class="form-group"><label>تاريخ الاستحقاق</label><input type="date" id="dDue"></div>
+        <div class="form-group"><label>ملاحظات</label><input type="text" id="dNote" placeholder="اختياري"></div>
       </div>
       <button class="btn btn-primary btn-block" onclick="addDebt()"><i class="fas fa-check-circle"></i> حفظ الدين</button>
     </div>
-    <div class="card"><div class="card-title"><i class="fas fa-list"></i> سجل الديون</div><div id="debtsList"></div></div>
+
+    <div class="card">
+      <div class="card-title"><i class="fas fa-list"></i> سجل الديون</div>
+      <div class="debts-pro-tools">
+        <input id="debtSearch" type="text" placeholder="🔍 ابحث بالاسم..." oninput="renderDebtsList()">
+        <select id="debtTypeFilter" onchange="renderDebtsList()">
+          <option value="">كل الديون</option><option value="لنا">📥 لنا</option><option value="علينا">📤 علينا</option>
+        </select>
+      </div>
+      <div id="debtsList"></div>
+    </div>
   </div>`;
   renderDebtsList();
 }
+
 function addDebt(){
   const person=document.getElementById('dPerson').value.trim();
   const amount=parseFloat(document.getElementById('dAmount').value)||0;
   if(!person||amount<=0)return showToast('أكمل البيانات','warning');
-  Store.add('debts',{date:document.getElementById('dDate').value||today(),person,type:document.getElementById('dType').value,amount,due:document.getElementById('dDue').value,note:document.getElementById('dNote').value,paid:false});
-  showToast('✅ تم التسجيل');document.getElementById('dPerson').value='';document.getElementById('dAmount').value='';document.getElementById('dDue').value='';document.getElementById('dNote').value='';
+  Store.add('debts',{
+    date:document.getElementById('dDate').value||today(),
+    person,
+    type:document.getElementById('dType').value,
+    amount,
+    paidAmount:0,
+    paymentHistory:[],
+    debtVersion:2,
+    due:document.getElementById('dDue').value,
+    note:document.getElementById('dNote').value,
+    paid:false
+  });
+  showToast('✅ تم التسجيل');
+  ['dPerson','dAmount','dDue','dNote'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
   renderDebtsList();
 }
+
 function renderDebtsList(){
-  const debts=Store.get('debts');
+  const allDebts=Store.get('debts')||[];
+  const search=(document.getElementById('debtSearch')?.value||'').trim().toLowerCase();
+  const type=(document.getElementById('debtTypeFilter')?.value||'');
+  const debts=allDebts.filter(d=>{
+    return (!search||String(d.person||'').toLowerCase().includes(search))&&(!type||d.type===type);
+  });
   const now=new Date().toISOString().split('T')[0];
-  document.getElementById('debtsList').innerHTML=debts.map(d=>{
-    const isOverdue=d.due&&d.due<now&&!d.paid;
-    return `<div class="debt-card ${d.paid?'paid':''}" style="${isOverdue?'border-right-color:var(--warning);background:rgba(245,158,11,0.05)':''}">
-    <div class="debt-info">
-      <div class="debt-person">${d.person} ${d.type==='علينا'?'📤':'📥'}</div>
-      <div class="debt-meta">${d.date} ${d.due?'| استحقاق: '+d.due:''} ${isOverdue?'<span style="color:var(--warning)">⚠️ متأخر</span>':''} ${d.note?'| '+d.note:''}</div>
-    </div>
-    <div style="text-align:left">
-      <div class="debt-amount">${fmt(d.amount)}</div>
-      <div style="margin-top:8px;display:flex;gap:6px">
-        <button class="btn btn-sm ${d.paid?'':'btn-success'}" onclick="toggleDebt('${d.id}',${d.paid})">${d.paid?'↩️':'✅ سداد'}</button>
-        <button class="btn btn-sm btn-danger" onclick="deleteDebt('${d.id}')"><i class="fas fa-trash"></i></button>
+  const active=allDebts.filter(d=>getDebtRemaining(d)>0);
+  const totalOwedToUs=active.filter(d=>d.type==='لنا').reduce((n,d)=>n+getDebtRemaining(d),0);
+  const totalWeOwe=active.filter(d=>d.type==='علينا').reduce((n,d)=>n+getDebtRemaining(d),0);
+  const totalActive=totalOwedToUs+totalWeOwe;
+  const stats=document.getElementById('debtsStats');
+  if(stats)stats.innerHTML=`
+    <div class="debts-pro-stat"><strong>${fmt(totalOwedToUs)}</strong><span>لنا</span></div>
+    <div class="debts-pro-stat"><strong>${fmt(totalWeOwe)}</strong><span>علينا</span></div>
+    <div class="debts-pro-stat"><strong>${fmt(totalActive)}</strong><span>إجمالي المتبقي</span></div>`;
+
+  const list=document.getElementById('debtsList');
+  if(!list)return;
+  list.innerHTML=debts.map(d=>{
+    const remaining=getDebtRemaining(d);
+    const original=Math.max(0,Number(d.amount||0));
+    const paid=Math.max(0,original-remaining);
+    const history=Array.isArray(d.paymentHistory)?d.paymentHistory:[];
+    const isOverdue=d.due&&d.due<now&&remaining>0;
+    const canWhatsApp=!!normalizeWhatsAppPhone(d.phone||'');
+    return `<div class="debt-card ${remaining<=0?'paid':''}" style="${isOverdue?'border-right-color:var(--warning);background:rgba(245,158,11,0.05)':''}">
+      <div class="debt-info">
+        <div class="debt-person">${d.person} ${d.type==='علينا'?'📤':'📥'}</div>
+        <div class="debt-meta">${d.date} ${d.due?'| استحقاق: '+d.due:''} ${isOverdue?'<span style="color:var(--warning)">⚠️ متأخر</span>':''} ${d.note?'| '+d.note:''}</div>
+        <div class="debt-balance-line">الدين ${fmt(original)} • مدفوع ${fmt(paid)} • <b>متبقي ${fmt(remaining)}</b></div>
       </div>
-    </div>
-  </div>`;
-  }).join('')||'<div class="empty-state"><i class="fas fa-clipboard-check"></i><p>لا يوجد ديون مسجلة</p></div>';
+      <div style="text-align:left">
+        <div class="debt-amount">${fmt(remaining)}</div>
+        <div class="debt-actions-pro">
+          ${remaining>0?`<button class="btn btn-sm btn-success" onclick="openDebtPayment('${d.id}')">💳 سداد جزء</button>`:''}
+          ${remaining>0?`<button class="btn btn-sm btn-primary" onclick="payDebtPart('${d.id}',${remaining})">✅ سداد كامل</button>`:''}
+          ${(history.length||d.paid)?`<button class="btn btn-sm btn-outline" onclick="undoLastDebtPayment('${d.id}')">↩️ تراجع عن السداد</button>`:''}
+          <button class="btn btn-sm btn-danger" onclick="deleteDebt('${d.id}')"><i class="fas fa-trash"></i></button>
+        </div>
+      </div>
+    </div>`;
+  }).join('')||'<div class="empty-state"><i class="fas fa-clipboard-check"></i><p>لا يوجد ديون مطابقة</p></div>';
 }
-function toggleDebt(id,currentPaid){
-  Store.update('debts',id,{paid:!currentPaid,paidAt:!currentPaid?new Date().toISOString():null});
-  showToast(currentPaid?'↩️ تم التراجع':'✅ تم السداد');
+
+function openDebtPayment(id){
+  const d=(Store.get('debts')||[]).find(x=>x.id===id);
+  if(!d)return;
+  const remaining=getDebtRemaining(d);
+  if(remaining<=0)return showToast('هذا الدين مسدد بالكامل','info');
+  openModal(`<div class="modal-header"><h2>💳 سداد جزء من الدين</h2><button class="modal-close" onclick="closeModal()">&times;</button></div>
+    <div class="card" style="background:var(--bg-soft);text-align:center">
+      <div style="font-weight:900">${d.person}</div>
+      <div style="margin-top:7px;color:var(--text-muted)">المتبقي الحالي</div>
+      <strong style="display:block;color:var(--primary);font-size:1.35rem;margin-top:3px">${fmt(remaining)}</strong>
+    </div>
+    <div class="form-group"><label>مبلغ السداد الآن</label><input type="number" id="debtPayAmount" min="0.01" max="${remaining}" step="0.01" placeholder="مثال: 500"></div>
+    <button class="btn btn-success btn-block" onclick="confirmDebtPayment('${id}')"><i class="fas fa-check"></i> تسجيل السداد</button>`);
+}
+
+function confirmDebtPayment(id){
+  const amount=parseFloat(document.getElementById('debtPayAmount')?.value)||0;
+  payDebtPart(id,amount);
+}
+
+function payDebtPart(id,amount){
+  const debts=Store.get('debts')||[];
+  const d=debts.find(x=>x.id===id);
+  if(!d)return;
+  const remaining=getDebtRemaining(d);
+  amount=Number(amount)||0;
+  if(amount<=0)return showToast('أدخل مبلغ السداد','warning');
+  if(amount>remaining+0.0001)return showToast('مبلغ السداد أكبر من المتبقي','warning');
+
+  const isLegacySource=(d.debtVersion!==2&&(d.source==='purchase'||d.source==='sale'));
+  const paidBefore=isLegacySource?0:Math.max(0,Number(d.paidAmount||0));
+  const paidAfter=paidBefore+amount;
+  const history=Array.isArray(d.paymentHistory)?d.paymentHistory.slice():[];
+  history.push({amount,date:new Date().toISOString(),type:amount>=remaining?'full':'partial'});
+  Store.update('debts',id,{
+    paidAmount:paidAfter,
+    paid:paidAfter>=Number(d.amount||0)-0.0001,
+    paymentHistory:history,
+    debtVersion:2,
+    lastPaymentAt:new Date().toISOString()
+  });
+  closeModal();
+  showToast(amount>=remaining?'✅ تم سداد الدين بالكامل':'✅ تم تسجيل السداد الجزئي');
   renderDebtsList();
+}
+
+function undoLastDebtPayment(id){
+  const debts=Store.get('debts')||[];
+  const d=debts.find(x=>x.id===id);
+  if(!d)return;
+  const history=Array.isArray(d.paymentHistory)?d.paymentHistory.slice():[];
+  if(history.length){
+    const last=history.pop();
+    const paidAfter=Math.max(0,Number(d.paidAmount||0)-Number(last.amount||0));
+    Store.update('debts',id,{paidAmount:paidAfter,paid:false,paymentHistory:history,lastPaymentAt:history.length?history[history.length-1].date:null,debtVersion:2});
+    showToast('↩️ تم التراجع عن آخر سداد');
+  }else if(d.paid){
+    Store.update('debts',id,{paid:false,paidAmount:0,paymentHistory:[],lastPaymentAt:null,debtVersion:2});
+    showToast('↩️ تم التراجع عن السداد');
+  }else{
+    showToast('لا يوجد سداد يمكن التراجع عنه','info');
+  }
+  renderDebtsList();
+}
+
+function toggleDebt(id,currentPaid){
+  if(currentPaid)return undoLastDebtPayment(id);
+  const d=(Store.get('debts')||[]).find(x=>x.id===id);
+  if(d)openDebtPayment(id);
 }
 function deleteDebt(id){if(!confirm('حذف الدين؟'))return;Store.delete('debts',id);showToast('🗑️ تم الحذف');renderDebtsList();}
+
+
+function getDebtRemaining(d){
+  if(!d)return 0;
+  if(d.paid)return 0;
+  const amount=Math.max(0,Number(d.amount||0));
+  const isLegacySource=(d.debtVersion!==2&&(d.source==='purchase'||d.source==='sale'));
+  const paidAmount=isLegacySource?0:Math.max(0,Number(d.paidAmount||0));
+  return Math.max(0,amount-paidAmount);
+}
+function normalizeWhatsAppPhone(phone){
+  let p=String(phone||'').replace(/[^\d+]/g,'');
+  if(p.startsWith('+20'))p=p.slice(1);
+  else if(p.startsWith('0020'))p=p.slice(2);
+  else if(p.startsWith('0'))p='20'+p.slice(1);
+  return p;
+}
+function openWhatsApp(phone,message){
+  const p=normalizeWhatsAppPhone(phone);
+  if(!p || p.length<11)return showToast('أضف رقم هاتف صحيح أولاً','warning');
+  const url='https://wa.me/'+p+'?text='+encodeURIComponent(message||'');
+  window.open(url,'_blank');
+}
+function debtShareMessage(name,remaining,type){
+  const relation=type==='علينا'?'المبلغ المستحق لنا':'المبلغ المتبقي عليك';
+  return `السلام عليكم ${name}،
+
+ده ملخص حسابك لدى كنوز الطبيعة:
+${relation}: ${fmt(remaining)}
+
+لو محتاج تفاصيل الحساب أنا تحت أمرك.`;
+}
 
 // ==================== العملاء (ميزة جديدة) ====================
 function getCustomerFinancials(customer){
@@ -4402,30 +4584,47 @@ function getCustomerFinancials(customer){
   const customerName=String(customer.name||'').trim().toLowerCase();
 
   const lines=sales.filter(s=>{
-    if(s.customerId && String(s.customerId)===customerId) return true;
-    return !s.customerId && String(s.customerName||'').trim().toLowerCase()===customerName;
+    if(s.customerId && String(s.customerId)===customerId)return true;
+    return !s.customerId&&String(s.customerName||'').trim().toLowerCase()===customerName;
   });
   const batches={};
   lines.forEach(s=>{
     const key=s.saleBatchId||s.invoiceNo||s.id;
-    if(!batches[key]) batches[key]={total:0,paid:0,remaining:0,date:s.date,invoiceNo:s.invoiceNo||key};
+    if(!batches[key])batches[key]={total:0,paid:0,remaining:0,date:s.date,invoiceNo:s.invoiceNo||key,saleBatchId:s.saleBatchId};
     batches[key].total=Math.max(batches[key].total,Number(s.total||0));
     batches[key].paid=Math.max(batches[key].paid,Number(s.paid||0));
     batches[key].remaining=Math.max(batches[key].remaining,Number(s.remaining||0));
     batches[key].date=s.date||batches[key].date;
     batches[key].invoiceNo=s.invoiceNo||batches[key].invoiceNo;
+    batches[key].saleBatchId=s.saleBatchId||batches[key].saleBatchId;
   });
   const invoices=Object.values(batches).sort((a,b)=>String(b.date||'').localeCompare(String(a.date||'')));
+
+  const linkedDebts=debts.filter(d=>d.type==='لنا'&&d.source==='sale'&&(
+    String(d.person||'').trim().toLowerCase()===customerName||
+    (d.customerId&&String(d.customerId)===customerId)
+  ));
+  const debtByKey={};
+  linkedDebts.forEach(d=>{
+    const key=String(d.saleBatchId||d.invoiceNo||'');
+    if(key)debtByKey[key]=d;
+  });
+
+  let invoiceOutstanding=0;
+  invoices.forEach(inv=>{
+    const key=String(inv.saleBatchId||inv.invoiceNo||'');
+    const debt=debtByKey[key];
+    invoiceOutstanding+=debt?getDebtRemaining(debt):Math.max(0,Number(inv.remaining||0));
+  });
+
+  const manualDebtRemaining=debts.filter(d=>d.type==='لنا'&&d.source!=='sale'&&(
+    String(d.person||'').trim().toLowerCase()===customerName||
+    (d.customerId&&String(d.customerId)===customerId)
+  )).reduce((n,d)=>n+getDebtRemaining(d),0);
+
   const totalSpent=invoices.reduce((n,x)=>n+Number(x.total||0),0);
-  const paid=invoices.reduce((n,x)=>n+Number(x.paid||0),0);
-  const salesRemaining=invoices.reduce((n,x)=>n+Number(x.remaining||0),0);
-  const debtRemaining=debts
-    .filter(d=>d.type==='لنا' && d.source==='sale' && (
-      String(d.person||'').trim().toLowerCase()===customerName
-      || (d.customerId && String(d.customerId)===customerId)
-    ))
-    .reduce((n,d)=>n+Number(d.amount||0),0);
-  return {lines,invoices,totalSpent,paid,remaining:Math.max(salesRemaining,debtRemaining)};
+  const paid=Math.max(0,totalSpent-invoiceOutstanding);
+  return {lines,invoices,totalSpent,paid,remaining:invoiceOutstanding+manualDebtRemaining,linkedDebts};
 }
 
 function renderCustomersPage(container){
@@ -4505,6 +4704,7 @@ function filterCustomers(){
       </div>
       <div class="customer-pro-actions">
         <button class="btn btn-sm btn-primary" onclick="openCustomerStatement('${c.id}')"><i class="fas fa-file-invoice-dollar"></i> كشف الحساب</button>
+        ${c.phone?`<button class="btn btn-sm btn-whatsapp" onclick="openWhatsApp('${c.phone}',debtShareMessage('${String(c.name).replace(/'/g,"\\'")}',${f.remaining},'لنا'))"><i class="fab fa-whatsapp"></i> واتس</button>`:''}
         <button class="btn btn-sm btn-outline" onclick="editCustomer('${c.id}')"><i class="fas fa-edit"></i> تعديل</button>
         <button class="btn btn-sm btn-danger" onclick="deleteCustomer('${c.id}')"><i class="fas fa-trash"></i></button>
       </div>
@@ -4527,6 +4727,7 @@ function openCustomerStatement(id){
       <div style="font-size:.7rem;opacity:.8">كشف حساب العميل</div>
       <h2 style="margin:4px 0">${customer.name}</h2>
       <div style="font-size:.68rem;opacity:.82">${customer.phone||'بدون هاتف'} ${customer.type==='wholesale'?'• عميل جملة':'• عميل قطاعي'}</div>
+      ${customer.phone?`<button class="btn btn-sm btn-whatsapp" style="margin-top:10px" onclick="openWhatsApp('${customer.phone}',debtShareMessage('${String(customer.name).replace(/'/g,"\\'")}',${f.remaining},'لنا'))"><i class="fab fa-whatsapp"></i> إرسال الحساب على واتساب</button>`:''}
       <div class="customer-statement-stats">
         <div class="customer-statement-stat"><strong>${fmt(f.totalSpent)}</strong><span>إجمالي المبيعات</span></div>
         <div class="customer-statement-stat"><strong>${fmt(f.paid)}</strong><span>إجمالي المدفوع</span></div>
@@ -4572,54 +4773,53 @@ function deleteCustomer(id){if(!confirm('حذف العميل؟'))return;Store.de
 // ==================== الموردين (ميزة جديدة) ====================
 function getSupplierFinancials(supplier){
   const purchases=Store.get('purchases')||[];
+  const debts=Store.get('debts')||[];
   const supplierId=String(supplier.id);
   const supplierName=String(supplier.name||'').trim().toLowerCase();
+
   const rows=purchases.filter(p=>{
-    if(p.supplierId && String(p.supplierId)===supplierId) return true;
-    return !p.supplierId && String(p.supplier||p.supplierName||'').trim().toLowerCase()===supplierName;
+    if(p.supplierId&&String(p.supplierId)===supplierId)return true;
+    return !p.supplierId&&String(p.supplier||p.supplierName||'').trim().toLowerCase()===supplierName;
   });
   const batches={};
   rows.forEach(p=>{
     const key=p.purchaseBatchId||p.invoiceNo||p.id;
-    if(!batches[key]) batches[key]={total:0,paid:0,remaining:0,date:p.date,invoiceNo:p.invoiceNo||key};
+    if(!batches[key])batches[key]={total:0,paid:0,remaining:0,date:p.date,invoiceNo:p.invoiceNo||key,purchaseBatchId:p.purchaseBatchId};
     batches[key].total=Math.max(batches[key].total,Number(p.total||p.cost||p.amount||0));
     batches[key].paid=Math.max(batches[key].paid,Number(p.paid||0));
     batches[key].remaining=Math.max(batches[key].remaining,Number(p.remaining||0));
     batches[key].date=p.date||batches[key].date;
     batches[key].invoiceNo=p.invoiceNo||batches[key].invoiceNo;
+    batches[key].purchaseBatchId=p.purchaseBatchId||batches[key].purchaseBatchId;
   });
   const invoices=Object.values(batches).sort((a,b)=>String(b.date||'').localeCompare(String(a.date||'')));
-  const totalPurchased=invoices.reduce((n,x)=>n+Number(x.total||0),0);
-  const purchasePaid=invoices.reduce((n,x)=>n+Number(x.paid||0),0);
-  const purchaseRemaining=invoices.reduce((n,x)=>n+Number(x.remaining||0),0);
 
-  // الديون المسجلة يدويًا أو الناتجة عن شراء آجل للمورد.
-  // «علينا» تعني أن المبلغ مستحق للمورد، لذلك يجب أن يظهر في كشف المورد
-  // حتى لو لم تكن الفاتورة مرتبطة بسجل المورد مباشرة.
-  const debts=Store.get('debts')||[];
-  const supplierDebts=debts.filter(d=>{
-    if(d.paid || d.type!=='علينا') return false;
-    const person=String(d.person||'').trim().toLowerCase();
-    return person===supplierName ||
-      (d.supplierId && String(d.supplierId)===supplierId);
-  });
-  const debtRemaining=supplierDebts.reduce((n,d)=>n+Number(d.amount||0),0);
-
-  // لا نكرر نفس الدين الناتج عن فاتورة شراء إذا كان المتبقي موجودًا بالفعل
-  // في سجل المشتريات، إلا إذا لم يكن هناك سجل شراء مطابق.
-  const purchaseDebtIds=new Set(
-    invoices.filter(x=>Number(x.remaining||0)>0)
-      .map(x=>String(x.purchaseBatchId||x.invoiceNo||''))
-  );
-  const manualDebtRemaining=supplierDebts.reduce((n,d)=>{
+  const linkedDebts=debts.filter(d=>d.type==='علينا'&&d.source==='purchase'&&(
+    String(d.person||'').trim().toLowerCase()===supplierName||
+    (d.supplierId&&String(d.supplierId)===supplierId)
+  ));
+  const debtByKey={};
+  linkedDebts.forEach(d=>{
     const key=String(d.purchaseBatchId||d.invoiceNo||'');
-    if(key && purchaseDebtIds.has(key)) return n;
-    return n+Number(d.amount||0);
-  },0);
+    if(key)debtByKey[key]=d;
+  });
 
-  const remaining=Math.max(purchaseRemaining,0)+manualDebtRemaining;
-  const paid=Math.max(0,purchasePaid);
-  return {rows,invoices,totalPurchased,paid,remaining,supplierDebts};
+  let invoiceOutstanding=0;
+  invoices.forEach(inv=>{
+    const key=String(inv.purchaseBatchId||inv.invoiceNo||'');
+    const debt=debtByKey[key];
+    invoiceOutstanding+=debt?getDebtRemaining(debt):Math.max(0,Number(inv.remaining||0));
+  });
+
+  const manualDebts=debts.filter(d=>d.type==='علينا'&&d.source!=='purchase'&&(
+    String(d.person||'').trim().toLowerCase()===supplierName||
+    (d.supplierId&&String(d.supplierId)===supplierId)
+  ));
+  const manualDebtRemaining=manualDebts.reduce((n,d)=>n+getDebtRemaining(d),0);
+  const totalPurchased=invoices.reduce((n,x)=>n+Number(x.total||0),0);
+  const paid=Math.max(0,totalPurchased-invoiceOutstanding);
+  const remaining=invoiceOutstanding+manualDebtRemaining;
+  return {rows,invoices,totalPurchased,paid,remaining,linkedDebts,manualDebts};
 }
 
 function renderSuppliersPage(container){
@@ -4700,6 +4900,7 @@ function filterSuppliers(){
       </div>
       <div class="supplier-pro-actions">
         <button class="btn btn-sm btn-primary" onclick="openSupplierStatement('${s.id}')"><i class="fas fa-file-invoice-dollar"></i> كشف الحساب</button>
+        ${s.phone?`<button class="btn btn-sm btn-whatsapp" onclick="openWhatsApp('${s.phone}',debtShareMessage('${String(s.name).replace(/'/g,"\\'")}',${f.remaining},'علينا'))"><i class="fab fa-whatsapp"></i> واتس</button>`:''}
         <button class="btn btn-sm btn-outline" onclick="editSupplier('${s.id}')"><i class="fas fa-edit"></i> تعديل</button>
         <button class="btn btn-sm btn-danger" onclick="deleteSupplier('${s.id}')"><i class="fas fa-trash"></i></button>
       </div>
@@ -4711,54 +4912,62 @@ function openSupplierStatement(id){
   const supplier=(Store.get('suppliers')||[]).find(s=>s.id===id);
   if(!supplier)return;
   const f=getSupplierFinancials(supplier);
-  const invoiceRows=f.invoices.slice(0,30).map(inv=>`
+
+  const invoiceRows=f.invoices.slice(0,50).map(inv=>{
+    const key=String(inv.purchaseBatchId||inv.invoiceNo||'');
+    const debt=(f.linkedDebts||[]).find(d=>String(d.purchaseBatchId||d.invoiceNo||'')===key);
+    const remaining=debt?getDebtRemaining(debt):Math.max(0,Number(inv.remaining||0));
+    return `<div class="supplier-statement-line">
+      <div><strong>فاتورة شراء ${inv.invoiceNo||inv.purchaseBatchId||'-'}</strong><small>${formatInvoiceDate(inv.date)} • ${remaining>0?'آجل':'مدفوعة'}</small></div>
+      <div style="text-align:left"><strong>${fmt(inv.total)}</strong><small>${remaining>0?'متبقي '+fmt(remaining):'مدفوع بالكامل'}</small></div>
+    </div>`;
+  }).join('');
+
+  const manualRows=(f.manualDebts||[]).map(d=>`
     <div class="supplier-statement-line">
-      <div><strong>فاتورة شراء ${inv.invoiceNo||'-'}</strong><small>${formatInvoiceDate(inv.date)}</small></div>
-      <div style="text-align:left"><strong>${fmt(inv.total)}</strong><small>${inv.remaining>0?'متبقي '+fmt(inv.remaining):'مدفوع '+fmt(inv.paid)}</small></div>
+      <div><strong>دين إضافي للمورد</strong><small>${formatInvoiceDate(d.date)}${d.note?' • '+d.note:''}</small></div>
+      <div style="text-align:left"><strong>${fmt(d.amount)}</strong><small>متبقي ${fmt(getDebtRemaining(d))}</small></div>
     </div>`).join('');
-  const debtRows=(f.supplierDebts||[]).slice(0,30).map(d=>`
-    <div class="supplier-statement-line">
-      <div><strong>دين مستحق للمورد</strong><small>${formatInvoiceDate(d.date)}${d.note?' • '+d.note:''}</small></div>
-      <div style="text-align:left"><strong>${fmt(d.amount)}</strong><small>متبقي</small></div>
-    </div>`).join('');
-  const rows=invoiceRows+debtRows;
 
   openModal(`
     <div class="supplier-statement-head">
-      <div style="font-size:.7rem;opacity:.8">كشف حساب المورد</div>
+      <div style="font-size:.7rem;opacity:.8">كشف حساب المورد — حركة مجمعة ومفصلة</div>
       <h2 style="margin:4px 0">${supplier.name}</h2>
       <div style="font-size:.68rem;opacity:.82">${supplier.phone||'بدون هاتف'}</div>
       <div class="supplier-statement-stats">
         <div class="supplier-statement-stat"><strong>${fmt(f.totalPurchased)}</strong><span>إجمالي المشتريات</span></div>
         <div class="supplier-statement-stat"><strong>${fmt(f.paid)}</strong><span>إجمالي المدفوع</span></div>
-        <div class="supplier-statement-stat"><strong>${fmt(f.remaining)}</strong><span>المتبقي</span></div>
+        <div class="supplier-statement-stat"><strong>${fmt(f.remaining)}</strong><span>المتبقي عليك</span></div>
       </div>
+      ${supplier.phone?`<button class="btn btn-sm btn-whatsapp" style="margin-top:10px" onclick="openWhatsApp('${supplier.phone}',debtShareMessage('${String(supplier.name).replace(/'/g,"\\\\'")}',${f.remaining},'علينا'))"><i class="fab fa-whatsapp"></i> إرسال الحساب على واتساب</button>`:''}
     </div>
     <div class="card">
-      <div class="card-title"><i class="fas fa-clock-rotate-left"></i> حركة فواتير الشراء</div>
-      ${rows||'<div class="empty-state"><i class="fas fa-receipt"></i><p>لا توجد مشتريات مسجلة لهذا المورد</p></div>'}
+      <div class="card-title"><i class="fas fa-layer-group"></i> حساب المورد مجمع — ${fmt(f.remaining)} متبقي</div>
+      ${invoiceRows||'<div class="empty-state"><i class="fas fa-receipt"></i><p>لا توجد فواتير شراء مسجلة</p></div>'}
+      ${manualRows}
     </div>
     <button class="btn btn-outline btn-block" onclick="closeModal()"><i class="fas fa-check"></i> تم</button>
   `);
 }
 
+
 function addSupplier(){
-  const name=document.getElementById('supName').value.trim();
+  const name=document.getElementById('sName').value.trim();
   if(!name)return showToast('أدخل اسم المورد','warning');
   Store.add('suppliers',{
     name,
-    phone:document.getElementById('supPhone').value,
-    address:document.getElementById('supAddress').value,
-    note:document.getElementById('supNote').value
+    phone:document.getElementById('sPhone').value,
+    address:document.getElementById('sAddress').value,
+    note:document.getElementById('sNote').value
   });
   showToast('✅ تم إضافة المورد');
-  document.getElementById('supName').value='';
-  document.getElementById('supPhone').value='';
-  document.getElementById('supAddress').value='';
-  document.getElementById('supNote').value='';
+  document.getElementById('sName').value='';
+  document.getElementById('sPhone').value='';
+  document.getElementById('sAddress').value='';
+  document.getElementById('sNote').value='';
   renderSuppliersPage(document.getElementById('contentArea'));
 }
-function filterSuppliers(){
+function legacyFilterSuppliers(){
   const search=document.getElementById('supplierSearch')?.value.toLowerCase()||'';
   const suppliers=(window.allSuppliers||[]).filter(s=>s.name.toLowerCase().includes(search)||(s.phone||'').includes(search));
   document.getElementById('suppliersList').innerHTML=suppliers.map(s=>`
