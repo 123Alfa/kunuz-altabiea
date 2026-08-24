@@ -1871,6 +1871,67 @@ html[data-theme="dark"] .stat-card{
 .invoice-pro-actions button{min-width:0!important;padding:7px 5px!important}
 @media(max-width:430px){.invoice-pro-actions{grid-template-columns:1fr 34px 34px 34px 34px!important;gap:4px!important}.invoice-pro-actions button{padding:6px 4px!important}}
 </style>
+
+<style id="sales-date-filter-v1535">
+/* خانة تاريخ المبيعات: واضحة عند عدم الاختيار، ومتناسقة مع بقية الفلاتر */
+.sales-date-filter,
+input[type="date"].sales-date-filter{
+  min-height:48px!important;
+  border:1px solid var(--border,#e5e7eb)!important;
+  border-radius:16px!important;
+  background:#fff!important;
+  color:var(--text,#263238)!important;
+  font-weight:800!important;
+  font-size:.78rem!important;
+  padding:0 13px!important;
+  box-sizing:border-box!important;
+}
+.sales-date-filter:invalid,
+input[type="date"].sales-date-filter:invalid{
+  color:#98a2ad!important;
+}
+.sales-date-filter:focus,
+input[type="date"].sales-date-filter:focus{
+  outline:none!important;
+  border-color:var(--primary,#087f73)!important;
+  box-shadow:0 0 0 3px rgba(8,127,115,.08)!important;
+}
+</style>
+
+
+<style id="sales-date-wrap-v1535">
+.sales-date-wrap{
+  min-height:48px!important;
+  border:1px solid var(--border,#e5e7eb)!important;
+  border-radius:16px!important;
+  background:#fff!important;
+  color:#98a2ad!important;
+  font-weight:800!important;
+  font-size:.78rem!important;
+  padding:0 13px!important;
+  box-sizing:border-box!important;
+  display:flex!important;
+  align-items:center!important;
+  gap:7px!important;
+  cursor:pointer!important;
+  position:relative!important;
+}
+.sales-date-wrap i{color:var(--primary,#087f73)!important}
+.sales-date-wrap input{
+  position:absolute!important;
+  inset:0!important;
+  width:100%!important;
+  height:100%!important;
+  opacity:0!important;
+  cursor:pointer!important;
+}
+.sales-date-wrap:has(input:not([value=""])){color:var(--text,#263238)!important}
+.sales-date-wrap:focus-within{
+  border-color:var(--primary,#087f73)!important;
+  box-shadow:0 0 0 3px rgba(8,127,115,.08)!important;
+}
+</style>
+
 </head>
 <body>
 <div id="loading-screen">
@@ -1942,7 +2003,7 @@ html[data-theme="dark"] .stat-card{
 </div>
 <script>
 // ==================== معلومات الإصدار ====================
-const APP_VERSION='v1.5.34';
+const APP_VERSION='v1.5.35';
 const APP_NAME = "كنوز الطبيعة";
 const APP_BUILD_DATE = "24 أغسطس 2026 — تطوير لوحة التحكم الاحترافية";
 
@@ -3099,7 +3160,7 @@ function renderSalesPage(container){
     <section class="sales-history-card sales-history-modern sales-history-collapsed" id="salesHistorySection" style="margin-top:18px">
       <div class="sales-history-head sales-history-toggle-head" onclick="toggleSalesHistory()"><div class="sales-history-title"><div class="sales-history-icon"><i class="fas fa-receipt"></i></div><div><h3>سجل المبيعات</h3><small>اضغط لعرض الفواتير والمبالغ والأرباح</small></div></div><div class="sales-history-head-actions"><button type="button" class="sales-refresh-btn" onclick="event.stopPropagation();renderSalesTable()" title="تحديث السجل"><i class="fas fa-rotate"></i></button><button type="button" class="sales-history-open-btn" id="salesHistoryOpenBtn" title="فتح سجل المبيعات"><i class="fas fa-chevron-down"></i></button></div></div>
       <div class="sales-history-body" id="salesHistoryBody"><div class="sales-stats-grid"><div class="sales-stat"><span class="sales-stat-icon"><i class="fas fa-file-invoice"></i></span><div><small>العمليات</small><strong id="salesStatCount">0</strong></div></div><div class="sales-stat"><span class="sales-stat-icon"><i class="fas fa-money-bill-wave"></i></span><div><small>المبيعات</small><strong id="salesStatTotal">0 ج.م</strong></div></div><div class="sales-stat"><span class="sales-stat-icon"><i class="fas fa-hand-holding-dollar"></i></span><div><small>المدفوع</small><strong id="salesStatPaid">0 ج.م</strong></div></div><div class="sales-stat"><span class="sales-stat-icon"><i class="fas fa-chart-line"></i></span><div><small>الربح</small><strong id="salesStatProfit">0 ج.م</strong></div></div></div>
-        <div class="sales-filters"><div class="sales-search-wrap"><i class="fas fa-search"></i><input type="text" id="saleSearch" placeholder="ابحث عن صنف أو عميل أو ملاحظة..." oninput="renderSalesTable()"><button type="button" onclick="document.getElementById('saleSearch').value='';renderSalesTable()"><i class="fas fa-xmark"></i></button></div><div class="sales-quick-filters"><button type="button" class="active" data-range="all" onclick="setSalesRange('all',this)">الكل</button><button type="button" data-range="today" onclick="setSalesRange('today',this)">اليوم</button><button type="button" data-range="week" onclick="setSalesRange('week',this)">هذا الأسبوع</button><button type="button" data-range="month" onclick="setSalesRange('month',this)">هذا الشهر</button></div><div class="sales-filter-row"><select id="saleTypeFilter" onchange="renderSalesTable()"><option value="">كل أنواع البيع</option><option value="retail">🛍️ قطاعي</option><option value="wholesale">📦 جملة</option></select><select id="salePaymentFilter" onchange="renderSalesTable()"><option value="">كل طرق السداد</option><option value="cash">💵 نقدي</option><option value="credit">⏳ آجل</option><option value="transfer">📱 تحويل</option><option value="card">💳 بطاقة</option></select><input type="date" id="saleFilterDate" onchange="setSalesRange('custom')"><button type="button" class="sales-clear-filters" onclick="clearSalesFilters()"><i class="fas fa-filter-circle-xmark"></i> مسح الفلاتر</button></div></div><div id="salesTable" class="sales-cards-list"></div></div>
+        <div class="sales-filters"><div class="sales-search-wrap"><i class="fas fa-search"></i><input type="text" id="saleSearch" placeholder="ابحث عن صنف أو عميل أو ملاحظة..." oninput="renderSalesTable()"><button type="button" onclick="document.getElementById('saleSearch').value='';renderSalesTable()"><i class="fas fa-xmark"></i></button></div><div class="sales-quick-filters"><button type="button" class="active" data-range="all" onclick="setSalesRange('all',this)">الكل</button><button type="button" data-range="today" onclick="setSalesRange('today',this)">اليوم</button><button type="button" data-range="week" onclick="setSalesRange('week',this)">هذا الأسبوع</button><button type="button" data-range="month" onclick="setSalesRange('month',this)">هذا الشهر</button></div><div class="sales-filter-row"><select id="saleTypeFilter" onchange="renderSalesTable()"><option value="">كل أنواع البيع</option><option value="retail">🛍️ قطاعي</option><option value="wholesale">📦 جملة</option></select><select id="salePaymentFilter" onchange="renderSalesTable()"><option value="">كل طرق السداد</option><option value="cash">💵 نقدي</option><option value="credit">⏳ آجل</option><option value="transfer">📱 تحويل</option><option value="card">💳 بطاقة</option></select><label class="sales-date-wrap" title="اختيار تاريخ محدد"><i class="fas fa-calendar-days"></i><span>اختر التاريخ</span><input type="date" id="saleFilterDate" onchange="setSalesRange('custom')" class="sales-date-filter" aria-label="اختيار تاريخ محدد"></label><button type="button" class="sales-clear-filters" onclick="clearSalesFilters()"><i class="fas fa-filter-circle-xmark"></i> مسح الفلاتر</button></div></div><div id="salesTable" class="sales-cards-list"></div></div>
     </section>
   </div>`;
   renderSaleProductGrid();
@@ -4011,7 +4072,7 @@ function editSale(id){
 
   openModal(`<div class="modal-header"><h2><i class="fas fa-edit" style="color:var(--primary);margin-left:8px"></i> تعديل عملية البيع</h2><button class="modal-close" onclick="closeModal()">&times;</button></div>
     <div class="form-grid">
-      <div class="form-group"><label>التاريخ</label><input type="date" id="esDate" value="${sale.date}"></div>
+      <div class="form-group"><label>التاريخ</label><input type="date" id="esDate" value="${sale.date}" class="sales-date-filter"></div>
       <div class="form-group"><label>الصنف</label><select id="esProduct" onchange="updateEditSalePrice()">${productOpts}</select></div>
       <div class="form-group"><label>نوع البيع</label><select id="esType" onchange="updateEditSalePrice()"><option value="retail" ${sale.type==='retail'?'selected':''}>🛍️ قطاعي</option><option value="wholesale" ${sale.type==='wholesale'?'selected':''}>📦 جملة</option></select></div>
       <div class="form-group"><label>العميل</label><select id="esCustomer" onchange="toggleEditCustomCustomer()"><option value="">عميل عادي — اكتب الاسم اختياريًا</option>${customerOpts}</select><input type="text" id="esCustomCustomer" placeholder="اسم العميل العادي (اختياري)" style="display:none" maxlength="80"></div>
@@ -4305,7 +4366,7 @@ function renderPurchasesPage(container){
     <section class="purchase-box-v6">
       <div class="purchase-box-title-v6"><span><i class="fas fa-plus-circle"></i> تسجيل عملية شراء</span><small>أدخل البيانات وسيتم حساب الإجمالي تلقائيًا</small></div>
       <div class="purchase-form-v6">
-        <label>التاريخ<input type="date" id="purDate" value="${today()}"></label>
+        <label>التاريخ<input type="date" id="purDate" value="${today()}" class="sales-date-filter"></label>
         <label>الصنف<select id="purProduct">${opts}</select></label>
         <label>الكمية<input type="number" id="purQty" placeholder="0" step="0.001" min="0" oninput="updatePurchasePreview()"></label>
         <label>سعر الشراء للوحدة<input type="number" id="purPrice" placeholder="0.00" step="0.01" min="0" oninput="updatePurchasePreview()"></label>
@@ -4329,8 +4390,8 @@ function renderPurchasesPage(container){
       <div class="purchase-box-title-v6"><span><i class="fas fa-clock-rotate-left"></i> سجل المشتريات</span><small>بحث وفلترة وتعديل وحذف العمليات</small></div>
       <div class="purchase-filters-v6">
         <div class="purchase-search-v6"><i class="fas fa-search"></i><input id="purchaseSearch" placeholder="ابحث بالصنف أو المورد أو الملاحظات" oninput="renderPurchasesTable()"></div>
-        <input type="date" id="purchaseFrom" onchange="renderPurchasesTable()" aria-label="من تاريخ">
-        <input type="date" id="purchaseTo" onchange="renderPurchasesTable()" aria-label="إلى تاريخ">
+        <input type="date" id="purchaseFrom" onchange="renderPurchasesTable()" aria-label="من تاريخ" class="sales-date-filter">
+        <input type="date" id="purchaseTo" onchange="renderPurchasesTable()" aria-label="إلى تاريخ" class="sales-date-filter">
         <select id="purchaseSupplierFilter" onchange="renderPurchasesTable()"><option value="">كل الموردين</option>${supplierOpts}</select>
         <button type="button" class="purchase-reset-v6" onclick="clearPurchaseFilters()"><i class="fas fa-rotate-left"></i> مسح الفلاتر</button>
       </div>
@@ -4414,7 +4475,7 @@ function editPurchase(id){
 
   openModal(`<div class="modal-header"><h2><i class="fas fa-edit" style="color:var(--primary);margin-left:8px"></i> تعديل عملية الشراء</h2><button class="modal-close" onclick="closeModal()">&times;</button></div>
     <div class="form-grid">
-      <div class="form-group"><label>التاريخ</label><input type="date" id="epurDate" value="${purchase.date}"></div>
+      <div class="form-group"><label>التاريخ</label><input type="date" id="epurDate" value="${purchase.date}" class="sales-date-filter"></div>
       <div class="form-group"><label>الصنف</label><select id="epurProduct">${productOpts}</select></div>
       <div class="form-group"><label>الكمية</label><input type="number" id="epurQty" value="${purchase.qty}" step="0.01"></div>
       <div class="form-group"><label>سعر الشراء (للوحدة)</label><input type="number" id="epurPrice" value="${purchase.price}" step="0.01"></div>
@@ -4525,7 +4586,7 @@ function renderExpensesPage(container){
   container.innerHTML=`<div class="fade-in">
     <div class="card"><div class="card-title"><i class="fas fa-file-invoice-dollar"></i> تسجيل مصروف</div>
       <div class="form-grid">
-        <div class="form-group"><label><i class="fas fa-calendar" style="margin-left:4px;color:var(--primary)"></i> التاريخ</label><input type="date" id="eDate" value="${today()}"></div>
+        <div class="form-group"><label><i class="fas fa-calendar" style="margin-left:4px;color:var(--primary)"></i> التاريخ</label><input type="date" id="eDate" value="${today()}" class="sales-date-filter"></div>
         <div class="form-group"><label><i class="fas fa-tag" style="margin-left:4px;color:var(--accent)"></i> نوع المصروف</label><select id="eType"><option>إيجار</option><option>كهرباء</option><option>مياه</option><option>رواتب</option><option>نقل</option><option>صيانة</option><option>تسويق</option><option>ضرائب</option><option>أخرى</option></select></div>
         <div class="form-group"><label><i class="fas fa-money-bill-wave" style="margin-left:4px;color:var(--danger)"></i> المبلغ</label><input type="number" id="eAmount" placeholder="0.00" step="0.01"></div>
         <div class="form-group"><label><i class="fas fa-sticky-note" style="margin-left:4px;color:var(--text-muted)"></i> ملاحظات</label><input type="text" id="eNote" placeholder="اختياري"></div>
@@ -4556,7 +4617,7 @@ function renderWithdrawalsPage(container){
   container.innerHTML=`<div class="fade-in">
     <div class="card"><div class="card-title"><i class="fas fa-hand-holding-usd"></i> سحب شخصي</div>
       <div class="form-grid">
-        <div class="form-group"><label><i class="fas fa-calendar" style="margin-left:4px;color:var(--primary)"></i> التاريخ</label><input type="date" id="wDate" value="${today()}"></div>
+        <div class="form-group"><label><i class="fas fa-calendar" style="margin-left:4px;color:var(--primary)"></i> التاريخ</label><input type="date" id="wDate" value="${today()}" class="sales-date-filter"></div>
         <div class="form-group"><label><i class="fas fa-money-bill-wave" style="margin-left:4px;color:var(--warning)"></i> المبلغ</label><input type="number" id="wAmount" placeholder="0.00" step="0.01"></div>
         <div class="form-group"><label><i class="fas fa-sticky-note" style="margin-left:4px;color:var(--text-muted)"></i> السبب</label><input type="text" id="wNote" placeholder="اختياري"></div>
       </div>
@@ -4594,11 +4655,11 @@ function renderDebtsPage(container){
     <div class="card">
       <div class="card-title"><i class="fas fa-clipboard-list"></i> تسجيل دين / آجل</div>
       <div class="form-grid">
-        <div class="form-group"><label>التاريخ</label><input type="date" id="dDate" value="${today()}"></div>
+        <div class="form-group"><label>التاريخ</label><input type="date" id="dDate" value="${today()}" class="sales-date-filter"></div>
         <div class="form-group"><label>الشخص</label><input type="text" id="dPerson" placeholder="اسم العميل أو المورد"></div>
         <div class="form-group"><label>نوع الدين</label><select id="dType"><option value="علينا">📤 علينا (مدينون لهم)</option><option value="لنا">📥 لنا (مدين لنا)</option></select></div>
         <div class="form-group"><label>المبلغ</label><input type="number" id="dAmount" placeholder="0.00" step="0.01"></div>
-        <div class="form-group"><label>تاريخ الاستحقاق</label><input type="date" id="dDue"></div>
+        <div class="form-group"><label>تاريخ الاستحقاق</label><input type="date" id="dDue" class="sales-date-filter"></div>
         <div class="form-group"><label>ملاحظات</label><input type="text" id="dNote" placeholder="اختياري"></div>
       </div>
       <button class="btn btn-primary btn-block" onclick="addDebt()"><i class="fas fa-check-circle"></i> حفظ الدين</button>
@@ -5612,8 +5673,8 @@ function renderOffersPage(container){
         <div class="form-group"><label>السعر الأصلي</label><input type="number" id="oBasePrice" placeholder="اختر الصنف أو اكتب السعر" min="0" step="0.01" oninput="updateOfferPreview()"></div>
         <div class="form-group"><label>نسبة الخصم المحسوبة</label><input type="text" id="oDiscountPercent" value="0%" readonly></div>
         <div class="form-group"><label>السعر بعد الخصم</label><input type="text" id="oOfferPrice" value="-" readonly></div>
-        <div class="form-group"><label>تاريخ البداية</label><input type="date" id="oStart" value="${today()}"></div>
-        <div class="form-group"><label>تاريخ النهاية</label><input type="date" id="oEnd"></div>
+        <div class="form-group"><label>تاريخ البداية</label><input type="date" id="oStart" value="${today()}" class="sales-date-filter"></div>
+        <div class="form-group"><label>تاريخ النهاية</label><input type="date" id="oEnd" class="sales-date-filter"></div>
         <div class="form-group"><label>ملاحظات</label><input type="text" id="oNote" placeholder="اختياري"></div>
       </div>
       <div class="offer-preview-box" id="offerPreviewBox">أدخل قيمة الخصم واختر الصنف لعرض النسبة والسعر بعد الخصم.</div>
@@ -6633,7 +6694,7 @@ if ('serviceWorker' in navigator) {
   window.editInvoicePro=function(key){
     const inv=findInvoice(key);if(!inv)return;
     const rows=inv.lines.map((s,i)=>`<div class="edit-invoice-line"><div class="edit-invoice-name"><strong>${esc(s.productName||'صنف')}</strong><small>المباع: ${money(s.qty)} ${s.weight?'كجم':''}</small></div><input data-edit-line="${i}" data-field="qty" type="number" min="0" step="0.001" value="${money(s.qty)}" placeholder="الكمية"><input data-edit-line="${i}" data-field="price" type="number" min="0" step="0.01" value="${money(s.price)}" placeholder="السعر"><input data-edit-line="${i}" data-field="discount" type="number" min="0" max="100" step="0.1" value="${money(s.discount)}" placeholder="خصم %"></div>`).join('');
-    openModal(`<div class="modal-header"><h2><i class="fas fa-pen" style="color:var(--primary);margin-left:8px"></i> تعديل الفاتورة ${esc(inv.invoiceNo)}</h2><button class="modal-close" onclick="closeModal()">&times;</button></div><div class="form-group" style="margin-bottom:12px"><label><i class="fas fa-calendar-day" style="color:var(--primary);margin-left:6px"></i> تاريخ الفاتورة</label><input id="editInvoiceDate" type="date" value="${esc(inv.date||'')}"></div><div class="edit-invoice-head"><span>الصنف</span><span>الكمية</span><span>السعر</span><span>الخصم %</span></div><div id="editInvoiceLines">${rows}</div><div class="form-group" style="margin-top:10px"><label>ملاحظات</label><input id="editInvoiceNote" value="${esc(inv.note)}"></div><button class="btn btn-primary btn-block" onclick="saveInvoiceEditPro('${esc(inv.key)}')"><i class="fas fa-save"></i> حفظ تعديل الفاتورة</button>`);
+    openModal(`<div class="modal-header"><h2><i class="fas fa-pen" style="color:var(--primary);margin-left:8px"></i> تعديل الفاتورة ${esc(inv.invoiceNo)}</h2><button class="modal-close" onclick="closeModal()">&times;</button></div><div class="form-group" style="margin-bottom:12px"><label><i class="fas fa-calendar-day" style="color:var(--primary);margin-left:6px"></i> تاريخ الفاتورة</label><input id="editInvoiceDate" type="date" value="${esc(inv.date||'')}" class="sales-date-filter"></div><div class="edit-invoice-head"><span>الصنف</span><span>الكمية</span><span>السعر</span><span>الخصم %</span></div><div id="editInvoiceLines">${rows}</div><div class="form-group" style="margin-top:10px"><label>ملاحظات</label><input id="editInvoiceNote" value="${esc(inv.note)}"></div><button class="btn btn-primary btn-block" onclick="saveInvoiceEditPro('${esc(inv.key)}')"><i class="fas fa-save"></i> حفظ تعديل الفاتورة</button>`);
   };
 
   window.saveInvoiceEditPro=function(key){
