@@ -1702,7 +1702,7 @@ html[data-theme="dark"] .stat-card{
 </div>
 <script>
 // ==================== معلومات الإصدار ====================
-const APP_VERSION='v1.5.22';
+const APP_VERSION='v1.5.23';
 const APP_NAME = "كنوز الطبيعة";
 const APP_BUILD_DATE = "24 أغسطس 2026 — تطوير لوحة التحكم الاحترافية";
 
@@ -4590,16 +4590,45 @@ function getSupplierFinancials(supplier){
   });
   const invoices=Object.values(batches).sort((a,b)=>String(b.date||'').localeCompare(String(a.date||'')));
   const totalPurchased=invoices.reduce((n,x)=>n+Number(x.total||0),0);
-  const paid=invoices.reduce((n,x)=>n+Number(x.paid||0),0);
-  const remaining=invoices.reduce((n,x)=>n+Number(x.remaining||0),0);
-  return {rows,invoices,totalPurchased,paid,remaining};
+  const purchasePaid=invoices.reduce((n,x)=>n+Number(x.paid||0),0);
+  const purchaseRemaining=invoices.reduce((n,x)=>n+Number(x.remaining||0),0);
+
+  // الديون المسجلة يدويًا أو الناتجة عن شراء آجل للمورد.
+  // «علينا» تعني أن المبلغ مستحق للمورد، لذلك يجب أن يظهر في كشف المورد
+  // حتى لو لم تكن الفاتورة مرتبطة بسجل المورد مباشرة.
+  const debts=Store.get('debts')||[];
+  const supplierDebts=debts.filter(d=>{
+    if(d.paid || d.type!=='علينا') return false;
+    const person=String(d.person||'').trim().toLowerCase();
+    return person===supplierName ||
+      (d.supplierId && String(d.supplierId)===supplierId);
+  });
+  const debtRemaining=supplierDebts.reduce((n,d)=>n+Number(d.amount||0),0);
+
+  // لا نكرر نفس الدين الناتج عن فاتورة شراء إذا كان المتبقي موجودًا بالفعل
+  // في سجل المشتريات، إلا إذا لم يكن هناك سجل شراء مطابق.
+  const purchaseDebtIds=new Set(
+    invoices.filter(x=>Number(x.remaining||0)>0)
+      .map(x=>String(x.purchaseBatchId||x.invoiceNo||''))
+  );
+  const manualDebtRemaining=supplierDebts.reduce((n,d)=>{
+    const key=String(d.purchaseBatchId||d.invoiceNo||'');
+    if(key && purchaseDebtIds.has(key)) return n;
+    return n+Number(d.amount||0);
+  },0);
+
+  const remaining=Math.max(purchaseRemaining,0)+manualDebtRemaining;
+  const paid=Math.max(0,purchasePaid);
+  return {rows,invoices,totalPurchased,paid,remaining,supplierDebts};
 }
 
 function renderSuppliersPage(container){
   const suppliers=Store.get('suppliers')||[];
   window.allSuppliers=suppliers;
-  const totalPurchased=suppliers.reduce((n,s)=>n+Number(s.totalPurchased||0),0);
-  const totalRemaining=suppliers.reduce((n,s)=>n+getSupplierFinancials(s).remaining,0);
+  const supplierFinancials=suppliers.map(s=>getSupplierFinancials(s));
+  const totalPurchased=supplierFinancials.reduce((n,f)=>n+Number(f.totalPurchased||0),0);
+  const totalPaid=supplierFinancials.reduce((n,f)=>n+Number(f.paid||0),0);
+  const totalRemaining=supplierFinancials.reduce((n,f)=>n+Number(f.remaining||0),0);
 
   container.innerHTML=`<div class="fade-in suppliers-pro">
     <div class="suppliers-pro-hero">
@@ -4611,7 +4640,7 @@ function renderSuppliersPage(container){
     <div class="suppliers-pro-stats">
       <div class="suppliers-pro-stat"><i class="fas fa-truck-field"></i><strong>${suppliers.length}</strong><span>إجمالي الموردين</span></div>
       <div class="suppliers-pro-stat"><i class="fas fa-cart-shopping"></i><strong>${fmt(totalPurchased)}</strong><span>إجمالي المشتريات</span></div>
-      <div class="suppliers-pro-stat"><i class="fas fa-money-bill-transfer"></i><strong>${fmt(suppliers.reduce((n,s)=>n+getSupplierFinancials(s).paid,0))}</strong><span>إجمالي المدفوع</span></div>
+      <div class="suppliers-pro-stat"><i class="fas fa-money-bill-transfer"></i><strong>${fmt(totalPaid)}</strong><span>إجمالي المدفوع</span></div>
       <div class="suppliers-pro-stat"><i class="fas fa-file-invoice-dollar"></i><strong>${fmt(totalRemaining)}</strong><span>إجمالي المتبقي</span></div>
     </div>
 
@@ -4682,11 +4711,17 @@ function openSupplierStatement(id){
   const supplier=(Store.get('suppliers')||[]).find(s=>s.id===id);
   if(!supplier)return;
   const f=getSupplierFinancials(supplier);
-  const rows=f.invoices.slice(0,30).map(inv=>`
+  const invoiceRows=f.invoices.slice(0,30).map(inv=>`
     <div class="supplier-statement-line">
       <div><strong>فاتورة شراء ${inv.invoiceNo||'-'}</strong><small>${formatInvoiceDate(inv.date)}</small></div>
       <div style="text-align:left"><strong>${fmt(inv.total)}</strong><small>${inv.remaining>0?'متبقي '+fmt(inv.remaining):'مدفوع '+fmt(inv.paid)}</small></div>
     </div>`).join('');
+  const debtRows=(f.supplierDebts||[]).slice(0,30).map(d=>`
+    <div class="supplier-statement-line">
+      <div><strong>دين مستحق للمورد</strong><small>${formatInvoiceDate(d.date)}${d.note?' • '+d.note:''}</small></div>
+      <div style="text-align:left"><strong>${fmt(d.amount)}</strong><small>متبقي</small></div>
+    </div>`).join('');
+  const rows=invoiceRows+debtRows;
 
   openModal(`
     <div class="supplier-statement-head">
