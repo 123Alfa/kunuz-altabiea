@@ -631,7 +631,7 @@ tr:hover td{background:rgba(15,118,110,.045)}
 .settings-edit-profile-btn{font-weight:900}
 @media(max-width:480px){.settings-section-title{font-size:.86rem}.settings-section-sub{font-size:.61rem}.settings-profile-pro{padding:12px}.settings-account-meta>div{padding:9px}}
 
-/* ===== الخزنة - v1.5.41 ===== */
+/* ===== الخزنة - v1.5.44 ===== */
 .cashbox-page{max-width:980px!important}.cashbox-hero{display:flex;align-items:center;justify-content:space-between;gap:14px;padding:20px;margin-bottom:14px;border-radius:22px;color:#fff;background:linear-gradient(135deg,#075e54,#0f8f78 55%,#d6a928);box-shadow:0 12px 28px rgba(8,121,109,.18)}.cashbox-hero h2{margin:4px 0;font-size:1.35rem}.cashbox-hero p{margin:0;color:rgba(255,255,255,.82);font-size:.72rem}.cashbox-hero-icon{width:58px;height:58px;border-radius:18px;background:rgba(255,255,255,.14);display:grid;place-items:center;font-size:1.55rem}.cashbox-balance{background:#fff;border:1px solid #dce9e4;border-radius:20px;padding:18px;margin-bottom:12px;text-align:center;box-shadow:0 8px 22px rgba(20,70,55,.05)}.cashbox-balance small{display:block;color:#7b888c;font-weight:800}.cashbox-balance strong{display:block;margin:5px 0;color:#08796d;font-size:1.85rem;font-weight:950}.cashbox-balance span{font-size:.66rem;color:#96a1a4}.cashbox-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:12px}.cashbox-stat{background:#fff;border:1px solid #e1ebe7;border-radius:17px;padding:13px;display:flex;align-items:center;gap:10px;box-shadow:0 5px 16px rgba(20,70,55,.04)}.cashbox-stat>i{width:40px;height:40px;border-radius:12px;display:grid;place-items:center}.cashbox-stat small{display:block;color:#7b878c;font-size:.62rem;font-weight:800}.cashbox-stat b{display:block;margin-top:3px;font-size:.95rem}.cashbox-stat.in>i{background:#eaf8f1;color:#08796d}.cashbox-stat.in b{color:#08796d}.cashbox-stat.out>i{background:#fff0f0;color:#c53b45}.cashbox-stat.out b{color:#c53b45}.cashbox-stat.net>i{background:#eef3ff;color:#4b5fc5}.cashbox-stat.net b{color:#4b5fc5}.cashbox-filter{background:#fff;border:1px solid #e1ebe7;border-radius:18px;padding:12px;margin-bottom:12px}.cashbox-filter-row{display:grid;grid-template-columns:1fr 1fr auto;gap:8px;align-items:end}.cashbox-filter label{display:block;color:#77848a;font-size:.64rem;font-weight:800;margin-bottom:5px}.cashbox-filter input{width:100%;box-sizing:border-box;padding:10px;border:1px solid #dce7e3;border-radius:11px;font:inherit;font-weight:800;background:#fbfdfc}.cashbox-filter button{height:42px;border:0;border-radius:11px;padding:0 15px;background:#eef7f3;color:#08796d;font:inherit;font-weight:900;cursor:pointer}.cashbox-section{background:#fff;border:1px solid #e1ebe7;border-radius:20px;overflow:hidden;box-shadow:0 7px 20px rgba(20,70,55,.04)}.cashbox-section-head{display:flex;justify-content:space-between;align-items:center;padding:14px 16px;border-bottom:1px solid #edf2ef}.cashbox-section-head h3{margin:0;font-size:.95rem}.cashbox-section-head small{color:#8b979b;font-size:.62rem}.cashbox-movement{display:flex;align-items:center;gap:10px;padding:12px 14px;border-bottom:1px solid #f0f3f2}.cashbox-movement:last-child{border-bottom:0}.cashbox-movement-icon{width:38px;height:38px;border-radius:11px;display:grid;place-items:center;flex:0 0 auto}.cashbox-movement.in .cashbox-movement-icon{background:#eaf8f1;color:#08796d}.cashbox-movement.out .cashbox-movement-icon{background:#fff0f0;color:#c53b45}.cashbox-movement-main{min-width:0;flex:1}.cashbox-movement-main strong{display:block;font-size:.72rem}.cashbox-movement-main small{display:block;color:#8b969a;font-size:.57rem;margin-top:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.cashbox-movement-amount{font-weight:950;font-size:.72rem;white-space:nowrap}.cashbox-movement.in .cashbox-movement-amount{color:#08796d}.cashbox-movement.out .cashbox-movement-amount{color:#c53b45}.cashbox-empty{text-align:center;padding:28px;color:#9aa5a8;font-size:.72rem}@media(max-width:600px){.cashbox-stats{grid-template-columns:1fr}.cashbox-filter-row{grid-template-columns:1fr 1fr}.cashbox-filter-row button{grid-column:1/-1}.cashbox-hero{padding:16px}.cashbox-hero h2{font-size:1.15rem}.cashbox-balance strong{font-size:1.6rem}}
 </style>
 <link rel="manifest" href="manifest.json">
@@ -2070,7 +2070,7 @@ input[type="date"].sales-date-filter:focus{
   .invoice-detail-actions button{width:100%!important;min-width:0!important;max-width:none!important;padding:8px 3px!important;font-size:.60rem!important;min-height:36px!important}
   .invoice-detail-actions button:last-child{ }
 }
-/* v1.5.43 — إصلاح صفحة الخزنة وترتيب أزرار تفاصيل الفاتورة */
+/* v1.5.44 — الخزنة: تسجيل الدفعة المقدمة من الفواتير الآجلة */
 @media(max-width:600px){
   .invoice-detail-actions{grid-template-columns:repeat(6,minmax(0,1fr))!important}
   .invoice-detail-actions button{grid-column:span 2!important}
@@ -2151,7 +2151,7 @@ input[type="date"].sales-date-filter:focus{
 </div>
 <script>
 // ==================== معلومات الإصدار ====================
-const APP_VERSION='v1.5.43';
+const APP_VERSION='v1.5.44';
 const APP_NAME = "كنوز الطبيعة";
 const APP_BUILD_DATE = "24 أغسطس 2026 — تطوير لوحة التحكم الاحترافية";
 
@@ -4758,9 +4758,22 @@ function getCashboxData(){
     saleGroups.forEach(lines=>{
       const first=lines[0]||{};
       const method=String(first.paymentMethod||'cash').toLowerCase();
+      const total=lines.reduce((n,x)=>n+cashboxNum(x&&x.total),0);
+      // الخزنة تسجل النقد الذي دخل فعليًا، وليس إجمالي الفاتورة.
+      // في الفاتورة الآجلة قد يوجد دفع جزئي وقت البيع؛ هذا المبلغ يدخل الخزنة فورًا.
+      // التحويل والبطاقة لا يدخلان الخزنة النقدية.
+      let cashReceived=0;
       if(method==='cash'||method==='نقدي'||method==='نقد'){
-        const total=lines.reduce((n,x)=>n+cashboxNum(x&&x.total),0);
-        if(total>0) movements.push({date:String(first.date||'').slice(0,10),time:String(first.time||'').slice(0,5),kind:'in',amount:total,title:'بيع نقدي',detail:'فاتورة '+String(first.invoiceSeq||first.invoiceNo||first.id||'')+' • '+String(first.customerName||'عميل عادي'),icon:'fa-cart-shopping',ref:first.saleBatchId||first.id});
+        // الفواتير القديمة قد لا تحتوي على paid؛ عندها نعتبر الفاتورة النقدية مدفوعة بالكامل.
+        const hasPaid=Object.prototype.hasOwnProperty.call(first,'paid');
+        cashReceived=hasPaid?Math.min(total,Math.max(0,Number(first.paid)||0)):total;
+      }else if(method==='credit'||method==='آجل'){
+        cashReceived=Math.min(total,Math.max(0,Number(first.paid)||0));
+      }
+      if(cashReceived>0){
+        const title=(method==='credit'||method==='آجل')?'بيع آجل — تحصيل مقدم':'بيع نقدي';
+        const detail='فاتورة '+String(first.invoiceSeq||first.invoiceNo||first.id||'')+' • '+String(first.customerName||'عميل عادي')+(method==='credit'||method==='آجل'?' • إجمالي '+fmt(total):'');
+        movements.push({date:String(first.date||'').slice(0,10),time:String(first.time||'').slice(0,5),kind:'in',amount:cashReceived,title,detail,icon:'fa-cart-shopping',ref:first.saleBatchId||first.id});
       }
     });
     cashboxList('purchases').forEach(p=>{
