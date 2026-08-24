@@ -1684,6 +1684,43 @@ html[data-theme="dark"] .stat-card{
 @media(max-width:430px){.debt-group-account-actions{grid-template-columns:1fr 1fr}.debt-group-account-actions .btn{font-size:.61rem}}
 </style>
 
+
+<style id="debts-compact-v1529">
+.compact-debt-card{padding:10px 11px!important;margin-bottom:8px!important}
+.compact-debt-info{min-height:0!important}
+.compact-debt-info .debt-person{font-size:.78rem!important}
+.compact-debt-info .debt-group-summary{margin-top:2px!important}
+.compact-debt-info .debt-group-summary strong{font-size:.92rem!important}
+.compact-debt-info .debt-group-summary span{font-size:.58rem!important}
+.compact-actions{margin:7px 0 4px!important;gap:5px!important}
+.compact-actions .btn{min-height:34px!important;font-size:.59rem!important;padding:5px 7px!important}
+.compact-undo{min-height:31px!important;font-size:.58rem!important;margin:2px 0 4px!important;width:auto!important}
+.debt-detail-toggle-row{display:flex;align-items:center;justify-content:space-between;gap:6px;margin-top:3px}
+.debt-detail-toggle{border:0;background:transparent;color:var(--primary);font-weight:900;font-size:.61rem;padding:4px 2px;cursor:pointer}
+.debt-whatsapp-mini{width:31px;height:31px;border:0;border-radius:10px;background:#e8f7ef;color:#159447;font-size:.9rem;cursor:pointer}
+.collapsible-debt-details{display:none!important;margin-top:5px!important;padding-top:6px!important}
+.collapsible-debt-details.is-open{display:block!important}
+.compact-detail{padding:6px 7px!important;margin-bottom:5px!important}
+.compact-detail .debt-group-detail-main{margin-bottom:0!important}
+.compact-detail .debt-group-detail-main>div:first-child{font-size:.62rem!important}
+.compact-detail .debt-meta{font-size:.54rem!important}
+.compact-detail .debt-balance-line{font-size:.55rem!important;margin-top:2px}
+.compact-debt-card.paid .debt-detail-toggle-row{margin-top:5px}
+.compact-debt-card.paid .debt-group-summary strong{color:var(--success,#159447)!important}
+</style>
+
+
+<style id="debt-delete-mini-v1530">
+.debt-detail-toggle-row{display:flex;align-items:center;justify-content:space-between;gap:6px}
+.debt-mini-actions{display:flex;align-items:center;gap:5px}
+.debt-delete-mini{
+  width:30px;height:30px;border:1px solid #f1c7c7;border-radius:9px;
+  background:#fff5f5;color:#dc3545;font-size:.68rem;cursor:pointer;
+  display:inline-flex;align-items:center;justify-content:center;
+}
+.debt-delete-mini:active{transform:scale(.96)}
+</style>
+
 </head>
 <body>
 <div id="loading-screen">
@@ -1755,7 +1792,7 @@ html[data-theme="dark"] .stat-card{
 </div>
 <script>
 // ==================== معلومات الإصدار ====================
-const APP_VERSION='v1.5.28';
+const APP_VERSION='v1.5.30';
 const APP_NAME = "كنوز الطبيعة";
 const APP_BUILD_DATE = "24 أغسطس 2026 — تطوير لوحة التحكم الاحترافية";
 
@@ -4486,19 +4523,20 @@ function renderDebtsList(){
     return br-ar;
   });
 
-  list.innerHTML=groupArray.map(g=>{
+  list.innerHTML=groupArray.map((g,gi)=>{
     const groupRemaining=g.items.reduce((n,d)=>n+getDebtRemaining(d),0);
     const groupOriginal=g.items.reduce((n,d)=>n+Number(d.amount||0),0);
     const groupPaid=g.items.reduce((n,d)=>n+(Number(d.amount||0)-getDebtRemaining(d)),0);
     const phone=(g.items.find(d=>d.phone)?.phone)||'';
+    const detailKey=encodeURIComponent((g.type||'')+'|'+(g.person||'')).replace(/%/g,'_');
 
-    // آخر دفعة جماعية قابلة للتراجع.
+    // التراجع لا يظهر للحساب المسدد بالكامل.
     const groupPayments=[];
     g.items.forEach(d=>(Array.isArray(d.paymentHistory)?d.paymentHistory:[]).forEach(h=>{
       if(h.groupId)groupPayments.push({groupId:h.groupId,date:h.date});
     }));
     groupPayments.sort((a,b)=>String(b.date||'').localeCompare(String(a.date||'')));
-    const canUndoGroup=groupPayments.length>0;
+    const canUndoGroup=groupRemaining>0 && groupPayments.length>0;
     const latestGroupId=canUndoGroup?groupPayments[0].groupId:'';
 
     const details=g.items.map(d=>{
@@ -4507,43 +4545,72 @@ function renderDebtsList(){
       const paid=Math.max(0,original-remaining);
       const now=new Date().toISOString().split('T')[0];
       const isOverdue=d.due&&d.due<now&&remaining>0;
-      return `<div class="debt-group-detail" style="${isOverdue?'border-right-color:var(--warning)':''}">
+      return `<div class="debt-group-detail compact-detail" style="${isOverdue?'border-right-color:var(--warning)':''}">
         <div class="debt-group-detail-main">
           <div><strong>${d.invoiceNo?`فاتورة ${d.invoiceNo}`:(d.note||'حركة دين')}</strong></div>
-          <div class="debt-meta">${d.date||''} ${d.due?'| استحقاق: '+d.due:''} ${isOverdue?'<span style="color:var(--warning)">⚠️ متأخر</span>':''}</div>
+          <div class="debt-meta">${d.date||''} ${isOverdue?'<span style="color:var(--warning)">⚠️ متأخر</span>':''}</div>
           <div class="debt-balance-line">الدين ${fmt(original)} • مدفوع ${fmt(paid)} • <b>متبقي ${fmt(remaining)}</b></div>
         </div>
       </div>`;
     }).join('');
 
-    return `<div class="debt-card debt-group-card ${groupRemaining<=0?'paid':''}">
-      <div class="debt-info">
+    return `<div class="debt-card debt-group-card compact-debt-card ${groupRemaining<=0?'paid':''}">
+      <div class="debt-info compact-debt-info">
         <div class="debt-person">${g.person} ${g.type==='علينا'?'📤':'📥'}</div>
         <div class="debt-group-summary">
-          <strong>${fmt(groupRemaining)}</strong>
-          <span>${g.items.length} حركة/فاتورة • الدين الأصلي ${fmt(groupOriginal)} • المدفوع ${fmt(groupPaid)}</span>
+          <strong>${groupRemaining>0?fmt(groupRemaining):'0 ج.م'}</strong>
+          <span>${groupRemaining>0?`${g.items.length} ${g.items.length===1?'فاتورة':'فواتير'} • مدفوع ${fmt(groupPaid)}`:'مسدد بالكامل ✓'}</span>
         </div>
       </div>
 
       ${groupRemaining>0?`
-      <div class="debt-group-account-actions">
-        <button class="btn btn-sm btn-success" onclick="openGroupDebtPayment('${encodeURIComponent(g.person)}','${g.type}')">💳 سداد جزء من الحساب</button>
-        <button class="btn btn-sm btn-primary" onclick="payGroupDebtFull('${encodeURIComponent(g.person)}','${g.type}')">✅ سداد الحساب كامل</button>
+      <div class="debt-group-account-actions compact-actions">
+        <button class="btn btn-sm btn-success" onclick="openGroupDebtPayment('${encodeURIComponent(g.person)}','${g.type}')">💳 سداد جزء</button>
+        <button class="btn btn-sm btn-primary" onclick="payGroupDebtFull('${encodeURIComponent(g.person)}','${g.type}')">✅ سداد كامل</button>
       </div>`:''}
 
       ${canUndoGroup?`
-      <button class="btn btn-sm btn-outline debt-group-undo" onclick="undoGroupDebtPayment('${encodeURIComponent(g.person)}','${g.type}','${latestGroupId}')">↩️ تراجع عن آخر سداد</button>`:''}
+      <button class="btn btn-sm btn-outline debt-group-undo compact-undo" onclick="undoGroupDebtPayment('${encodeURIComponent(g.person)}','${g.type}','${latestGroupId}')">↩️ تراجع عن آخر سداد</button>`:''}
 
-      <div class="debt-group-details">
-        <div class="debt-group-details-title">تفاصيل الحساب — بدون فصل المبلغ الإجمالي</div>
-        ${details}
+      <div class="debt-detail-toggle-row">
+        <button id="debtDetailsBtn-${detailKey}" class="debt-detail-toggle" onclick="toggleDebtGroupDetails('${detailKey}')">تفاصيل الحساب ↓</button>
+        ${phone?`<button class="debt-whatsapp-mini" title="إرسال الحساب على واتساب" onclick="openWhatsApp('${phone}',debtShareMessage('${String(g.person).replace(/'/g,"\\\\'")}',${groupRemaining},'${g.type}'))"><i class="fab fa-whatsapp"></i></button>`:''}
+      <button class="debt-delete-mini" title="حذف الحساب" onclick="deleteDebtGroup('${encodeURIComponent(g.person)}','${g.type}')"><i class="fas fa-trash"></i></button>
       </div>
 
-      ${phone?`<button class="btn btn-sm btn-whatsapp" style="margin-top:8px" onclick="openWhatsApp('${phone}',debtShareMessage('${String(g.person).replace(/'/g,"\\\\'")}',${groupRemaining},'${g.type}'))"><i class="fab fa-whatsapp"></i> إرسال الحساب على واتساب</button>`:''}
+      <div id="debtDetails-${detailKey}" class="debt-group-details collapsible-debt-details">
+        ${details}
+      </div>
     </div>`;
   }).join('')||'<div class="empty-state"><i class="fas fa-clipboard-check"></i><p>لا يوجد ديون مطابقة</p></div>';
 }
 
+
+function toggleDebtGroupDetails(key){
+  const el=document.getElementById('debtDetails-'+key);
+  const btn=document.getElementById('debtDetailsBtn-'+key);
+  if(!el||!btn)return;
+  const open=el.classList.toggle('is-open');
+  btn.innerHTML=open?'إخفاء التفاصيل ↑':'تفاصيل الحساب ↓';
+}
+
+
+function deleteDebtGroup(encodedPerson,type){
+  const person=decodeURIComponent(encodedPerson);
+  const debts=Store.get('debts')||[];
+  const matches=debts.filter(d=>d.type===type&&String(d.person||'').trim().toLowerCase()===String(person||'').trim().toLowerCase());
+  if(!matches.length)return showToast('الحساب غير موجود','warning');
+
+  const hasBalance=matches.some(d=>getDebtRemaining(d)>0);
+  const msg=hasBalance
+    ? `سيتم حذف حساب ${person} بالكامل بكل فواتيره وحركاته. هل أنت متأكد؟`
+    : `سيتم حذف سجل حساب ${person} بالكامل. هل أنت متأكد؟`;
+  if(!confirm(msg))return;
+
+  matches.forEach(d=>Store.remove('debts',d.id));
+  showToast(`🗑️ تم حذف حساب ${person}`);
+  renderDebtsList();
+}
 
 function getDebtGroup(person,type){
   const key=String(person||'').trim().toLowerCase();
