@@ -1658,6 +1658,20 @@ html[data-theme="dark"] .stat-card{
 }
 </style>
 
+
+<style id="debts-group-v1526">
+.debt-group-card{display:block!important;padding:12px!important}
+.debt-group-summary{margin-top:5px;display:flex;align-items:baseline;gap:8px;flex-wrap:wrap}
+.debt-group-summary strong{font-size:1.02rem;color:var(--primary)}
+.debt-group-summary span{font-size:.61rem;color:var(--text-muted)}
+.debt-group-details{margin-top:9px;padding-top:8px;border-top:1px solid var(--border)}
+.debt-group-details-title{font-size:.68rem;font-weight:900;color:var(--text-muted);margin-bottom:6px}
+.debt-group-detail{padding:8px 0;border-right:3px solid var(--primary);padding-right:8px;margin-bottom:7px}
+.debt-group-detail-main{margin-bottom:5px}
+.debt-group-detail .debt-actions-pro{justify-content:flex-start}
+.debt-group-detail .debt-actions-pro .btn{font-size:.6rem;min-height:34px}
+</style>
+
 </head>
 <body>
 <div id="loading-screen">
@@ -1729,7 +1743,7 @@ html[data-theme="dark"] .stat-card{
 </div>
 <script>
 // ==================== معلومات الإصدار ====================
-const APP_VERSION='v1.5.25';
+const APP_VERSION='v1.5.26';
 const APP_NAME = "كنوز الطبيعة";
 const APP_BUILD_DATE = "24 أغسطس 2026 — تطوير لوحة التحكم الاحترافية";
 
@@ -4430,10 +4444,10 @@ function renderDebtsList(){
   const allDebts=Store.get('debts')||[];
   const search=(document.getElementById('debtSearch')?.value||'').trim().toLowerCase();
   const type=(document.getElementById('debtTypeFilter')?.value||'');
-  const debts=allDebts.filter(d=>{
+  const filtered=allDebts.filter(d=>{
     return (!search||String(d.person||'').toLowerCase().includes(search))&&(!type||d.type===type);
   });
-  const now=new Date().toISOString().split('T')[0];
+
   const active=allDebts.filter(d=>getDebtRemaining(d)>0);
   const totalOwedToUs=active.filter(d=>d.type==='لنا').reduce((n,d)=>n+getDebtRemaining(d),0);
   const totalWeOwe=active.filter(d=>d.type==='علينا').reduce((n,d)=>n+getDebtRemaining(d),0);
@@ -4444,30 +4458,65 @@ function renderDebtsList(){
     <div class="debts-pro-stat"><strong>${fmt(totalWeOwe)}</strong><span>علينا</span></div>
     <div class="debts-pro-stat"><strong>${fmt(totalActive)}</strong><span>إجمالي المتبقي</span></div>`;
 
+  // تجميع سجل الديون حسب الشخص والنوع: الشخص يظهر مرة واحدة،
+  // بينما الفواتير/الديون تظل مفصلة داخل نفس الخانة.
+  const groups={};
+  filtered.forEach(d=>{
+    const key=(String(d.type||'')+'|'+String(d.person||'').trim().toLowerCase());
+    if(!groups[key])groups[key]={person:d.person,type:d.type,items:[]};
+    groups[key].items.push(d);
+  });
+
   const list=document.getElementById('debtsList');
   if(!list)return;
-  list.innerHTML=debts.map(d=>{
-    const remaining=getDebtRemaining(d);
-    const original=Math.max(0,Number(d.amount||0));
-    const paid=Math.max(0,original-remaining);
-    const history=Array.isArray(d.paymentHistory)?d.paymentHistory:[];
-    const isOverdue=d.due&&d.due<now&&remaining>0;
-    const canWhatsApp=!!normalizeWhatsAppPhone(d.phone||'');
-    return `<div class="debt-card ${remaining<=0?'paid':''}" style="${isOverdue?'border-right-color:var(--warning);background:rgba(245,158,11,0.05)':''}">
-      <div class="debt-info">
-        <div class="debt-person">${d.person} ${d.type==='علينا'?'📤':'📥'}</div>
-        <div class="debt-meta">${d.date} ${d.due?'| استحقاق: '+d.due:''} ${isOverdue?'<span style="color:var(--warning)">⚠️ متأخر</span>':''} ${d.note?'| '+d.note:''}</div>
-        <div class="debt-balance-line">الدين ${fmt(original)} • مدفوع ${fmt(paid)} • <b>متبقي ${fmt(remaining)}</b></div>
-      </div>
-      <div style="text-align:left">
-        <div class="debt-amount">${fmt(remaining)}</div>
+
+  const groupArray=Object.values(groups).sort((a,b)=>{
+    const ar=a.items.reduce((n,d)=>n+getDebtRemaining(d),0);
+    const br=b.items.reduce((n,d)=>n+getDebtRemaining(d),0);
+    return br-ar;
+  });
+
+  list.innerHTML=groupArray.map(g=>{
+    const groupRemaining=g.items.reduce((n,d)=>n+getDebtRemaining(d),0);
+    const groupOriginal=g.items.reduce((n,d)=>n+Number(d.amount||0),0);
+    const groupPaid=g.items.reduce((n,d)=>n+(Number(d.amount||0)-getDebtRemaining(d)),0);
+    const phone=(g.items.find(d=>d.phone)?.phone)||'';
+    const details=g.items.map(d=>{
+      const remaining=getDebtRemaining(d);
+      const original=Math.max(0,Number(d.amount||0));
+      const paid=Math.max(0,original-remaining);
+      const history=Array.isArray(d.paymentHistory)?d.paymentHistory:[];
+      const now=new Date().toISOString().split('T')[0];
+      const isOverdue=d.due&&d.due<now&&remaining>0;
+      const canUndo=history.length>0 && Number(d.paidAmount||0)>0;
+      return `<div class="debt-group-detail" style="${isOverdue?'border-right-color:var(--warning)':''}">
+        <div class="debt-group-detail-main">
+          <div><strong>${d.invoiceNo?`فاتورة ${d.invoiceNo}`:(d.note||'حركة دين')}</strong></div>
+          <div class="debt-meta">${d.date||''} ${d.due?'| استحقاق: '+d.due:''} ${isOverdue?'<span style="color:var(--warning)">⚠️ متأخر</span>':''}</div>
+          <div class="debt-balance-line">الدين ${fmt(original)} • مدفوع ${fmt(paid)} • <b>متبقي ${fmt(remaining)}</b></div>
+        </div>
         <div class="debt-actions-pro">
           ${remaining>0?`<button class="btn btn-sm btn-success" onclick="openDebtPayment('${d.id}')">💳 سداد جزء</button>`:''}
           ${remaining>0?`<button class="btn btn-sm btn-primary" onclick="payDebtPart('${d.id}',${remaining})">✅ سداد كامل</button>`:''}
-          ${(history.length||d.paid)?`<button class="btn btn-sm btn-outline" onclick="undoLastDebtPayment('${d.id}')">↩️ تراجع عن السداد</button>`:''}
+          ${canUndo?`<button class="btn btn-sm btn-outline" onclick="undoLastDebtPayment('${d.id}')">↩️ تراجع عن السداد</button>`:''}
           <button class="btn btn-sm btn-danger" onclick="deleteDebt('${d.id}')"><i class="fas fa-trash"></i></button>
         </div>
+      </div>`;
+    }).join('');
+
+    return `<div class="debt-card debt-group-card ${groupRemaining<=0?'paid':''}">
+      <div class="debt-info">
+        <div class="debt-person">${g.person} ${g.type==='علينا'?'📤':'📥'}</div>
+        <div class="debt-group-summary">
+          <strong>${fmt(groupRemaining)}</strong>
+          <span>${g.items.length} حركة/فاتورة • الدين الأصلي ${fmt(groupOriginal)} • المدفوع ${fmt(groupPaid)}</span>
+        </div>
       </div>
+      <div class="debt-group-details">
+        <div class="debt-group-details-title">تفاصيل الحساب</div>
+        ${details}
+      </div>
+      ${phone?`<button class="btn btn-sm btn-whatsapp" style="margin-top:8px" onclick="openWhatsApp('${phone}',debtShareMessage('${String(g.person).replace(/'/g,"\\\\'")}',${groupRemaining},'${g.type}'))"><i class="fab fa-whatsapp"></i> إرسال الحساب على واتساب</button>`:''}
     </div>`;
   }).join('')||'<div class="empty-state"><i class="fas fa-clipboard-check"></i><p>لا يوجد ديون مطابقة</p></div>';
 }
