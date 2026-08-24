@@ -1752,6 +1752,65 @@ html[data-theme="dark"] .stat-card{
 .supplier-cleared .supplier-compact-money strong{color:var(--success,#159447)}
 </style>
 
+
+<style id="suppliers-compact-v1532">
+/* ترتيب كارت المورد على الموبايل: البيانات أولاً ثم أزرار السداد ثم التفاصيل */
+.supplier-compact-card{
+  direction:rtl!important;
+  text-align:right!important;
+}
+.supplier-compact-top{
+  direction:rtl!important;
+  grid-template-columns:38px minmax(0,1fr) auto!important;
+}
+.supplier-compact-main{
+  min-width:0;
+}
+.supplier-compact-money{
+  text-align:left!important;
+  white-space:nowrap;
+}
+.supplier-account-actions{
+  direction:rtl!important;
+  grid-template-columns:1fr 1fr!important;
+}
+.supplier-account-actions .btn{
+  width:100%!important;
+  display:flex!important;
+  align-items:center!important;
+  justify-content:center!important;
+  white-space:nowrap!important;
+}
+.supplier-compact-bottom{
+  direction:rtl!important;
+  display:flex!important;
+  flex-direction:row!important;
+  align-items:center!important;
+  justify-content:space-between!important;
+  width:100%!important;
+}
+.supplier-detail-toggle{
+  order:1!important;
+  margin-right:0!important;
+  margin-left:auto!important;
+}
+.supplier-mini-actions{
+  order:2!important;
+  display:flex!important;
+  flex-direction:row!important;
+  gap:4px!important;
+  margin-right:auto!important;
+  margin-left:0!important;
+}
+.supplier-collapsible-details{
+  direction:rtl!important;
+  text-align:right!important;
+}
+.supplier-detail-line{
+  direction:rtl!important;
+}
+</style>
+
 </head>
 <body>
 <div id="loading-screen">
@@ -1823,7 +1882,7 @@ html[data-theme="dark"] .stat-card{
 </div>
 <script>
 // ==================== معلومات الإصدار ====================
-const APP_VERSION='v1.5.31';
+const APP_VERSION='v1.5.32';
 const APP_NAME = "كنوز الطبيعة";
 const APP_BUILD_DATE = "24 أغسطس 2026 — تطوير لوحة التحكم الاحترافية";
 
@@ -4859,7 +4918,8 @@ function openWhatsApp(phone,message){
   window.open(url,'_blank');
 }
 function debtShareMessage(name,remaining,type){
-  const relation=type==='علينا'?'المبلغ المستحق لنا':'المبلغ المتبقي عليك';
+  // "علينا" = نحن مدينون للطرف الآخر، لذلك المبلغ مستحق له.
+  const relation=type==='علينا'?'المبلغ المستحق لكم':'المبلغ المتبقي عليك';
   return `السلام عليكم ${name}،
 
 ده ملخص حسابك لدى كنوز الطبيعة:
