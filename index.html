@@ -1450,6 +1450,31 @@ html[data-theme="dark"] .stat-card{
 }
 </style>
 
+
+<style id="premium-lock-v1516">
+.lock-security-badge{
+  display:inline-flex;align-items:center;gap:6px;margin-top:7px;
+  padding:5px 9px;border-radius:999px;font-size:.67rem;font-weight:900;
+  color:var(--primary);background:color-mix(in srgb,var(--primary) 9%,var(--bg-card));
+  border:1px solid color-mix(in srgb,var(--primary) 16%,var(--border));
+}
+.lock-pin-card{
+  background:linear-gradient(135deg,color-mix(in srgb,var(--primary) 8%,var(--bg-card)),color-mix(in srgb,var(--accent) 7%,var(--bg-card)));
+  border:1px solid color-mix(in srgb,var(--accent) 22%,var(--border));
+  border-radius:16px;padding:16px;margin-top:12px;
+}
+.lock-pin-card h4{font-size:.9rem;margin-bottom:5px}
+.lock-pin-card p{font-size:.72rem;color:var(--text-light);line-height:1.7}
+.lock-pin-input{
+  width:100%;padding:15px;text-align:center;letter-spacing:8px;font-size:1.25rem;font-weight:900;
+  border:2px solid var(--border);border-radius:14px;background:var(--bg-input);color:var(--text);
+  margin-top:10px;
+}
+.lock-pin-input:focus{outline:none;border-color:var(--primary);box-shadow:0 0 0 4px color-mix(in srgb,var(--primary) 12%,transparent)}
+.lock-action-row{display:flex;gap:8px;margin-top:10px}
+.lock-action-row .btn{flex:1}
+</style>
+
 </head>
 <body>
 <div id="loading-screen">
@@ -1521,7 +1546,7 @@ html[data-theme="dark"] .stat-card{
 </div>
 <script>
 // ==================== معلومات الإصدار ====================
-const APP_VERSION='v1.5.15';
+const APP_VERSION='v1.5.16';
 const APP_NAME = "كنوز الطبيعة";
 const APP_BUILD_DATE = "24 أغسطس 2026 — تطوير لوحة التحكم الاحترافية";
 
@@ -2011,9 +2036,72 @@ function applyAppIdentity(){
   const authBrand=document.getElementById('authBrandName'); if(authBrand) authBrand.textContent=name;
   document.querySelectorAll('[data-app-name]').forEach(e=>e.textContent=name);
 }
-function toggleAppSetting(key,checked){
+async function hashLockPin(pin){
+  const data=new TextEncoder().encode(String(pin));
+  if(window.crypto?.subtle){
+    const digest=await crypto.subtle.digest('SHA-256',data);
+    return Array.from(new Uint8Array(digest)).map(b=>b.toString(16).padStart(2,'0')).join('');
+  }
+  /* fallback محلي فقط عند عدم توفر Web Crypto */
+  let h=2166136261;
+  for(let i=0;i<String(pin).length;i++){h^=String(pin).charCodeAt(i);h=Math.imul(h,16777619);}
+  return 'fallback-'+(h>>>0).toString(16);
+}
+async function setLockPin(){
+  const first=document.getElementById('newLockPin')?.value.trim()||'';
+  const second=document.getElementById('confirmLockPin')?.value.trim()||'';
+  if(!/^\d{4,6}$/.test(first)){showToast('⚠️ رمز القفل يجب أن يكون من 4 إلى 6 أرقام','warning');return;}
+  if(first!==second){showToast('⚠️ رمزا القفل غير متطابقين','warning');return;}
+  const s=getAppSettings();
+  s.lockPinHash=await hashLockPin(first);
+  s.lockEnabled=true;
+  saveAppSettings(s);
+  closeModal();
+  showToast('🔒 تم تفعيل قفل البرنامج بنجاح','success');
+  navigateTo('settings');
+}
+function openLockPinSetup(changePin=false){
+  const title=changePin?'تغيير رمز القفل':'تفعيل قفل البرنامج';
+  openModal(`
+    <div class="card-title"><i class="fas fa-shield-halved"></i> ${title}</div>
+    <div class="lock-pin-card">
+      <h4>🔐 رمز قفل كنوز الطبيعة</h4>
+      <p>استخدم رمزًا من 4 إلى 6 أرقام. سيُطلب عند فتح البرنامج أو بعد قفله يدويًا.</p>
+      <input id="newLockPin" class="lock-pin-input" type="password" inputmode="numeric" maxlength="6" placeholder="••••••">
+      <input id="confirmLockPin" class="lock-pin-input" type="password" inputmode="numeric" maxlength="6" placeholder="تأكيد الرمز">
+      <div class="lock-action-row">
+        <button class="btn btn-primary" type="button" onclick="setLockPin()"><i class="fas fa-check"></i> حفظ الرمز</button>
+        <button class="btn btn-outline" type="button" onclick="closeModal()"><i class="fas fa-xmark"></i> إلغاء</button>
+      </div>
+    </div>
+  `);
+  setTimeout(()=>document.getElementById('newLockPin')?.focus(),100);
+}
+async function toggleAppSetting(key,checked){
+  if(key==='lockEnabled'){
+    const s=getAppSettings();
+    if(checked){
+      if(s.lockPinHash){
+        s.lockEnabled=true; saveAppSettings(s);
+        showToast('🔒 تم تفعيل قفل البرنامج','success');
+        navigateTo('settings');
+      }else{
+        openLockPinSetup(false);
+      }
+    }else{
+      s.lockEnabled=false; saveAppSettings(s);
+      showToast('⏸️ تم إيقاف قفل البرنامج','success');
+      navigateTo('settings');
+    }
+    return;
+  }
   const s=getAppSettings(); s[key]=!!checked; saveAppSettings(s);
   showToast(checked?'✅ تم تفعيل الإعداد':'⏸️ تم إيقاف الإعداد');
+}
+function openLockSettings(){
+  const s=getAppSettings();
+  if(s.lockPinHash) openLockPinSetup(true);
+  else openLockPinSetup(false);
 }
 function setAppName(){
   const current=getAppName();
@@ -2039,13 +2127,26 @@ function switchAuth(type){
   document.getElementById('registerForm').style.display=type==='register'?'block':'none';
   document.getElementById('authError').style.display='none';
 }
-function handleLogin(e){
+async function handleLogin(e){
   e.preventDefault();
-  const btn=document.getElementById('loginBtn');btn.disabled=true;btn.innerHTML='<i class="fas fa-spinner fa-spin"></i> جاري...';
-  const email=document.getElementById('loginEmail').value;
+  const btn=document.getElementById('loginBtn');
+  btn.disabled=true;btn.innerHTML='<i class="fas fa-spinner fa-spin"></i> جاري...';
+  const email=document.getElementById('loginEmail').value.trim();
+  const pin=document.getElementById('loginPassword').value;
   const user=Store.getUser();
-  if(user&&user.email===email){currentUser=user;showApp();}
-  else{document.getElementById('authError').textContent='البريد غير مسجل. أنشئ حساب جديد.';document.getElementById('authError').style.display='block';}
+  const s=getAppSettings();
+  let ok=!!(user&&user.email===email);
+  if(ok && s.lockEnabled && s.lockPinHash){
+    ok=(await hashLockPin(pin))===s.lockPinHash;
+  }
+  if(ok){currentUser=user;showApp();}
+  else{
+    const msg=(s.lockEnabled&&s.lockPinHash)
+      ? 'رمز القفل أو البريد الإلكتروني غير صحيح.'
+      : 'البريد غير مسجل. أنشئ حساب جديد.';
+    document.getElementById('authError').textContent=msg;
+    document.getElementById('authError').style.display='block';
+  }
   btn.disabled=false;btn.innerHTML='<i class="fas fa-sign-in-alt"></i> تسجيل الدخول';
 }
 function handleRegister(e){
@@ -2080,6 +2181,22 @@ function showAuthScreen(){
   document.getElementById('loading-screen').classList.add('hidden');
   document.getElementById('auth-screen').style.display='flex';
   document.getElementById('app').style.display='none';
+  const locked=isLockEnabled() && getAppSettings().lockPinHash;
+  const passLabel=document.querySelector('#loginForm label:nth-of-type(2)');
+  const passInput=document.getElementById('loginPassword');
+  const authFooter=document.querySelector('.auth-footer p');
+  const registerTab=document.querySelector('.auth-tab[onclick*="register"]');
+  if(locked){
+    if(passLabel) passLabel.innerHTML='<i class="fas fa-shield-halved" style="margin-left:6px;color:var(--accent)"></i> رمز القفل';
+    if(passInput){passInput.placeholder='أدخل رمز القفل';passInput.setAttribute('inputmode','numeric');passInput.setAttribute('maxlength','6');}
+    if(authFooter) authFooter.innerHTML='<i class="fas fa-lock" style="color:var(--primary);margin-left:4px"></i> البرنامج مقفول — أدخل رمز القفل للمتابعة';
+    if(registerTab) registerTab.style.display='none';
+  }else{
+    if(passLabel) passLabel.innerHTML='<i class="fas fa-lock" style="margin-left:6px;color:var(--primary)"></i> كلمة المرور';
+    if(passInput){passInput.placeholder='••••••••';passInput.removeAttribute('inputmode');passInput.removeAttribute('maxlength');}
+    if(authFooter) authFooter.innerHTML='<i class="fas fa-shield-alt" style="color:var(--success);margin-left:4px"></i> البيانات محمية ومتزامنة في السحابة';
+    if(registerTab) registerTab.style.display='';
+  }
 }
 async function showApp(){
   applyAppTheme();
@@ -4759,10 +4876,19 @@ function renderSettingsPage(container){
         <div class="settings-arrow"><i class="fas fa-chevron-left"></i></div>
       </div>
       <label class="settings-row" style="cursor:default">
-        <div class="settings-icon"><i class="fas fa-lock"></i></div>
-        <div class="settings-row-main"><div class="settings-row-title">قفل البرنامج عند الفتح</div><div class="settings-row-sub">يمكنك تشغيل القفل أو إيقافه بحرية. عند إيقافه يفتح البرنامج مباشرة.</div></div>
+        <div class="settings-icon"><i class="fas fa-shield-halved"></i></div>
+        <div class="settings-row-main">
+          <div class="settings-row-title">قفل البرنامج عند الفتح</div>
+          <div class="settings-row-sub">${s.lockEnabled===true?'🔒 القفل مفعل — يُطلب رمز القفل عند الفتح':'يمكنك حماية البرنامج برمز قفل من 4 إلى 6 أرقام.'}</div>
+          ${s.lockEnabled===true?'<div class="lock-security-badge"><i class="fas fa-circle-check"></i> حماية مفعلة</div>':''}
+        </div>
         <div class="settings-switch"><input type="checkbox" ${s.lockEnabled===true?'checked':''} onchange="toggleAppSetting('lockEnabled',this.checked)"><span></span></div>
       </label>
+      ${s.lockPinHash?`<div class="settings-row" onclick="openLockSettings()">
+        <div class="settings-icon"><i class="fas fa-key"></i></div>
+        <div class="settings-row-main"><div class="settings-row-title">تغيير رمز القفل</div><div class="settings-row-sub">تغيير الرمز السري الخاص بحماية البرنامج</div></div>
+        <div class="settings-arrow"><i class="fas fa-chevron-left"></i></div>
+      </div>`:''}
     </div>
 
     <div class="backup-center cloud-backup-card">
