@@ -1589,7 +1589,7 @@ html[data-theme="dark"] .stat-card{
 </div>
 <script>
 // ==================== معلومات الإصدار ====================
-const APP_VERSION='v1.5.17';
+const APP_VERSION='v1.5.18';
 const APP_NAME = "كنوز الطبيعة";
 const APP_BUILD_DATE = "24 أغسطس 2026 — تطوير لوحة التحكم الاحترافية";
 
@@ -1881,8 +1881,8 @@ async function backupToGoogle(options={}){
     if(!verified) throw new Error('GOOGLE_BACKUP_VERIFY_FAILED');
 
     const stamp=new Date().toLocaleString('ar-EG');
-    localStorage.setItem('bm_google_backup_at',stamp);
-    localStorage.setItem('bm_last_backup',stamp);
+    localStorage.setItem('bm_google_backup_at',stamp); refreshLocalBackupStamp(stamp);
+    localStorage.setItem('bm_last_backup',stamp); refreshLocalBackupStamp(stamp);
     localStorage.setItem('bm_google_backup_counts',JSON.stringify(backupRecordCounts(payload).counts));
     refreshGoogleBackupStatusUI();
     if(!silent) showToast('☁️ تم رفع النسخة السليمة والتحقق منها على Google بنجاح','success');
@@ -1925,8 +1925,8 @@ async function restoreFromGoogle(){
     for(const col of collections) Store.set(col,Array.isArray(data[col])?data[col]:[]);
     if(data.userData){ currentUser=data.userData; Store.setUser(currentUser); }
     const stamp=data.exportedAt ? new Date(data.exportedAt).toLocaleString('ar-EG') : new Date().toLocaleString('ar-EG');
-    localStorage.setItem('bm_google_backup_at',stamp);
-    localStorage.setItem('bm_last_backup',stamp);
+    localStorage.setItem('bm_google_backup_at',stamp); refreshLocalBackupStamp(stamp);
+    localStorage.setItem('bm_last_backup',stamp); refreshLocalBackupStamp(stamp);
     showToast('✅ تمت استعادة بياناتك من Google Drive','success');
     setTimeout(()=>location.reload(),700);
   }catch(e){
@@ -1963,7 +1963,14 @@ function getGoogleBackupDisplay(){
   return {title:'حالة النسخة على Google',value:'لم يتم ربط حساب Google بعد',ok:false};
 }
 
+
+function refreshLocalBackupStamp(stamp){
+  const value=stamp||localStorage.getItem('bm_last_backup')||'لم يتم إنشاء نسخة بعد';
+  document.querySelectorAll('[data-last-backup]').forEach(el=>el.textContent=value);
+}
+
 function refreshGoogleBackupStatusUI(){
+  refreshLocalBackupStamp(localStorage.getItem('bm_last_backup'));
   const box=document.getElementById('googleBackupStatusBox');
   const localBox=document.getElementById('localBackupStatusValue');
   const accountTitle=document.getElementById('backupAccountTitle');
@@ -5060,7 +5067,7 @@ function renderSettingsPage(container){
 async function createSettingsBackup(){
   exportData();
   const stamp=new Date().toLocaleString('ar-EG');
-  localStorage.setItem('bm_last_backup',stamp);
+  localStorage.setItem('bm_last_backup',stamp); refreshLocalBackupStamp(stamp);
   refreshGoogleBackupStatusUI();
   if(driveAccessTokenValid()) await backupToGoogle({silent:false});
   else showToast('✅ تم إنشاء النسخة على الجهاز. يمكنك ربط Google ورفعها للسحابة عند الحاجة.','success');
@@ -5147,7 +5154,7 @@ function importData(input){
       if(data.userData)Store.setUser(data.userData);
       currentUser=data.userData||currentUser;
       const stamp=new Date().toLocaleString('ar-EG');
-      localStorage.setItem('bm_last_backup',stamp);
+      localStorage.setItem('bm_last_backup',stamp); refreshLocalBackupStamp(stamp);
       refreshGoogleBackupStatusUI();
       showToast('✅ تمت استعادة النسخة من الجهاز بنجاح','success');
       setTimeout(()=>navigateTo('dashboard'),350);
