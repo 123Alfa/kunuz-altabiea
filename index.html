@@ -1672,6 +1672,18 @@ html[data-theme="dark"] .stat-card{
 .debt-group-detail .debt-actions-pro .btn{font-size:.6rem;min-height:34px}
 </style>
 
+
+<style id="group-debt-payment-v1527">
+.debt-group-account-actions{display:grid;grid-template-columns:1fr 1fr;gap:7px;margin:10px 0 6px}
+.debt-group-account-actions .btn{min-height:42px;font-size:.67rem}
+.debt-group-undo{width:100%;margin:3px 0 7px;min-height:38px}
+.group-payment-summary{background:linear-gradient(135deg,var(--primary-dark),var(--primary),var(--accent));color:#fff;border-radius:15px;padding:15px;text-align:center;margin-bottom:12px}
+.group-payment-summary strong{display:block;font-size:1.45rem;margin-top:8px}
+.group-payment-summary small{opacity:.8;font-size:.62rem}
+.group-payment-note{font-size:.64rem;color:var(--text-muted);background:var(--bg-soft);border-radius:10px;padding:9px;margin:8px 0 10px;line-height:1.6}
+@media(max-width:430px){.debt-group-account-actions{grid-template-columns:1fr 1fr}.debt-group-account-actions .btn{font-size:.61rem}}
+</style>
+
 </head>
 <body>
 <div id="loading-screen">
@@ -1743,7 +1755,7 @@ html[data-theme="dark"] .stat-card{
 </div>
 <script>
 // ==================== معلومات الإصدار ====================
-const APP_VERSION='v1.5.26';
+const APP_VERSION='v1.5.28';
 const APP_NAME = "كنوز الطبيعة";
 const APP_BUILD_DATE = "24 أغسطس 2026 — تطوير لوحة التحكم الاحترافية";
 
@@ -4444,9 +4456,9 @@ function renderDebtsList(){
   const allDebts=Store.get('debts')||[];
   const search=(document.getElementById('debtSearch')?.value||'').trim().toLowerCase();
   const type=(document.getElementById('debtTypeFilter')?.value||'');
-  const filtered=allDebts.filter(d=>{
-    return (!search||String(d.person||'').toLowerCase().includes(search))&&(!type||d.type===type);
-  });
+  const filtered=allDebts.filter(d=>(
+    (!search||String(d.person||'').toLowerCase().includes(search))&&(!type||d.type===type)
+  ));
 
   const active=allDebts.filter(d=>getDebtRemaining(d)>0);
   const totalOwedToUs=active.filter(d=>d.type==='لنا').reduce((n,d)=>n+getDebtRemaining(d),0);
@@ -4458,11 +4470,9 @@ function renderDebtsList(){
     <div class="debts-pro-stat"><strong>${fmt(totalWeOwe)}</strong><span>علينا</span></div>
     <div class="debts-pro-stat"><strong>${fmt(totalActive)}</strong><span>إجمالي المتبقي</span></div>`;
 
-  // تجميع سجل الديون حسب الشخص والنوع: الشخص يظهر مرة واحدة،
-  // بينما الفواتير/الديون تظل مفصلة داخل نفس الخانة.
   const groups={};
   filtered.forEach(d=>{
-    const key=(String(d.type||'')+'|'+String(d.person||'').trim().toLowerCase());
+    const key=String(d.type||'')+'|'+String(d.person||'').trim().toLowerCase();
     if(!groups[key])groups[key]={person:d.person,type:d.type,items:[]};
     groups[key].items.push(d);
   });
@@ -4481,25 +4491,27 @@ function renderDebtsList(){
     const groupOriginal=g.items.reduce((n,d)=>n+Number(d.amount||0),0);
     const groupPaid=g.items.reduce((n,d)=>n+(Number(d.amount||0)-getDebtRemaining(d)),0);
     const phone=(g.items.find(d=>d.phone)?.phone)||'';
+
+    // آخر دفعة جماعية قابلة للتراجع.
+    const groupPayments=[];
+    g.items.forEach(d=>(Array.isArray(d.paymentHistory)?d.paymentHistory:[]).forEach(h=>{
+      if(h.groupId)groupPayments.push({groupId:h.groupId,date:h.date});
+    }));
+    groupPayments.sort((a,b)=>String(b.date||'').localeCompare(String(a.date||'')));
+    const canUndoGroup=groupPayments.length>0;
+    const latestGroupId=canUndoGroup?groupPayments[0].groupId:'';
+
     const details=g.items.map(d=>{
       const remaining=getDebtRemaining(d);
       const original=Math.max(0,Number(d.amount||0));
       const paid=Math.max(0,original-remaining);
-      const history=Array.isArray(d.paymentHistory)?d.paymentHistory:[];
       const now=new Date().toISOString().split('T')[0];
       const isOverdue=d.due&&d.due<now&&remaining>0;
-      const canUndo=history.length>0 && Number(d.paidAmount||0)>0;
       return `<div class="debt-group-detail" style="${isOverdue?'border-right-color:var(--warning)':''}">
         <div class="debt-group-detail-main">
           <div><strong>${d.invoiceNo?`فاتورة ${d.invoiceNo}`:(d.note||'حركة دين')}</strong></div>
           <div class="debt-meta">${d.date||''} ${d.due?'| استحقاق: '+d.due:''} ${isOverdue?'<span style="color:var(--warning)">⚠️ متأخر</span>':''}</div>
           <div class="debt-balance-line">الدين ${fmt(original)} • مدفوع ${fmt(paid)} • <b>متبقي ${fmt(remaining)}</b></div>
-        </div>
-        <div class="debt-actions-pro">
-          ${remaining>0?`<button class="btn btn-sm btn-success" onclick="openDebtPayment('${d.id}')">💳 سداد جزء</button>`:''}
-          ${remaining>0?`<button class="btn btn-sm btn-primary" onclick="payDebtPart('${d.id}',${remaining})">✅ سداد كامل</button>`:''}
-          ${canUndo?`<button class="btn btn-sm btn-outline" onclick="undoLastDebtPayment('${d.id}')">↩️ تراجع عن السداد</button>`:''}
-          <button class="btn btn-sm btn-danger" onclick="deleteDebt('${d.id}')"><i class="fas fa-trash"></i></button>
         </div>
       </div>`;
     }).join('');
@@ -4512,13 +4524,146 @@ function renderDebtsList(){
           <span>${g.items.length} حركة/فاتورة • الدين الأصلي ${fmt(groupOriginal)} • المدفوع ${fmt(groupPaid)}</span>
         </div>
       </div>
+
+      ${groupRemaining>0?`
+      <div class="debt-group-account-actions">
+        <button class="btn btn-sm btn-success" onclick="openGroupDebtPayment('${encodeURIComponent(g.person)}','${g.type}')">💳 سداد جزء من الحساب</button>
+        <button class="btn btn-sm btn-primary" onclick="payGroupDebtFull('${encodeURIComponent(g.person)}','${g.type}')">✅ سداد الحساب كامل</button>
+      </div>`:''}
+
+      ${canUndoGroup?`
+      <button class="btn btn-sm btn-outline debt-group-undo" onclick="undoGroupDebtPayment('${encodeURIComponent(g.person)}','${g.type}','${latestGroupId}')">↩️ تراجع عن آخر سداد</button>`:''}
+
       <div class="debt-group-details">
-        <div class="debt-group-details-title">تفاصيل الحساب</div>
+        <div class="debt-group-details-title">تفاصيل الحساب — بدون فصل المبلغ الإجمالي</div>
         ${details}
       </div>
+
       ${phone?`<button class="btn btn-sm btn-whatsapp" style="margin-top:8px" onclick="openWhatsApp('${phone}',debtShareMessage('${String(g.person).replace(/'/g,"\\\\'")}',${groupRemaining},'${g.type}'))"><i class="fab fa-whatsapp"></i> إرسال الحساب على واتساب</button>`:''}
     </div>`;
   }).join('')||'<div class="empty-state"><i class="fas fa-clipboard-check"></i><p>لا يوجد ديون مطابقة</p></div>';
+}
+
+
+function getDebtGroup(person,type){
+  const key=String(person||'').trim().toLowerCase();
+  return (Store.get('debts')||[]).filter(d=>
+    d.type===type && String(d.person||'').trim().toLowerCase()===key && getDebtRemaining(d)>0
+  ).sort((a,b)=>{
+    const ad=String(a.date||'9999-99-99'),bd=String(b.date||'9999-99-99');
+    return ad.localeCompare(bd);
+  });
+}
+
+function openGroupDebtPayment(encodedPerson,type){
+  const person=decodeURIComponent(encodedPerson);
+  const items=getDebtGroup(person,type);
+  const remaining=items.reduce((n,d)=>n+getDebtRemaining(d),0);
+  if(remaining<=0)return showToast('الحساب مسدد بالكامل','info');
+
+  openModal(`<div class="modal-header">
+      <h2>💳 سداد من إجمالي الحساب</h2>
+      <button class="modal-close" onclick="closeModal()">&times;</button>
+    </div>
+    <div class="group-payment-summary">
+      <div style="font-weight:950;font-size:1rem">${person}</div>
+      <div style="color:var(--text-muted);font-size:.68rem;margin-top:4px">عدد الفواتير/الحركات: ${items.length}</div>
+      <strong>${fmt(remaining)}</strong>
+      <small>إجمالي المتبقي</small>
+    </div>
+    <div class="form-group">
+      <label>مبلغ السداد الآن</label>
+      <input type="number" id="groupDebtPayAmount" min="0.01" max="${remaining}" step="0.01" placeholder="مثال: 500">
+    </div>
+    <div class="group-payment-note">
+💡 المبلغ سيتم توزيعه تلقائيًا على أقدم الفواتير أولًا، مع بقاء تفاصيل كل فاتورة محفوظة.<br>
+مثال: حساب ١٣٧٥ ج.م ودفع ١٠٠٠ ج.م → المتبقي ٣٧٥ ج.م.
+</div>
+    <button class="btn btn-success btn-block" onclick="confirmGroupDebtPayment('${encodeURIComponent(person)}','${type}')">
+      <i class="fas fa-check"></i> تسجيل السداد
+    </button>`);
+}
+
+function confirmGroupDebtPayment(encodedPerson,type){
+  const person=decodeURIComponent(encodedPerson);
+  const amount=Number(document.getElementById('groupDebtPayAmount')?.value)||0;
+  applyGroupDebtPayment(person,type,amount,false);
+}
+
+function payGroupDebtFull(encodedPerson,type){
+  const person=decodeURIComponent(encodedPerson);
+  const items=getDebtGroup(person,type);
+  const remaining=items.reduce((n,d)=>n+getDebtRemaining(d),0);
+  if(remaining<=0)return showToast('الحساب مسدد بالكامل','info');
+  if(!confirm(`تأكيد سداد كامل حساب ${person} بمبلغ ${fmt(remaining)}؟`))return;
+  applyGroupDebtPayment(person,type,remaining,true);
+}
+
+function applyGroupDebtPayment(person,type,amount,isFull){
+  const debts=Store.get('debts')||[];
+  const items=getDebtGroup(person,type);
+  const total=items.reduce((n,d)=>n+getDebtRemaining(d),0);
+  amount=Number(amount)||0;
+  if(amount<=0)return showToast('أدخل مبلغ السداد','warning');
+  if(amount>total+0.0001){
+  return showToast(`مبلغ السداد لا يمكن أن يتجاوز إجمالي الحساب (${fmt(total)})`,'warning');
+}
+
+  const groupId='PAY-'+Date.now()+'-'+Math.random().toString(36).slice(2,7);
+  let left=amount;
+  const now=new Date().toISOString();
+
+  for(const d of items){
+    if(left<=0)break;
+    const rem=getDebtRemaining(d);
+    const pay=Math.min(rem,left);
+    if(pay<=0)continue;
+
+    const isLegacySource=(d.debtVersion!==2&&(d.source==='purchase'||d.source==='sale'));
+    const paidBefore=isLegacySource?0:Math.max(0,Number(d.paidAmount||0));
+    const paidAfter=paidBefore+pay;
+    const history=Array.isArray(d.paymentHistory)?d.paymentHistory.slice():[];
+    history.push({amount:pay,date:now,type:pay>=rem?'full':'partial',groupId});
+    Store.update('debts',d.id,{
+      paidAmount:paidAfter,
+      paid:paidAfter>=Number(d.amount||0)-0.0001,
+      paymentHistory:history,
+      debtVersion:2,
+      lastPaymentAt:now
+    });
+    left-=pay;
+  }
+
+  closeModal();
+  showToast(isFull?'✅ تم سداد الحساب بالكامل':'✅ تم تسجيل السداد وتوزيعه على الفواتير');
+  renderDebtsList();
+}
+
+function undoGroupDebtPayment(encodedPerson,type,groupId){
+  const person=decodeURIComponent(encodedPerson);
+  const debts=Store.get('debts')||[];
+  let changed=0;
+
+  debts.filter(d=>d.type===type&&String(d.person||'').trim().toLowerCase()===String(person||'').trim().toLowerCase())
+    .forEach(d=>{
+      const history=Array.isArray(d.paymentHistory)?d.paymentHistory.slice():[];
+      const entries=history.filter(h=>h.groupId===groupId);
+      if(!entries.length)return;
+      const amount=entries.reduce((n,h)=>n+Number(h.amount||0),0);
+      const remainingHistory=history.filter(h=>h.groupId!==groupId);
+      const paidAfter=Math.max(0,Number(d.paidAmount||0)-amount);
+      Store.update('debts',d.id,{
+        paidAmount:paidAfter,
+        paid:false,
+        paymentHistory:remainingHistory,
+        lastPaymentAt:remainingHistory.length?remainingHistory[remainingHistory.length-1].date:null,
+        debtVersion:2
+      });
+      changed++;
+    });
+
+  showToast(changed?'↩️ تم التراجع عن آخر سداد للحساب':'لا يوجد سداد يمكن التراجع عنه','info');
+  renderDebtsList();
 }
 
 function openDebtPayment(id){
