@@ -612,6 +612,24 @@ tr:hover td{background:rgba(15,118,110,.045)}
 @media(max-width:800px){.dashboard-v2 .dash-overview{grid-template-columns:repeat(2,1fr)}.dashboard-v2 .dash-kpi{min-height:118px}}
 @media(max-width:480px){.dashboard-v2 .dash-welcome{min-height:0;padding:18px}.dashboard-v2 .dash-welcome h2{font-size:1.18rem}.dashboard-v2 .dash-kpis{gap:8px}.dashboard-v2 .dash-kpi{padding:12px;min-height:112px;border-radius:16px}.dashboard-v2 .dash-kpi-icon{width:38px;height:38px;border-radius:11px}.dashboard-v2 .dash-kpi strong{font-size:1rem}.dashboard-v2 .dash-overview{gap:7px}.dashboard-v2 .dash-overview-item{padding:9px 8px;gap:7px}.dashboard-v2 .dash-overview-item i{width:29px;height:29px;flex-basis:29px;font-size:.72rem}.dashboard-v2 .dash-overview-item b{font-size:.7rem}.dashboard-v2 .dash-overview-item small{font-size:.54rem}}
 
+
+/* v1.5.13 — تطوير بطاقة الحساب فقط */
+.settings-section-heading{display:flex;align-items:center;gap:10px;margin-bottom:12px}
+.settings-section-icon{width:40px;height:40px;border-radius:12px;display:flex;align-items:center;justify-content:center;background:rgba(15,118,110,.10);color:var(--primary);font-size:1rem}
+.settings-section-title{font-weight:950;font-size:.92rem}
+.settings-section-sub{font-size:.66rem;color:var(--text-muted);margin-top:2px}
+.settings-profile-pro{padding:14px;border-radius:16px}
+.settings-profile-pro .settings-profile-info small{display:block;color:var(--success);font-size:.62rem;font-weight:800;margin-top:5px}
+.settings-profile-pro .settings-profile-info small i{font-size:.42rem;margin-left:4px}
+.settings-edit-icon{width:36px;height:36px;border:1px solid var(--border);background:var(--bg);color:var(--primary);border-radius:11px;display:flex;align-items:center;justify-content:center;cursor:pointer}
+.settings-account-meta{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-top:10px}
+.settings-account-meta>div{background:var(--bg-elevated);border:1px solid var(--border);border-radius:12px;padding:10px}
+.settings-account-meta span{display:block;font-size:.62rem;color:var(--text-muted);margin-bottom:3px}
+.settings-account-meta strong{font-size:.76rem}
+.settings-online-text{color:var(--success)}
+.settings-stat-grid-pro{margin-top:10px}
+.settings-edit-profile-btn{font-weight:900}
+@media(max-width:480px){.settings-section-title{font-size:.86rem}.settings-section-sub{font-size:.61rem}.settings-profile-pro{padding:12px}.settings-account-meta>div{padding:9px}}
 </style>
 <link rel="manifest" href="manifest.json">
 <link rel="apple-touch-icon" href="icon-192.png">
@@ -4545,23 +4563,31 @@ function renderSettingsPage(container){
       </div>
     </div>
 
-    <div class="card">
-      <div class="card-title"><i class="fas fa-store"></i> البيانات العامة</div>
-      <div class="settings-profile">
+    <div class="card settings-account-card">
+      <div class="settings-section-heading">
+        <div class="settings-section-icon"><i class="fas fa-user-circle"></i></div>
+        <div><div class="settings-section-title">الحساب والبيانات العامة</div><div class="settings-section-sub">بيانات المستخدم وإحصائيات البرنامج</div></div>
+      </div>
+      <div class="settings-profile settings-profile-pro">
         <div class="settings-profile-avatar">${initial}</div>
         <div class="settings-profile-info">
           <strong>${name}</strong>
           <span>${email}</span>
+          <small><i class="fas fa-circle"></i> متصل محليًا</small>
         </div>
-        <span class="settings-badge">متصل محليًا</span>
+        <button class="settings-edit-icon" type="button" onclick="editProfile()" aria-label="تعديل بيانات المستخدم"><i class="fas fa-pen"></i></button>
       </div>
-      <div class="settings-stat-grid" style="margin-top:12px">
+      <div class="settings-account-meta">
+        <div><span>رأس المال</span><strong>${fmt(currentUser?.capital||0)} ج.م</strong></div>
+        <div><span>حالة الحساب</span><strong class="settings-online-text">نشط</strong></div>
+      </div>
+      <div class="settings-stat-grid settings-stat-grid-pro">
         <div class="settings-mini-stat"><strong>${c.products}</strong><span>الأصناف</span></div>
         <div class="settings-mini-stat"><strong>${c.sales}</strong><span>المبيعات</span></div>
         <div class="settings-mini-stat"><strong>${c.purchases}</strong><span>المشتريات</span></div>
         <div class="settings-mini-stat"><strong>${c.customers}</strong><span>العملاء</span></div>
       </div>
-      <button class="btn btn-outline btn-block" style="margin-top:12px" onclick="editProfile()"><i class="fas fa-user-edit"></i> تعديل بيانات المستخدم</button>
+      <button class="btn btn-primary btn-block settings-edit-profile-btn" style="margin-top:12px" onclick="editProfile()"><i class="fas fa-user-pen"></i> تعديل بيانات الحساب</button>
     </div>
 
     <div class="card">
@@ -4718,9 +4744,9 @@ function editProfile(){
   const capital=currentUser?.capital||0;
   openModal(`
     <div class="card-title"><i class="fas fa-user-edit"></i> تعديل بيانات المستخدم</div>
-    <div class="form-group"><label>الاسم</label><input id="settingsProfileName" value="${String(name).replace(/"/g,'&quot;')}"></div>
-    <div class="form-group" style="margin-top:12px"><label>البريد الإلكتروني</label><input id="settingsProfileEmail" type="email" value="${String(email).replace(/"/g,'&quot;')}"></div>
-    <div class="form-group" style="margin-top:12px"><label>رأس المال</label><input id="settingsProfileCapital" type="number" value="${capital}"></div>
+    <div class="form-group"><label>الاسم</label><input id="settingsProfileName" autocomplete="name" value="${String(name).replace(/"/g,'&quot;')}"></div>
+    <div class="form-group" style="margin-top:12px"><label>البريد الإلكتروني</label><input id="settingsProfileEmail" type="email" autocomplete="email" inputmode="email" value="${String(email).replace(/"/g,'&quot;')}"></div>
+    <div class="form-group" style="margin-top:12px"><label>رأس المال</label><input id="settingsProfileCapital" type="number" inputmode="decimal" min="0" step="0.01" value="${capital}"></div>
     <button class="btn btn-primary btn-block" style="margin-top:16px" onclick="saveProfile()"><i class="fas fa-save"></i> حفظ البيانات</button>
     <button class="btn btn-outline btn-block" style="margin-top:10px" onclick="closeModal()">إلغاء</button>
   `);
