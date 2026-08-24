@@ -1475,6 +1475,49 @@ html[data-theme="dark"] .stat-card{
 .lock-action-row .btn{flex:1}
 </style>
 
+
+<style id="backup-premium-v1517">
+.backup-center{
+  overflow:hidden;
+  border:1px solid color-mix(in srgb,var(--primary) 14%,var(--border)) !important;
+  box-shadow:0 12px 34px color-mix(in srgb,var(--primary) 9%,transparent) !important;
+}
+.backup-head{
+  background:
+    radial-gradient(circle at 88% 12%,color-mix(in srgb,var(--accent) 25%,transparent),transparent 28%),
+    linear-gradient(135deg,var(--primary-dark),var(--primary) 65%,var(--accent)) !important;
+}
+.backup-head-status{
+  border:1px solid rgba(255,255,255,.18) !important;
+  backdrop-filter:blur(8px);
+}
+.backup-status-card{
+  transition:.2s ease;
+}
+.backup-status-card:hover{
+  transform:translateY(-2px);
+  border-color:color-mix(in srgb,var(--primary) 20%,var(--border));
+}
+.backup-action{
+  border-radius:15px !important;
+  min-height:60px !important;
+  font-weight:900 !important;
+}
+.backup-action.primary{
+  background:linear-gradient(135deg,var(--primary-dark),var(--primary),var(--accent)) !important;
+  box-shadow:0 8px 22px color-mix(in srgb,var(--primary) 18%,transparent);
+}
+.backup-action.cloud{
+  background:linear-gradient(135deg,#0b67c2,#4285f4) !important;
+}
+.backup-data-item strong{
+  color:var(--primary) !important;
+}
+.backup-note,.backup-restore-note{
+  border-color:color-mix(in srgb,var(--primary) 12%,var(--border)) !important;
+}
+</style>
+
 </head>
 <body>
 <div id="loading-screen">
@@ -1546,7 +1589,7 @@ html[data-theme="dark"] .stat-card{
 </div>
 <script>
 // ==================== معلومات الإصدار ====================
-const APP_VERSION='v1.5.16';
+const APP_VERSION='v1.5.17';
 const APP_NAME = "كنوز الطبيعة";
 const APP_BUILD_DATE = "24 أغسطس 2026 — تطوير لوحة التحكم الاحترافية";
 
@@ -1732,6 +1775,8 @@ async function findUsableGoogleBackupFile(){
 
 function buildBackupPayload(){
   return {
+    backupType:'kanouz-al-tabia-data',
+    backupVersion:2,
     appName:getAppName(),
     version:APP_VERSION,
     exportedAt:new Date().toISOString(),
@@ -1763,7 +1808,9 @@ function backupSummary(data){
 }
 function isUsableBackup(data){
   if(!data || typeof data!=='object') return false;
-  return backupRecordCounts(data).total>0;
+  const core=['products','sales','purchases','expenses','withdrawals','debts','customers','suppliers','offers'];
+  const validShape=core.every(k=>Array.isArray(data[k]));
+  return validShape && backupRecordCounts(data).total>0;
 }
 
 async function createDriveBackupFile(payload){
@@ -4898,7 +4945,7 @@ function renderSettingsPage(container){
             <div class="backup-head-icon"><i class="fas fa-shield-halved"></i></div>
             <div style="min-width:0">
               <h3>مركز النسخ الاحتياطي</h3>
-              <p>احفظ بياناتك على الجهاز وارفع نسخة آمنة إلى Google Drive.</p>
+              <p>احفظ بيانات كنوز الطبيعة على جهازك أو Google Drive مع التحقق من سلامة النسخة.</p>
             </div>
           </div>
           <div class="backup-head-status" id="backupOverallStatus"><i class="fas fa-circle"></i> جاهز</div>
@@ -4949,7 +4996,7 @@ function renderSettingsPage(container){
         <button class="backup-action outline" style="width:100%;min-height:58px;flex-direction:row" onclick="restoreFromGoogle()"><i class="fas fa-cloud-arrow-down"></i><span>استعادة النسخة من Google Drive</span></button>
         <div class="backup-restore-note"><i class="fas fa-triangle-exclamation"></i><span>الاستعادة من Google Drive تستبدل البيانات المحلية الحالية بالنسخة الموجودة على السحابة. تأكد من أن النسخة السحابية هي النسخة المطلوبة قبل المتابعة.</span></div>
 
-        <div class="backup-note"><i class="fas fa-circle-info"></i><span>البيانات الأساسية تظل محفوظة محليًا وتعمل بدون إنترنت. عند اتصال Google، يقوم البرنامج بتحديث النسخة السحابية تلقائيًا بعد التعديلات على البيانات.</span></div>
+        <div class="backup-note"><i class="fas fa-circle-info"></i><span>بياناتك الأساسية تُحفظ محليًا وتعمل بدون إنترنت. وعند ربط Google، يحدّث البرنامج النسخة السحابية تلقائيًا بعد التعديلات المهمة، مع التحقق من النسخة قبل اعتبارها ناجحة.</span></div>
       </div>
     </div>
 
@@ -5067,43 +5114,52 @@ function showAboutApp(){
 
 // ==================== التصدير والاستيراد ====================
 function exportData(){
-  const data={
-    products:Store.get('products'),
-    sales:Store.get('sales'),
-    purchases:Store.get('purchases'),
-    expenses:Store.get('expenses'),
-    withdrawals:Store.get('withdrawals'),
-    debts:Store.get('debts'),
-    customers:Store.get('customers'),
-    suppliers:Store.get('suppliers'),
-    offers:Store.get('offers'),
-    auditLog:Store.get('auditLog'),
-    userData:currentUser,
-    exportedAt:new Date().toISOString()
-  };
-  const blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'});
+  const data=buildBackupPayload();
+  const json=JSON.stringify(data,null,2);
+  const blob=new Blob([json],{type:'application/json;charset=utf-8'});
   const url=URL.createObjectURL(blob);
-  const a=document.createElement('a');a.href=url;a.download='mozzarella_backup_'+today()+'.json';a.click();URL.revokeObjectURL(url);
-  showToast('✅ تم التصدير');
+  const a=document.createElement('a');
+  a.href=url;
+  a.download='كنوز_الطبيعة_نسخة_احتياطية_'+today()+'_'+APP_VERSION+'.json';
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  setTimeout(()=>URL.revokeObjectURL(url),1000);
+  const size=Math.max(1,Math.round(blob.size/1024));
+  showToast('✅ تم حفظ نسخة احتياطية آمنة — '+size+' كيلوبايت','success');
+  return true;
 }
 function importData(input){
   const file=input.files[0];if(!file)return;
   const reader=new FileReader();
   reader.onload=e=>{
-  const data=JSON.parse(e.target.result);
-    if(!isUsableBackup(data)){
-      showToast('🛡️ ملف النسخة الاحتياطية فارغ أو غير صالح، ولم يتم تغيير أي بيانات','error');
-      return;
+    try{
+      const data=JSON.parse(e.target.result);
+      if(!isUsableBackup(data)){
+        showToast('🛡️ ملف النسخة الاحتياطية فارغ أو غير صالح، ولم يتم تغيير أي بيانات','error');
+        input.value='';
+        return;
+      }
+      const sourceVersion=data.version||'غير معروف';
+      if(!confirm('تم العثور على نسخة صالحة من «'+(data.appName||'كنوز الطبيعة')+'».\nالإصدار: '+sourceVersion+'\n'+backupSummary(data)+'\n\nسيتم استبدال البيانات الحالية. هل تريد المتابعة؟'))return;
+      const collections=getBackupCollections();
+      for(const k of collections) Store.set(k,Array.isArray(data[k])?data[k]:[]);
+      if(data.userData)Store.setUser(data.userData);
+      currentUser=data.userData||currentUser;
+      const stamp=new Date().toLocaleString('ar-EG');
+      localStorage.setItem('bm_last_backup',stamp);
+      refreshGoogleBackupStatusUI();
+      showToast('✅ تمت استعادة النسخة من الجهاز بنجاح','success');
+      setTimeout(()=>navigateTo('dashboard'),350);
+    }catch(err){
+      console.error('Local backup import failed:',err);
+      showToast('❌ ملف النسخة الاحتياطية غير صالح أو تالف','error');
+    }finally{
+      input.value='';
     }
-    if(!confirm('تم العثور على نسخة صالحة.\n'+backupSummary(data)+'\n\nسيتم استبدال البيانات الحالية. هل تريد المتابعة؟'))return;
-    ['products','sales','purchases','expenses','withdrawals','debts','customers','suppliers','offers','auditLog'].forEach(k=>Store.set(k,Array.isArray(data[k])?data[k]:[]));
-    if(data.userData)Store.setUser(data.userData);
-    const stamp=new Date().toLocaleString('ar-EG');
-    localStorage.setItem('bm_last_backup',stamp);
-    refreshGoogleBackupStatusUI();
-    showToast('✅ تمت استعادة النسخة من الجهاز بنجاح');navigateTo('dashboard');
   };
-  reader.readAsText(file);
+  reader.onerror=()=>{showToast('❌ تعذر قراءة ملف النسخة الاحتياطية','error');input.value='';};
+  reader.readAsText(file,'utf-8');
 }
 function clearAllData(){
   if(!confirm('⚠️ سيتم حذف جميع البيانات! متأكد؟'))return;
