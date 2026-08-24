@@ -1576,6 +1576,61 @@ html[data-theme="dark"] .stat-card{
 }
 </style>
 
+
+<style id="suppliers-pro-v1522">
+.suppliers-pro-hero{
+  background:
+    radial-gradient(circle at 88% 15%,color-mix(in srgb,var(--accent) 24%,transparent),transparent 28%),
+    linear-gradient(135deg,var(--primary-dark),var(--primary) 65%,var(--accent));
+  color:#fff;border-radius:18px;padding:18px;margin-bottom:12px;
+  box-shadow:0 12px 30px color-mix(in srgb,var(--primary) 18%,transparent);
+}
+.suppliers-pro-hero h2{margin:3px 0;font-size:1.15rem}
+.suppliers-pro-hero small{opacity:.85}
+.suppliers-pro-stats{display:grid;grid-template-columns:repeat(2,1fr);gap:9px;margin-bottom:12px}
+.suppliers-pro-stat{background:var(--bg-card);border:1px solid var(--border);border-radius:15px;padding:12px;text-align:center}
+.suppliers-pro-stat i{display:block;color:var(--primary);font-size:1rem;margin-bottom:5px}
+.suppliers-pro-stat strong{display:block;font-size:1rem}
+.suppliers-pro-stat span{display:block;margin-top:3px;color:var(--text-muted);font-size:.66rem}
+.suppliers-pro-tools{display:grid;grid-template-columns:1fr auto;gap:8px;margin-bottom:10px}
+.suppliers-pro-tools select,.suppliers-pro-tools input{width:100%;min-height:43px}
+.supplier-pro-card{
+  display:grid;grid-template-columns:auto 1fr auto;gap:9px;align-items:center;
+  padding:10px 11px;border:1px solid var(--border);border-radius:15px;background:var(--bg-card);
+  margin-bottom:7px;box-shadow:0 4px 15px rgba(0,0,0,.035);
+}
+.supplier-pro-avatar{
+  width:40px;height:40px;border-radius:12px;display:flex;align-items:center;justify-content:center;
+  background:linear-gradient(135deg,var(--primary),var(--accent));color:#fff;font-weight:950;
+}
+.supplier-pro-name{font-weight:950;font-size:.82rem;line-height:1.4}
+.supplier-pro-meta{font-size:.62rem;color:var(--text-muted);margin-top:2px;line-height:1.45}
+.supplier-pro-money{text-align:left;white-space:nowrap}
+.supplier-pro-money strong{display:block;color:var(--primary);font-size:.72rem}
+.supplier-pro-money small{display:block;margin-top:2px;font-size:.59rem}
+.supplier-pro-debt{color:#b47700}
+.supplier-pro-actions{grid-column:1/-1;display:grid;grid-template-columns:1.15fr 1fr .7fr;gap:5px;margin-top:1px}
+.supplier-pro-actions .btn{min-height:39px;padding:7px 6px;font-size:.68rem}
+.supplier-statement-head{
+  background:linear-gradient(135deg,var(--primary-dark),var(--primary),var(--accent));
+  color:#fff;border-radius:16px;padding:16px;margin-bottom:12px;
+}
+.supplier-statement-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:7px;margin-top:11px}
+.supplier-statement-stat{background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.16);border-radius:11px;padding:9px;text-align:center}
+.supplier-statement-stat strong{display:block;font-size:.78rem}
+.supplier-statement-stat span{display:block;font-size:.58rem;opacity:.8;margin-top:3px}
+.supplier-statement-line{padding:11px 2px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;gap:10px;align-items:center}
+.supplier-statement-line:last-child{border-bottom:0}
+.supplier-statement-line small{display:block;color:var(--text-muted);margin-top:3px;font-size:.61rem}
+.supplier-statement-line strong{font-size:.75rem}
+@media(max-width:430px){
+  .supplier-pro-card{grid-template-columns:auto 1fr auto}
+  .supplier-pro-money{text-align:left}
+  .supplier-pro-name{font-size:.78rem}
+  .supplier-pro-meta{max-width:190px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+}
+</style>
+
 </head>
 <body>
 <div id="loading-screen">
@@ -1647,7 +1702,7 @@ html[data-theme="dark"] .stat-card{
 </div>
 <script>
 // ==================== معلومات الإصدار ====================
-const APP_VERSION='v1.5.21';
+const APP_VERSION='v1.5.22';
 const APP_NAME = "كنوز الطبيعة";
 const APP_BUILD_DATE = "24 أغسطس 2026 — تطوير لوحة التحكم الاحترافية";
 
@@ -4515,26 +4570,143 @@ function saveCustomerEdit(id){
 function deleteCustomer(id){if(!confirm('حذف العميل؟'))return;Store.delete('customers',id);showToast('🗑️ تم الحذف');renderCustomersPage(document.getElementById('contentArea'));}
 
 // ==================== الموردين (ميزة جديدة) ====================
+function getSupplierFinancials(supplier){
+  const purchases=Store.get('purchases')||[];
+  const supplierId=String(supplier.id);
+  const supplierName=String(supplier.name||'').trim().toLowerCase();
+  const rows=purchases.filter(p=>{
+    if(p.supplierId && String(p.supplierId)===supplierId) return true;
+    return !p.supplierId && String(p.supplier||p.supplierName||'').trim().toLowerCase()===supplierName;
+  });
+  const batches={};
+  rows.forEach(p=>{
+    const key=p.purchaseBatchId||p.invoiceNo||p.id;
+    if(!batches[key]) batches[key]={total:0,paid:0,remaining:0,date:p.date,invoiceNo:p.invoiceNo||key};
+    batches[key].total=Math.max(batches[key].total,Number(p.total||p.cost||p.amount||0));
+    batches[key].paid=Math.max(batches[key].paid,Number(p.paid||0));
+    batches[key].remaining=Math.max(batches[key].remaining,Number(p.remaining||0));
+    batches[key].date=p.date||batches[key].date;
+    batches[key].invoiceNo=p.invoiceNo||batches[key].invoiceNo;
+  });
+  const invoices=Object.values(batches).sort((a,b)=>String(b.date||'').localeCompare(String(a.date||'')));
+  const totalPurchased=invoices.reduce((n,x)=>n+Number(x.total||0),0);
+  const paid=invoices.reduce((n,x)=>n+Number(x.paid||0),0);
+  const remaining=invoices.reduce((n,x)=>n+Number(x.remaining||0),0);
+  return {rows,invoices,totalPurchased,paid,remaining};
+}
+
 function renderSuppliersPage(container){
-  const suppliers=Store.get('suppliers');
+  const suppliers=Store.get('suppliers')||[];
   window.allSuppliers=suppliers;
-  container.innerHTML=`<div class="fade-in">
-    <div class="card"><div class="card-title"><i class="fas fa-truck"></i> إضافة مورد جديد</div>
+  const totalPurchased=suppliers.reduce((n,s)=>n+Number(s.totalPurchased||0),0);
+  const totalRemaining=suppliers.reduce((n,s)=>n+getSupplierFinancials(s).remaining,0);
+
+  container.innerHTML=`<div class="fade-in suppliers-pro">
+    <div class="suppliers-pro-hero">
+      <small>إدارة الموردين والحسابات</small>
+      <h2><i class="fas fa-truck-field"></i> الموردين</h2>
+      <small>متابعة الموردين والمشتريات والمدفوعات وكشوف الحساب</small>
+    </div>
+
+    <div class="suppliers-pro-stats">
+      <div class="suppliers-pro-stat"><i class="fas fa-truck-field"></i><strong>${suppliers.length}</strong><span>إجمالي الموردين</span></div>
+      <div class="suppliers-pro-stat"><i class="fas fa-cart-shopping"></i><strong>${fmt(totalPurchased)}</strong><span>إجمالي المشتريات</span></div>
+      <div class="suppliers-pro-stat"><i class="fas fa-money-bill-transfer"></i><strong>${fmt(suppliers.reduce((n,s)=>n+getSupplierFinancials(s).paid,0))}</strong><span>إجمالي المدفوع</span></div>
+      <div class="suppliers-pro-stat"><i class="fas fa-file-invoice-dollar"></i><strong>${fmt(totalRemaining)}</strong><span>إجمالي المتبقي</span></div>
+    </div>
+
+    <div class="card">
+      <div class="card-title"><i class="fas fa-user-plus"></i> إضافة مورد جديد</div>
       <div class="form-grid">
-        <div class="form-group"><label>اسم المورد</label><input type="text" id="supName" placeholder="اسم المورد"></div>
-        <div class="form-group"><label>رقم الهاتف</label><input type="tel" id="supPhone" placeholder="01xxxxxxxx"></div>
-        <div class="form-group"><label>العنوان</label><input type="text" id="supAddress" placeholder="اختياري"></div>
-        <div class="form-group"><label>ملاحظات</label><input type="text" id="supNote" placeholder="اختياري"></div>
+        <div class="form-group"><label>اسم المورد</label><input type="text" id="sName" placeholder="اسم المورد"></div>
+        <div class="form-group"><label>رقم الهاتف</label><input type="tel" id="sPhone" placeholder="01xxxxxxxx"></div>
+        <div class="form-group"><label>العنوان</label><input type="text" id="sAddress" placeholder="اختياري"></div>
+        <div class="form-group"><label>ملاحظات</label><input type="text" id="sNote" placeholder="اختياري"></div>
       </div>
       <button class="btn btn-primary btn-block" onclick="addSupplier()"><i class="fas fa-save"></i> حفظ المورد</button>
     </div>
-    <div class="card"><div class="card-title"><i class="fas fa-list"></i> قائمة الموردين</div>
-      <div class="search-box"><input type="text" id="supplierSearch" placeholder="🔍 ابحث..." oninput="filterSuppliers()"></div>
+
+    <div class="card">
+      <div class="card-title"><i class="fas fa-address-book"></i> قائمة الموردين</div>
+      <div class="suppliers-pro-tools">
+        <input type="text" id="supplierSearch" placeholder="🔍 ابحث بالاسم أو الهاتف..." oninput="filterSuppliers()">
+        <select id="supplierBalanceFilter" onchange="filterSuppliers()">
+          <option value="" selected>كل الموردين</option>
+          <option value="debt">عليه متبقي</option>
+          <option value="clear">حسابه خالص</option>
+        </select>
+      </div>
       <div id="suppliersList"></div>
     </div>
   </div>`;
   filterSuppliers();
 }
+
+function filterSuppliers(){
+  const search=(document.getElementById('supplierSearch')?.value||'').toLowerCase().trim();
+  const balance=document.getElementById('supplierBalanceFilter')?.value||'';
+  const suppliers=(window.allSuppliers||[]).filter(s=>{
+    const f=getSupplierFinancials(s);
+    const matchesSearch=!search || String(s.name||'').toLowerCase().includes(search) || String(s.phone||'').includes(search);
+    const matchesBalance=!balance || (balance==='debt'&&f.remaining>0) || (balance==='clear'&&f.remaining<=0);
+    return matchesSearch&&matchesBalance;
+  });
+
+  document.getElementById('suppliersList').innerHTML=suppliers.map(s=>{
+    const f=getSupplierFinancials(s);
+    const contactParts=[];
+    if(String(s.phone||'').trim()) contactParts.push('📞 '+s.phone);
+    if(String(s.address||'').trim()) contactParts.push('📍 '+s.address);
+    const meta=contactParts.length?contactParts.join(' • '):'بيانات الاتصال غير مضافة';
+    const first=String(s.name||'م')[0];
+    return `<div class="supplier-pro-card">
+      <div class="supplier-pro-avatar">${first}</div>
+      <div>
+        <div class="supplier-pro-name">${s.name}</div>
+        <div class="supplier-pro-meta">${meta}</div>
+      </div>
+      <div class="supplier-pro-money">
+        <strong>${fmt(f.totalPurchased)}</strong>
+        <small class="${f.remaining>0?'supplier-pro-debt':''}">${f.remaining>0?'متبقي '+fmt(f.remaining):'لا يوجد متبقي'}</small>
+      </div>
+      <div class="supplier-pro-actions">
+        <button class="btn btn-sm btn-primary" onclick="openSupplierStatement('${s.id}')"><i class="fas fa-file-invoice-dollar"></i> كشف الحساب</button>
+        <button class="btn btn-sm btn-outline" onclick="editSupplier('${s.id}')"><i class="fas fa-edit"></i> تعديل</button>
+        <button class="btn btn-sm btn-danger" onclick="deleteSupplier('${s.id}')"><i class="fas fa-trash"></i></button>
+      </div>
+    </div>`;
+  }).join('')||'<div class="empty-state"><i class="fas fa-truck-field"></i><p>لا يوجد موردون مطابقون للبحث</p></div>';
+}
+
+function openSupplierStatement(id){
+  const supplier=(Store.get('suppliers')||[]).find(s=>s.id===id);
+  if(!supplier)return;
+  const f=getSupplierFinancials(supplier);
+  const rows=f.invoices.slice(0,30).map(inv=>`
+    <div class="supplier-statement-line">
+      <div><strong>فاتورة شراء ${inv.invoiceNo||'-'}</strong><small>${formatInvoiceDate(inv.date)}</small></div>
+      <div style="text-align:left"><strong>${fmt(inv.total)}</strong><small>${inv.remaining>0?'متبقي '+fmt(inv.remaining):'مدفوع '+fmt(inv.paid)}</small></div>
+    </div>`).join('');
+
+  openModal(`
+    <div class="supplier-statement-head">
+      <div style="font-size:.7rem;opacity:.8">كشف حساب المورد</div>
+      <h2 style="margin:4px 0">${supplier.name}</h2>
+      <div style="font-size:.68rem;opacity:.82">${supplier.phone||'بدون هاتف'}</div>
+      <div class="supplier-statement-stats">
+        <div class="supplier-statement-stat"><strong>${fmt(f.totalPurchased)}</strong><span>إجمالي المشتريات</span></div>
+        <div class="supplier-statement-stat"><strong>${fmt(f.paid)}</strong><span>إجمالي المدفوع</span></div>
+        <div class="supplier-statement-stat"><strong>${fmt(f.remaining)}</strong><span>المتبقي</span></div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title"><i class="fas fa-clock-rotate-left"></i> حركة فواتير الشراء</div>
+      ${rows||'<div class="empty-state"><i class="fas fa-receipt"></i><p>لا توجد مشتريات مسجلة لهذا المورد</p></div>'}
+    </div>
+    <button class="btn btn-outline btn-block" onclick="closeModal()"><i class="fas fa-check"></i> تم</button>
+  `);
+}
+
 function addSupplier(){
   const name=document.getElementById('supName').value.trim();
   if(!name)return showToast('أدخل اسم المورد','warning');
