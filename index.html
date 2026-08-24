@@ -556,7 +556,7 @@ tr:hover td{background:rgba(15,118,110,.045)}
 @media(max-width:800px){.dash-kpis,.products-kpis{grid-template-columns:repeat(2,1fr)}.dash-grid-2{grid-template-columns:1fr}.products-filters{grid-template-columns:1fr}.products-filter-buttons{order:2}.products-filters select{order:3}.sales-today-strip{grid-template-columns:repeat(2,1fr)}}
 @media(max-width:480px){.dash-welcome,.products-hero{align-items:flex-start;flex-direction:column}.dash-date{align-self:stretch;text-align:center}.dash-kpi strong{font-size:1.05rem}.products-kpis>div{padding:10px}.products-kpis>div{display:grid;grid-template-columns:32px 1fr}.products-kpis i{width:32px;height:32px;grid-row:1/3}.products-list-view .product-item{display:grid;grid-template-columns:64px 1fr}.products-list-view .product-item .p-image{width:64px;height:64px}.products-list-view .product-item .p-actions{grid-column:2;grid-row:auto}.products-list-view .product-item .p-actions .btn:first-child{display:inline-flex}.sales-today-strip>div{padding:8px}.sales-today-strip strong{font-size:.72rem}}
 
-/* ==================== كنوز الطبيعة v1.5.11 - لوحة تحكم احترافية ==================== */
+/* ==================== كنوز الطبيعة v1.5.12 - تحسين لوحة التحكم ==================== */
 .dashboard-v2{padding-bottom:8px}
 .dashboard-v2 .dash-welcome{position:relative;overflow:hidden;min-height:142px;padding:22px 20px;background:linear-gradient(135deg,#0b655e 0%,#0f766e 48%,#1d857a 72%,#c99a22 155%);box-shadow:0 14px 34px rgba(15,118,110,.20)}
 .dashboard-v2 .dash-welcome::before{content:'';position:absolute;width:220px;height:220px;border-radius:50%;left:-90px;top:-125px;background:rgba(255,255,255,.07);pointer-events:none}
@@ -577,7 +577,14 @@ tr:hover td{background:rgba(15,118,110,.045)}
 .dashboard-v2 .dash-kpi:nth-child(3) .dash-kpi-icon{background:rgba(47,128,183,.11);color:var(--info)}
 .dashboard-v2 .dash-kpi:nth-child(4) .dash-kpi-icon{background:rgba(201,154,34,.12);color:#a7790c}
 .dashboard-v2 .dash-kpi span{font-size:.67rem;font-weight:800}
-.dashboard-v2 .dash-kpi strong{font-size:1.18rem;letter-spacing:.1px}
+.dashboard-v2 .dash-kpi strong{font-size:1.34rem;letter-spacing:.1px;line-height:1.2;white-space:nowrap}
+.dashboard-v2 .dash-kpi small{font-size:.6rem}
+.dashboard-v2 .dash-kpi.main strong{font-size:1.42rem}
+.dashboard-v2 .dashboard-chart-wrap{height:260px;position:relative}
+.dashboard-v2 .dash-recent-list{position:relative}
+.dashboard-v2 .dash-recent-more{display:flex;justify-content:center;align-items:center;width:100%;margin-top:8px;padding:9px 12px;border:1px solid var(--border);background:#f7faf8;color:var(--primary);border-radius:11px;font-family:inherit;font-weight:900;font-size:.68rem;cursor:pointer}
+.dashboard-v2 .dash-recent-more:hover{background:var(--primary);color:#fff;border-color:var(--primary)}
+@media(max-width:480px){.dashboard-v2 .dash-kpi strong{font-size:1.12rem}.dashboard-v2 .dash-kpi.main strong{font-size:1.2rem}.dashboard-v2 .dashboard-chart-wrap{height:235px}.dashboard-v2 .dash-card-head h3{font-size:.9rem}.dashboard-v2 .dash-card-head small{font-size:.61rem}.dashboard-v2 .dash-recent>div{padding:8px 0}.dashboard-v2 .dash-recent-icon{width:31px;height:31px}.dashboard-v2 .dash-recent strong{font-size:.66rem}.dashboard-v2 .dash-recent div:nth-child(2){font-size:.68rem}}
 .dashboard-v2 .dash-trend{display:inline-flex!important;align-items:center;gap:4px;margin-top:4px;padding:3px 7px;border-radius:999px;background:#f2faf6}
 .dashboard-v2 .dash-trend.down{background:#fff5f5}
 .dashboard-v2 .dash-overview{display:grid;grid-template-columns:repeat(4,1fr);gap:9px;margin:-2px 0 16px}
@@ -1340,7 +1347,7 @@ html[data-theme="dark"] .receipt-pro-new th{background:var(--primary-dark)!impor
 </div>
 <script>
 // ==================== معلومات الإصدار ====================
-const APP_VERSION='v1.5.11';
+const APP_VERSION='v1.5.12';
 const APP_NAME = "كنوز الطبيعة";
 const APP_BUILD_DATE = "24 أغسطس 2026 — تطوير لوحة التحكم الاحترافية";
 
@@ -2011,7 +2018,7 @@ function renderDashboardPage(container){
   const best=Object.entries(sold).sort((a,b)=>b[1]-a[1]).slice(0,5).map(([id,qty])=>{
     const p=products.find(x=>String(x.id)===String(id)); return {name:p?.name||id,qty,p};
   });
-  const recent=[...sales.map(x=>({...x,kind:'بيع',icon:'🛒',time:x.createdAt||x.date})),...debts.filter(d=>!d.paid).map(x=>({...x,kind:'دين',icon:'📋',time:x.createdAt||x.date,total:x.amount}))].sort((a,b)=>String(b.time).localeCompare(String(a.time))).slice(0,6);
+  const recent=[...sales.map(x=>({...x,kind:'بيع',icon:'🛒',time:x.createdAt||x.date})),...debts.filter(d=>!d.paid).map(x=>({...x,kind:'دين',icon:'📋',time:x.createdAt||x.date,total:x.amount}))].sort((a,b)=>String(b.time).localeCompare(String(a.time))).slice(0,4);
   const trend=change>=0?`<span class="dash-trend up"><i class="fas fa-arrow-trend-up"></i> ${Math.abs(change).toFixed(1)}% عن أمس</span>`:`<span class="dash-trend down"><i class="fas fa-arrow-trend-down"></i> ${Math.abs(change).toFixed(1)}% عن أمس</span>`;
   const lowHtml=lowStock.length?`<div class="dash-alert"><div class="dash-alert-icon"><i class="fas fa-triangle-exclamation"></i></div><div><strong>تنبيه المخزون</strong><span>${lowStock.length} صنف يحتاج مراجعة${outStock.length?` — ${outStock.length} صنف نافد`:''}</span></div><button onclick="navigateTo('products')">عرض الأصناف</button></div>`:'';
   container.innerHTML=`<div class="fade-in dashboard-v2">
@@ -2040,10 +2047,10 @@ function renderDashboardPage(container){
       <div class="card dash-card"><div class="dash-card-head"><div><h3><i class="fas fa-wallet"></i> المديونيات</h3><small>الوضع الحالي</small></div></div><div class="dash-debts"><button onclick="navigateTo('debts')"><span class="debt-dot ours"></span><div><b>مستحق لنا</b><small>عملاء مدينون</small></div><strong>${fmt(activeDebts)}</strong></button><button onclick="navigateTo('debts')"><span class="debt-dot theirs"></span><div><b>علينا</b><small>موردون / التزامات</small></div><strong>${fmt(debtsOnUs)}</strong></button></div></div>
     </div>
     <div class="dash-grid-2">
-      <div class="card dash-card"><div class="dash-card-head"><div><h3><i class="fas fa-chart-column"></i> أداء المبيعات والأرباح</h3><small>آخر 7 أيام</small></div><button onclick="navigateTo('summary')">التفاصيل</button></div><div class="chart-container"><canvas id="weekChart"></canvas></div></div>
+      <div class="card dash-card"><div class="dash-card-head"><div><h3><i class="fas fa-chart-column"></i> أداء المبيعات والأرباح</h3><small>آخر 7 أيام</small></div><button onclick="navigateTo('summary')">التفاصيل</button></div><div class="dashboard-chart-wrap"><canvas id="weekChart"></canvas></div></div>
       <div class="card dash-card"><div class="dash-card-head"><div><h3><i class="fas fa-star"></i> الأكثر مبيعًا اليوم</h3><small>حسب الكمية</small></div></div><div class="dash-best-list">${best.length?best.map((x,i)=>`<div><span>${i+1}</span><div class="dash-best-img">${x.p?.image?`<img src="${x.p.image}" alt="">`:(x.p?.type==='cheese'?'🧀':'❄️')}</div><b>${x.name}</b><strong>${formatProductQty(x.p,x.qty)} ${x.p?.unit||'كجم'}</strong></div>`).join(''):'<div class="empty-state"><i class="fas fa-box-open"></i><p>لا توجد مبيعات أصناف اليوم</p></div>'}</div></div>
     </div>
-    <div class="card dash-card"><div class="dash-card-head"><div><h3><i class="fas fa-clock-rotate-left"></i> آخر العمليات</h3><small>أحدث النشاطات</small></div><span class="dash-count">${customers.length} عميل</span></div><div class="dash-recent">${recent.length?recent.map(a=>`<div><span class="dash-recent-icon">${a.icon}</span><div><b>${a.kind}</b><small>${a.productName||a.person||a.customerName||'عملية'}</small></div><strong>${fmt(a.total||0)}</strong></div>`).join(''):'<div class="empty-state"><i class="fas fa-inbox"></i><p>لا توجد عمليات بعد</p></div>'}</div></div>
+    <div class="card dash-card"><div class="dash-card-head"><div><h3><i class="fas fa-clock-rotate-left"></i> آخر العمليات</h3><small>أحدث 4 عمليات</small></div><span class="dash-count">${customers.length} عميل</span></div><div class="dash-recent-list"><div class="dash-recent">${recent.length?recent.map(a=>`<div><span class="dash-recent-icon">${a.icon}</span><div><b>${a.kind}</b><small>${a.productName||a.person||a.customerName||'عملية'}</small></div><strong>${fmt(a.total||0)}</strong></div>`).join(''):'<div class="empty-state"><i class="fas fa-inbox"></i><p>لا توجد عمليات بعد</p></div>'}</div>${recent.length?'<button class="dash-recent-more" onclick="navigateTo(&quot;sales&quot;)">عرض كل العمليات <i class="fas fa-arrow-left" style="margin-right:6px"></i></button>':''}</div></div>
   </div>`;
   renderWeekChart(sales);
 }
@@ -2054,7 +2061,7 @@ function renderWeekChart(sales){
   const ctx=document.getElementById('weekChart');if(!ctx)return;
   const days=[],data=[],profitData=[];
   for(let i=6;i>=0;i--){const d=new Date();d.setDate(d.getDate()-i);const ds=d.toISOString().split('T')[0];days.push(d.toLocaleDateString('ar-EG',{weekday:'short'}));const daySales=sales.filter(s=>s.date===ds);data.push(daySales.reduce((sum,s)=>sum+(s.total||0),0));profitData.push(daySales.reduce((sum,s)=>sum+(s.profit||0),0));}
-  new Chart(ctx,{type:'bar',data:{labels:days,datasets:[{label:'المبيعات',data,backgroundColor:'rgba(15,118,110,0.7)',borderColor:'#0f766e',borderWidth:1,borderRadius:8,yAxisID:'y'},{label:'المكسب',data:profitData,backgroundColor:'rgba(16,185,129,0.7)',borderColor:'#10b981',borderWidth:1,borderRadius:8,yAxisID:'y1'}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:true,labels:{color:'#94a3b8'}}},scales:{y:{beginAtZero:true,grid:{color:'rgba(255,255,255,0.05)'},ticks:{color:'#94a3b8'},position:'right'},y1:{beginAtZero:true,grid:{display:false},ticks:{color:'#10b981'},position:'left'}}}});
+  new Chart(ctx,{type:'bar',data:{labels:days,datasets:[{label:'المبيعات',data,backgroundColor:'rgba(15,118,110,0.7)',borderColor:'#0f766e',borderWidth:1,borderRadius:7,yAxisID:'y'},{label:'المكسب',data:profitData,backgroundColor:'rgba(16,185,129,0.7)',borderColor:'#10b981',borderWidth:1,borderRadius:7,yAxisID:'y1'}]},options:{responsive:true,maintainAspectRatio:false,interaction:{mode:'index',intersect:false},plugins:{legend:{display:true,position:'top',align:'end',labels:{color:'#64748b',font:{size:9,weight:'700'},boxWidth:10,padding:10}},tooltip:{callbacks:{label:(ctx)=>`${ctx.dataset.label}: ${fmt(ctx.parsed.y||0)}`}}},scales:{x:{grid:{display:false},ticks:{color:'#94a3b8',font:{size:8,weight:'700'}}},y:{beginAtZero:true,grid:{color:'rgba(148,163,184,0.10)'},ticks:{color:'#94a3b8',font:{size:8},maxTicksLimit:5},position:'right'},y1:{beginAtZero:true,grid:{display:false},ticks:{color:'#10b981',font:{size:8},maxTicksLimit:5},position:'left'}}}});
 }
 
 // ==================== الأصناف ====================
