@@ -2050,6 +2050,7 @@ input[type="date"].sales-date-filter:focus{
   background:#eaf8f1!important;border-color:#c8eadb!important;color:#087443!important;
 }
 @media(max-width:600px){
+  .invoice-modal-pro{max-height:72vh!important;padding-bottom:4px!important}
   .invoice-detail-modern{max-width:none}
   .invoice-detail-customer{padding:9px;margin-bottom:7px}
   .invoice-detail-avatar{width:34px;height:34px;border-radius:10px}
@@ -2062,8 +2063,17 @@ input[type="date"].sales-date-filter:focus{
   .invoice-line-pro strong{font-size:.68rem!important}
   .invoice-line-pro small{font-size:.56rem!important}
   .invoice-line-pro>b{font-size:.68rem!important}
-  .invoice-detail-actions{display:flex!important;flex-wrap:wrap!important;justify-content:center!important;gap:6px!important}
-  .invoice-detail-actions button{flex:0 0 calc((100% - 12px)/3)!important;padding:9px 4px!important;font-size:.61rem!important;min-height:38px!important}
+  .invoice-detail-actions{display:grid!important;grid-template-columns:repeat(3,minmax(0,1fr))!important;gap:6px!important;align-items:stretch!important}
+  .invoice-detail-actions button{width:100%!important;min-width:0!important;max-width:none!important;padding:8px 3px!important;font-size:.60rem!important;min-height:36px!important}
+  .invoice-detail-actions button:last-child{ }
+}
+/* v1.5.39 — ترتيب أزرار تفاصيل الفاتورة على الشاشات الضيقة */
+@media(max-width:600px){
+  .invoice-detail-actions{grid-template-columns:repeat(6,minmax(0,1fr))!important}
+  .invoice-detail-actions button{grid-column:span 2!important}
+  .invoice-detail-actions button:nth-child(4){grid-column:2 / span 2!important}
+  .invoice-detail-actions button:nth-child(5){grid-column:4 / span 2!important}
+  .invoice-detail-actions button:nth-child(6){grid-column:3 / span 2!important}
 }
 </style>
 
@@ -2138,7 +2148,7 @@ input[type="date"].sales-date-filter:focus{
 </div>
 <script>
 // ==================== معلومات الإصدار ====================
-const APP_VERSION='v1.5.38';
+const APP_VERSION='v1.5.39';
 const APP_NAME = "كنوز الطبيعة";
 const APP_BUILD_DATE = "24 أغسطس 2026 — تطوير لوحة التحكم الاحترافية";
 
@@ -3978,7 +3988,7 @@ function printPOSReceipt(){
   const w=window.open('','_blank','width=760,height=900'); if(!w)return showToast('المتصفح منع نافذة الطباعة','warning');
   const doc=`<!doctype html><html lang="ar" dir="rtl"><head><meta charset="utf-8"><title>${inv.invoiceNo}</title><style>
   @page{size:A4;margin:14mm}body{font-family:Arial,sans-serif;color:#222;margin:0;background:#fff}.page{max-width:760px;margin:0 auto;padding:18px}.brand{text-align:center;font-size:24px;font-weight:900;margin-bottom:4px}.sub{text-align:center;color:#666;font-size:12px;line-height:1.8}.line{border-top:1px dashed #888;margin:14px 0}table{width:100%;border-collapse:collapse;font-size:13px}th,td{padding:9px 5px;border-bottom:1px solid #ddd;text-align:right}.r{display:flex;justify-content:space-between;padding:8px 0}.grand{font-size:19px;font-weight:900;border-top:2px solid #222;margin-top:8px;padding-top:12px}.thanks{text-align:center;margin-top:20px;font-size:12px;color:#666}@media print{.page{padding:0}}
-  </style></head><body><div class="page"><div class="brand">كنوز الطبيعة</div><div class="sub">فاتورة بيع رقم ${inv.invoiceSeq||inv.invoiceNo}<br>${formatInvoiceDate(inv.date)}${inv.time?' • '+inv.time:''}<br>العميل: ${inv.customerName}<br>نوع البيع: ${inv.type==='wholesale'?'جملة':'قطاعي'}</div><div class="line"></div><table><thead><tr><th>الصنف</th><th>الكمية</th><th>الإجمالي</th></tr></thead><tbody>${rows}</tbody></table><div class="line"></div><div class="r"><span>الإجمالي قبل الخصم</span><b>${fmt(inv.subtotal)}</b></div><div class="r"><span>الخصم</span><b>${fmt(inv.discount)}</b></div><div class="r"><span>الضريبة</span><b>${fmt(inv.tax)}</b></div><div class="r grand"><span>الإجمالي النهائي</span><b>${fmt(inv.total)} ج.م</b></div><div class="r"><span>المدفوع</span><b>${fmt(inv.paid)}</b></div><div class="r"><span>${inv.method==='cash'?'الباقي':'المتبقي'}</span><b>${fmt(inv.method==='cash'?inv.change:inv.remaining)}</b></div><div class="r"><span>السداد</span><b>${({cash:'نقدي',credit:'آجل',transfer:'تحويل',card:'بطاقة'})[inv.method]||inv.method||'نقدي'}</b></div><div class="thanks">شكرًا لتعاملكم معنا ❤️</div></div></body></html>`;
+  </style></head><body><div class="page"><div class="brand">كنوز الطبيعة</div><div class="sub">فاتورة بيع رقم ${inv.invoiceSeq||inv.invoiceNo}<br>${formatInvoiceDate(inv.date)}${inv.time?' • '+inv.time:''}<br>العميل: ${inv.customerName}<br>نوع البيع: ${inv.type==='wholesale'?'جملة':'قطاعي'}</div><div class="line"></div><table><thead><tr><th>الصنف</th><th>الكمية</th><th>الإجمالي</th></tr></thead><tbody>${rows}</tbody></table><div class="line"></div><div class="r"><span>الإجمالي قبل الخصم</span><b>${fmt(inv.subtotal)}</b></div><div class="r"><span>الخصم</span><b>${fmt(inv.discount)}</b></div><div class="r"><span>الضريبة</span><b>${fmt(inv.tax)}</b></div><div class="r grand"><span>الإجمالي النهائي</span><b>${fmt(inv.total)}</b></div><div class="r"><span>المدفوع</span><b>${fmt(inv.paid)}</b></div><div class="r"><span>${inv.method==='cash'?'الباقي':'المتبقي'}</span><b>${fmt(inv.method==='cash'?inv.change:inv.remaining)}</b></div><div class="r"><span>السداد</span><b>${({cash:'نقدي',credit:'آجل',transfer:'تحويل',card:'بطاقة'})[inv.method]||inv.method||'نقدي'}</b></div><div class="thanks">شكرًا لتعاملكم معنا ❤️</div></div></body></html>`;
   w.document.open(); w.document.write(doc); w.document.close(); w.focus(); setTimeout(()=>w.print(),300);
 }
 
@@ -6755,15 +6765,15 @@ if ('serviceWorker' in navigator) {
       const cashierLabel=`بيع من الكاشير — ${qty}`;
       t+=`${i+1}. *${s.productName||'صنف'}*\n`;
       t+=`   📦 ${cashierLabel}\n`;
-      t+=`   💰 ${fmt(s.total)} ج.م\n`;
+      t+=`   💰 ${fmt(s.total)}\n`;
     });
     t+=`━━━━━━━━━━━━━━\n`;
     if(money(inv.subtotal)!==money(inv.total)||money(inv.discount)>0)t+=`الإجمالي قبل الخصم: ${fmt(inv.subtotal)}\n`;
     if(money(inv.discount)>0)t+=`🏷️ الخصم: ${fmt(inv.discount)}\n`;
     if(money(inv.tax)>0)t+=`🧾 الضريبة: ${fmt(inv.tax)}\n`;
-    t+=`💰 *الإجمالي النهائي: ${fmt(inv.total)} ج.م*\n`;
-    t+=`💵 المدفوع: ${fmt(inv.paid)} ج.م\n`;
-    t+=`${inv.paymentMethod==='cash'?'💸 الباقي':'📌 المتبقي'}: *${fmt(inv.paymentMethod==='cash'?Math.max(0,inv.paid-inv.total):inv.remaining)} ج.م*\n`;
+    t+=`💰 *الإجمالي النهائي: ${fmt(inv.total)}*\n`;
+    t+=`💵 المدفوع: ${fmt(inv.paid)}\n`;
+    t+=`${inv.paymentMethod==='cash'?'💸 الباقي':'📌 المتبقي'}: *${fmt(inv.paymentMethod==='cash'?Math.max(0,inv.paid-inv.total):inv.remaining)}*\n`;
     t+=`💳 السداد: *${paymentLabel(inv.paymentMethod)}*`;
     if(inv.note)t+=`\n📝 ملاحظة: ${inv.note}`;
     t+=`\n━━━━━━━━━━━━━━\n❤️ *شكرًا لتعاملكم معنا*`;
