@@ -2024,7 +2024,31 @@ input[type="date"].sales-date-filter:focus{
   margin:2px 0;padding:7px 8px!important;
   border-radius:9px;background:#fff7e8;
 }
-.invoice-detail-actions{margin-top:9px!important}
+.invoice-detail-actions{
+  margin-top:10px!important;
+  display:flex!important;
+  flex-wrap:wrap!important;
+  justify-content:center!important;
+  gap:7px!important;
+}
+.invoice-detail-actions button{
+  flex:0 0 calc((100% - 14px)/3)!important;
+  min-height:40px!important;
+  padding:9px 5px!important;
+  border-radius:11px!important;
+}
+.invoice-detail-totals .invoice-remaining-row{
+  margin:3px 0!important;
+  padding:8px 10px!important;
+  border-radius:10px!important;
+  background:linear-gradient(135deg,#fff8e8,#fff3d7)!important;
+  border:1px solid #f0d79b!important;
+  color:#9a6200!important;
+}
+.invoice-detail-totals .invoice-remaining-row b{font-size:.82rem!important;font-weight:950!important}
+.invoice-detail-totals .invoice-remaining-row.paid-ok{
+  background:#eaf8f1!important;border-color:#c8eadb!important;color:#087443!important;
+}
 @media(max-width:600px){
   .invoice-detail-modern{max-width:none}
   .invoice-detail-customer{padding:9px;margin-bottom:7px}
@@ -2038,8 +2062,8 @@ input[type="date"].sales-date-filter:focus{
   .invoice-line-pro strong{font-size:.68rem!important}
   .invoice-line-pro small{font-size:.56rem!important}
   .invoice-line-pro>b{font-size:.68rem!important}
-  .invoice-detail-actions{grid-template-columns:repeat(3,1fr)!important;gap:6px!important}
-  .invoice-detail-actions button{padding:9px 4px!important;font-size:.61rem!important}
+  .invoice-detail-actions{display:flex!important;flex-wrap:wrap!important;justify-content:center!important;gap:6px!important}
+  .invoice-detail-actions button{flex:0 0 calc((100% - 12px)/3)!important;padding:9px 4px!important;font-size:.61rem!important;min-height:38px!important}
 }
 </style>
 
@@ -2114,7 +2138,7 @@ input[type="date"].sales-date-filter:focus{
 </div>
 <script>
 // ==================== معلومات الإصدار ====================
-const APP_VERSION='v1.5.37';
+const APP_VERSION='v1.5.38';
 const APP_NAME = "كنوز الطبيعة";
 const APP_BUILD_DATE = "24 أغسطس 2026 — تطوير لوحة التحكم الاحترافية";
 
@@ -6827,7 +6851,7 @@ if ('serviceWorker' in navigator) {
       <div class="invoice-totals-pro invoice-detail-totals">
         <div><span>الإجمالي</span><b>${fmt(inv.total)}</b></div>
         <div><span>المدفوع</span><b>${fmt(inv.paid)}</b></div>
-        <div class="${inv.remaining>0?'due-row':''}"><span>المتبقي</span><b>${fmt(inv.remaining)}</b></div>
+        <div class="${inv.remaining>0?'due-row':'paid-ok'} invoice-remaining-row"><span>${inv.remaining>0?'المتبقي':'الحالة'}</span><b>${inv.remaining>0?fmt(inv.remaining):'مدفوعة بالكامل ✓'}</b></div>
         <div><span>الربح</span><b class="profit-text">${fmt(inv.profit)}</b></div>
       </div>
 
