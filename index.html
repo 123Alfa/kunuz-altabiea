@@ -1366,6 +1366,90 @@ html[data-theme="dark"] .receipt-pro-new th{background:var(--primary-dark)!impor
 }
 </style>
 
+
+<style id="emerald-gold-premium-v1515">
+/* ==================== Emerald Gold Premium v1.5.15 ==================== */
+:root{
+  --premium-gold:#d4af37;
+  --premium-gold-light:#f6d77a;
+  --premium-emerald:#075e56;
+  --premium-emerald-deep:#043f3b;
+}
+.app-header{
+  border-bottom:1px solid color-mix(in srgb,var(--accent) 22%,var(--border)) !important;
+  box-shadow:0 6px 26px color-mix(in srgb,var(--primary) 10%,transparent) !important;
+}
+.app-header .logo-icon{
+  position:relative;
+  background:linear-gradient(145deg,var(--premium-emerald-deep) 0%,var(--primary) 48%,var(--premium-gold) 100%) !important;
+  box-shadow:0 8px 26px color-mix(in srgb,var(--primary) 30%,transparent),0 0 0 1px color-mix(in srgb,var(--accent) 35%,transparent) !important;
+}
+.app-header .logo-icon::after{
+  content:'';
+  position:absolute;
+  inset:2px;
+  border-radius:12px;
+  border:1px solid rgba(255,255,255,.18);
+  pointer-events:none;
+}
+.btn-primary{
+  background:linear-gradient(135deg,var(--premium-emerald-deep),var(--primary) 58%,var(--premium-gold)) !important;
+  box-shadow:0 8px 26px color-mix(in srgb,var(--primary) 25%,transparent),0 2px 0 rgba(255,255,255,.12) inset !important;
+}
+.btn-primary:hover{
+  box-shadow:0 11px 30px color-mix(in srgb,var(--primary) 32%,transparent) !important;
+}
+.card-title{
+  position:relative;
+}
+.card-title::after{
+  content:'';
+  position:absolute;
+  bottom:-2px;
+  right:0;
+  width:58px;
+  height:2px;
+  border-radius:4px;
+  background:linear-gradient(90deg,var(--primary),var(--accent));
+}
+.stat-card{
+  background:
+    radial-gradient(circle at 90% 10%,color-mix(in srgb,var(--accent) 7%,transparent),transparent 30%),
+    var(--bg-card) !important;
+}
+.stat-card::before{
+  height:4px !important;
+  background:linear-gradient(90deg,var(--primary),var(--accent)) !important;
+}
+.stat-card .stat-value{
+  letter-spacing:.2px;
+}
+.bottom-nav{
+  border-top-color:color-mix(in srgb,var(--primary) 16%,var(--border)) !important;
+}
+.bottom-nav-item.active{
+  box-shadow:0 5px 18px color-mix(in srgb,var(--primary) 10%,transparent);
+}
+.settings-row:hover{
+  background:linear-gradient(90deg,color-mix(in srgb,var(--primary) 5%,transparent),color-mix(in srgb,var(--accent) 4%,transparent));
+}
+.theme-current-preview{
+  border-color:color-mix(in srgb,var(--accent) 32%,var(--border)) !important;
+}
+.theme-preview-dot{
+  background:linear-gradient(135deg,var(--premium-emerald-deep),var(--primary),var(--premium-gold)) !important;
+}
+html[data-theme="dark"] .app-header{
+  background:
+    radial-gradient(circle at 15% 20%,color-mix(in srgb,var(--accent) 12%,transparent),transparent 25%),
+    linear-gradient(135deg,#071b19,#0b2925 60%,#211b0c) !important;
+}
+html[data-theme="dark"] .card,
+html[data-theme="dark"] .stat-card{
+  box-shadow:0 8px 28px rgba(0,0,0,.22),0 0 0 1px color-mix(in srgb,var(--accent) 5%,transparent);
+}
+</style>
+
 </head>
 <body>
 <div id="loading-screen">
@@ -1437,7 +1521,7 @@ html[data-theme="dark"] .receipt-pro-new th{background:var(--primary-dark)!impor
 </div>
 <script>
 // ==================== معلومات الإصدار ====================
-const APP_VERSION='v1.5.14';
+const APP_VERSION='v1.5.15';
 const APP_NAME = "كنوز الطبيعة";
 const APP_BUILD_DATE = "24 أغسطس 2026 — تطوير لوحة التحكم الاحترافية";
 
