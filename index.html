@@ -1984,6 +1984,65 @@ input[type="date"].sales-date-filter:focus{
 }
 </style>
 
+
+<style id="invoice-detail-modern-v1537">
+.invoice-detail-modern{max-width:620px;margin:auto}
+.invoice-detail-head{align-items:center!important;margin-bottom:10px!important}
+.invoice-detail-title{display:flex;align-items:center;gap:8px}
+.invoice-detail-title i{color:var(--primary);font-size:1rem}
+.invoice-detail-title h2{margin:0!important}
+.invoice-detail-head small{color:var(--text-muted);font-size:.68rem}
+.invoice-detail-customer{
+  display:flex;align-items:center;gap:9px;
+  padding:10px 11px;margin-bottom:8px;
+  border:1px solid #e1ece8;border-radius:14px;
+  background:linear-gradient(135deg,#f8fbfa,#f0f8f5);
+}
+.invoice-detail-avatar{
+  width:38px;height:38px;border-radius:12px;
+  display:grid;place-items:center;
+  background:#dff3ec;color:var(--primary);
+  flex:0 0 auto;
+}
+.invoice-detail-customer-info{min-width:0;flex:1}
+.invoice-detail-customer-info span{display:block;color:var(--text-muted);font-size:.57rem}
+.invoice-detail-customer-info strong{display:block;font-size:.82rem;margin-top:2px}
+.invoice-detail-customer-info small{display:block;color:#7d8b87;font-size:.58rem;margin-top:2px}
+.invoice-detail-wa{
+  width:38px;height:38px;border:1px solid #d8ece2;border-radius:11px;
+  background:#effaf4;color:#168a57;font-size:1rem;cursor:pointer;
+}
+.invoice-detail-banner{margin-bottom:9px!important}
+.invoice-detail-section-label{
+  font-weight:900;font-size:.68rem;color:#4d5c58;
+  margin:8px 2px 5px;display:flex;align-items:center;gap:5px
+}
+.invoice-detail-section-label i{color:var(--primary)}
+.invoice-detail-totals{padding:8px!important}
+.invoice-detail-totals>div{padding:5px 6px!important}
+.invoice-detail-totals .due-row{
+  margin:2px 0;padding:7px 8px!important;
+  border-radius:9px;background:#fff7e8;
+}
+.invoice-detail-actions{margin-top:9px!important}
+@media(max-width:600px){
+  .invoice-detail-modern{max-width:none}
+  .invoice-detail-customer{padding:9px;margin-bottom:7px}
+  .invoice-detail-avatar{width:34px;height:34px;border-radius:10px}
+  .invoice-detail-title h2{font-size:.86rem!important}
+  .invoice-detail-banner{gap:5px!important}
+  .invoice-detail-banner>div{padding:7px!important}
+  .invoice-detail-banner span{font-size:.53rem!important}
+  .invoice-detail-banner strong{font-size:.62rem!important}
+  .invoice-line-pro{padding:8px 9px!important}
+  .invoice-line-pro strong{font-size:.68rem!important}
+  .invoice-line-pro small{font-size:.56rem!important}
+  .invoice-line-pro>b{font-size:.68rem!important}
+  .invoice-detail-actions{grid-template-columns:repeat(3,1fr)!important;gap:6px!important}
+  .invoice-detail-actions button{padding:9px 4px!important;font-size:.61rem!important}
+}
+</style>
+
 </head>
 <body>
 <div id="loading-screen">
@@ -2055,7 +2114,7 @@ input[type="date"].sales-date-filter:focus{
 </div>
 <script>
 // ==================== معلومات الإصدار ====================
-const APP_VERSION='v1.5.36';
+const APP_VERSION='v1.5.37';
 const APP_NAME = "كنوز الطبيعة";
 const APP_BUILD_DATE = "24 أغسطس 2026 — تطوير لوحة التحكم الاحترافية";
 
@@ -6729,8 +6788,60 @@ if ('serviceWorker' in navigator) {
 
   window.openInvoicePro=function(key){
     const inv=findInvoice(key);if(!inv)return;
-    const rows=inv.lines.map(s=>{const q=money(s.packages||s.qty||1),w=money(s.weight||1);const p=productForSaleLine(s);const qty=isKgProduct(p)||s.isWeightSale?saleQuantityLabel(p,q,w):`${q} ${isFixedPackProduct(p)?'علبة':(s.sellUnit||p?.unit||'علبة')}`;return `<div class="invoice-line-pro"><div><strong>${esc(s.productName||'صنف')}</strong><small>${esc(qty)} — ${fmt(s.price||0)}</small></div><b>${fmt(s.total)}</b></div>`}).join('');
-    openModal(`<div class="invoice-modal-pro"><div class="modal-header"><div><h2><i class="fas fa-file-invoice" style="color:var(--primary);margin-left:8px"></i> فاتورة رقم ${esc(inv.invoiceSeq||inv.invoiceNo)}</h2><small style="color:var(--text-muted)">${esc(inv.date)} ${esc(inv.time)}</small></div><button class="modal-close" onclick="closeModal()">&times;</button></div><div class="invoice-pro-banner"><div><span>العميل</span><strong>${esc(inv.customerName)}</strong></div><div><span>طريقة السداد</span><strong><i class="fas ${paymentIcon(inv.paymentMethod)}"></i> ${paymentLabel(inv.paymentMethod)}</strong></div><div><span>نوع البيع</span><strong>${inv.type==='wholesale'?'📦 جملة':'🛍️ قطاعي'}</strong></div></div><div class="invoice-lines-pro">${rows}</div><div class="invoice-totals-pro"><div><span>الإجمالي</span><b>${fmt(inv.total)}</b></div><div><span>المدفوع</span><b>${fmt(inv.paid)}</b></div><div class="${inv.remaining>0?'due-row':''}"><span>المتبقي</span><b>${fmt(inv.remaining)}</b></div><div><span>الربح</span><b class="profit-text">${fmt(inv.profit)}</b></div></div>${inv.note?`<div class="invoice-note-pro"><i class="fas fa-note-sticky"></i> ${esc(inv.note)}</div>`:''}<div class="invoice-actions-pro"><button onclick="printInvoicePro('${esc(inv.key)}')"><i class="fas fa-print"></i><span>إعادة طباعة</span></button><button onclick="shareInvoicePro('${esc(inv.key)}')"><i class="fab fa-whatsapp"></i><span>واتساب</span></button><button onclick="editInvoicePro('${esc(inv.key)}')"><i class="fas fa-pen"></i><span>تعديل</span></button><button onclick="openInvoiceReturnPro('${esc(inv.key)}')"><i class="fas fa-rotate-left"></i><span>مرتجع</span></button>${inv.remaining>0?`<button onclick="openInvoiceCollectionPro('${esc(inv.key)}')"><i class="fas fa-money-bill-wave"></i><span>تحصيل</span></button>`:''}<button class="danger" onclick="deleteInvoicePro('${esc(inv.key)}')"><i class="fas fa-trash"></i><span>حذف</span></button></div></div>`);
+    const customer=(Store.get('customers')||[]).find(c=>inv.customerId&&String(c.id)===String(inv.customerId));
+    const phone=customer?.phone||'';
+    const rows=inv.lines.map(s=>{
+      const q=money(s.packages||s.qty||1),w=money(s.weight||1),p=productForSaleLine(s);
+      const qty=isKgProduct(p)||s.isWeightSale?saleQuantityLabel(p,q,w):`${q} ${isFixedPackProduct(p)?'علبة':(s.sellUnit||p?.unit||'علبة')}`;
+      return `<div class="invoice-line-pro"><div><strong>${esc(s.productName||'صنف')}</strong><small>${esc(qty)} × ${fmt(s.price||0)}</small></div><b>${fmt(s.total)}</b></div>`;
+    }).join('');
+    const status=inv.remaining>0?`<span class="invoice-detail-status due">متبقي ${fmt(inv.remaining)}</span>`:`<span class="invoice-detail-status paid">مدفوعة بالكامل ✓</span>`;
+    openModal(`<div class="invoice-modal-pro invoice-detail-modern">
+      <div class="modal-header invoice-detail-head">
+        <div>
+          <div class="invoice-detail-title"><i class="fas fa-file-invoice"></i><h2>فاتورة رقم ${esc(inv.invoiceSeq||inv.invoiceNo)}</h2></div>
+          <small>${esc(inv.date)} ${esc(inv.time)}</small>
+        </div>
+        <button class="modal-close" onclick="closeModal()">&times;</button>
+      </div>
+
+      <div class="invoice-detail-customer">
+        <div class="invoice-detail-avatar"><i class="fas fa-user"></i></div>
+        <div class="invoice-detail-customer-info">
+          <span>العميل</span>
+          <strong>${esc(inv.customerName)}</strong>
+          ${phone?`<small><i class="fas fa-phone"></i> ${esc(phone)}</small>`:''}
+        </div>
+        ${phone?`<button class="invoice-detail-wa" title="إرسال الفاتورة على واتساب" onclick="openWhatsApp('${esc(phone)}',invoiceText(findInvoice('${esc(inv.key)}')))"><i class="fab fa-whatsapp"></i></button>`:''}
+      </div>
+
+      <div class="invoice-pro-banner invoice-detail-banner">
+        <div><span>طريقة السداد</span><strong><i class="fas ${paymentIcon(inv.paymentMethod)}"></i> ${paymentLabel(inv.paymentMethod)}</strong></div>
+        <div><span>نوع البيع</span><strong>${inv.type==='wholesale'?'📦 جملة':'🛍️ قطاعي'}</strong></div>
+        <div><span>الحالة</span><strong>${status}</strong></div>
+      </div>
+
+      <div class="invoice-detail-section-label"><i class="fas fa-box-open"></i> الأصناف</div>
+      <div class="invoice-lines-pro">${rows}</div>
+
+      <div class="invoice-totals-pro invoice-detail-totals">
+        <div><span>الإجمالي</span><b>${fmt(inv.total)}</b></div>
+        <div><span>المدفوع</span><b>${fmt(inv.paid)}</b></div>
+        <div class="${inv.remaining>0?'due-row':''}"><span>المتبقي</span><b>${fmt(inv.remaining)}</b></div>
+        <div><span>الربح</span><b class="profit-text">${fmt(inv.profit)}</b></div>
+      </div>
+
+      ${inv.note?`<div class="invoice-note-pro"><i class="fas fa-note-sticky"></i><span>${esc(inv.note)}</span></div>`:''}
+
+      <div class="invoice-actions-pro invoice-detail-actions">
+        <button onclick="printInvoicePro('${esc(inv.key)}')"><i class="fas fa-print"></i><span>طباعة</span></button>
+        <button onclick="shareInvoicePro('${esc(inv.key)}')"><i class="fab fa-whatsapp"></i><span>واتساب</span></button>
+        <button onclick="editInvoicePro('${esc(inv.key)}')"><i class="fas fa-pen"></i><span>تعديل</span></button>
+        <button onclick="openInvoiceReturnPro('${esc(inv.key)}')"><i class="fas fa-rotate-left"></i><span>مرتجع</span></button>
+        ${inv.remaining>0?`<button onclick="openInvoiceCollectionPro('${esc(inv.key)}')"><i class="fas fa-money-bill-wave"></i><span>تحصيل</span></button>`:''}
+        <button class="danger" onclick="deleteInvoicePro('${esc(inv.key)}')"><i class="fas fa-trash"></i><span>حذف</span></button>
+      </div>
+    </div>`);
   };
 
   window.shareInvoicePro=function(key){const inv=findInvoice(key);if(!inv)return;window.open('https://wa.me/?text='+encodeURIComponent(invoiceText(inv)),'_blank');};
