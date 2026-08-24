@@ -1721,6 +1721,37 @@ html[data-theme="dark"] .stat-card{
 .debt-delete-mini:active{transform:scale(.96)}
 </style>
 
+
+<style id="suppliers-compact-v1531">
+.supplier-compact-card{padding:10px 11px!important;margin-bottom:8px!important}
+.supplier-compact-top{display:grid;grid-template-columns:38px 1fr auto;align-items:center;gap:8px}
+.supplier-compact-main .supplier-pro-name{font-size:.78rem!important}
+.supplier-compact-main .supplier-pro-meta{font-size:.56rem!important;margin-top:2px}
+.supplier-compact-money{text-align:left}
+.supplier-compact-money strong{font-size:.9rem!important}
+.supplier-compact-money small{font-size:.55rem!important}
+.supplier-account-actions{display:grid;grid-template-columns:1fr 1fr;gap:5px;margin-top:7px}
+.supplier-account-actions .btn{min-height:34px!important;font-size:.59rem!important;padding:5px 7px!important}
+.supplier-undo-btn{border:1px solid #ddd2f5;background:#fbf9ff;color:#7044c7;border-radius:9px;padding:6px 9px;font-size:.58rem;font-weight:900;margin-top:4px;width:100%}
+.supplier-compact-bottom{display:flex;align-items:center;justify-content:space-between;gap:6px;margin-top:4px}
+.supplier-detail-toggle{border:0;background:transparent;color:var(--primary);font-weight:900;font-size:.6rem;padding:4px 2px}
+.supplier-mini-actions{display:flex;gap:4px;align-items:center}
+.supplier-whatsapp-mini,.supplier-edit-mini,.supplier-delete-mini{
+ width:29px;height:29px;border-radius:9px;display:inline-flex;align-items:center;justify-content:center;
+ cursor:pointer;font-size:.66rem;background:#fff;
+}
+.supplier-whatsapp-mini{border:1px solid #cdebd9;color:#159447;background:#f1fbf5}
+.supplier-edit-mini{border:1px solid var(--border);color:var(--primary)}
+.supplier-delete-mini{border:1px solid #f0caca;color:#dc3545;background:#fff5f5}
+.supplier-collapsible-details{display:none;margin-top:6px;padding-top:6px;border-top:1px dashed var(--border)}
+.supplier-collapsible-details.is-open{display:block}
+.supplier-detail-summary{font-size:.58rem;color:var(--text-muted);text-align:center;margin-bottom:6px}
+.supplier-details-title{font-size:.61rem;font-weight:900;margin:4px 0}
+.supplier-detail-line{display:flex;justify-content:space-between;gap:8px;padding:7px 6px;border-bottom:1px solid var(--border);font-size:.6rem}
+.supplier-detail-line small{display:block;color:var(--text-muted);font-size:.53rem;margin-top:2px}
+.supplier-cleared .supplier-compact-money strong{color:var(--success,#159447)}
+</style>
+
 </head>
 <body>
 <div id="loading-screen">
@@ -1792,7 +1823,7 @@ html[data-theme="dark"] .stat-card{
 </div>
 <script>
 // ==================== معلومات الإصدار ====================
-const APP_VERSION='v1.5.30';
+const APP_VERSION='v1.5.31';
 const APP_NAME = "كنوز الطبيعة";
 const APP_BUILD_DATE = "24 أغسطس 2026 — تطوير لوحة التحكم الاحترافية";
 
@@ -5142,36 +5173,204 @@ function filterSuppliers(){
     return matchesSearch&&matchesBalance;
   });
 
-  document.getElementById('suppliersList').innerHTML=suppliers.map(s=>{
+  document.getElementById('suppliersList').innerHTML=suppliers.map((s,idx)=>{
     const f=getSupplierFinancials(s);
-    const contactParts=[];
-    if(String(s.phone||'').trim()) contactParts.push('📞 '+s.phone);
-    if(String(s.address||'').trim()) contactParts.push('📍 '+s.address);
-    const meta=contactParts.length?contactParts.join(' • '):'بيانات الاتصال غير مضافة';
-    const first=String(s.name||'م')[0];
-    return `<div class="supplier-pro-card">
-      <div class="supplier-pro-avatar">${first}</div>
-      <div>
-        <div class="supplier-pro-name">${s.name}</div>
-        <div class="supplier-pro-meta">${meta}</div>
+    const phone=String(s.phone||'').trim();
+    const key='sup_'+encodeURIComponent(String(s.id)).replace(/%/g,'_');
+    const invoices=f.invoices.slice().sort((a,b)=>String(b.date||'').localeCompare(String(a.date||'')));
+    const invoiceDetails=invoices.map(inv=>{
+      const k=String(inv.purchaseBatchId||inv.invoiceNo||'');
+      const debt=(f.linkedDebts||[]).find(d=>String(d.purchaseBatchId||d.invoiceNo||'')===k);
+      const rem=debt?getDebtRemaining(debt):Math.max(0,Number(inv.remaining||0));
+      return `<div class="supplier-detail-line">
+        <div><strong>فاتورة ${inv.invoiceNo||inv.purchaseBatchId||'-'}</strong><small>${formatInvoiceDate(inv.date)}</small></div>
+        <div><strong>${fmt(inv.total)}</strong><small>${rem>0?'متبقي '+fmt(rem):'مدفوعة بالكامل'}</small></div>
+      </div>`;
+    }).join('');
+
+    const manualDetails=(f.manualDebts||[]).map(d=>`
+      <div class="supplier-detail-line">
+        <div><strong>دين إضافي</strong><small>${formatInvoiceDate(d.date)}${d.note?' • '+d.note:''}</small></div>
+        <div><strong>${fmt(d.amount)}</strong><small>متبقي ${fmt(getDebtRemaining(d))}</small></div>
+      </div>`).join('');
+
+    return `<div class="supplier-pro-card supplier-compact-card ${f.remaining<=0?'supplier-cleared':''}">
+      <div class="supplier-compact-top">
+        <div class="supplier-pro-avatar">${String(s.name||'م')[0]}</div>
+        <div class="supplier-compact-main">
+          <div class="supplier-pro-name">${s.name} 🏭</div>
+          <div class="supplier-pro-meta">${phone?'📞 '+phone:'بيانات الاتصال غير مضافة'}</div>
+        </div>
+        <div class="supplier-pro-money supplier-compact-money">
+          <strong>${fmt(f.remaining)}</strong>
+          <small class="${f.remaining>0?'supplier-pro-debt':''}">${f.remaining>0?'متبقي عليك':'الحساب خالص ✓'}</small>
+        </div>
       </div>
-      <div class="supplier-pro-money">
-        <strong>الحساب ${fmt(f.remaining)}</strong>
-        <small class="${f.remaining>0?'supplier-pro-debt':''}">${f.remaining>0?'متبقي عليك • '+fmt(f.remaining):'الحساب خالص'}</small>
+
+      ${f.remaining>0?`
+      <div class="supplier-account-actions">
+        <button class="btn btn-sm btn-success" onclick="openSupplierPayment('${s.id}')">💳 سداد جزء</button>
+        <button class="btn btn-sm btn-primary" onclick="paySupplierFull('${s.id}')">✅ سداد كامل</button>
+      </div>`:''}
+
+      ${f.remaining>0&&getSupplierLastPaymentGroup(s.id)?`
+      <button class="supplier-undo-btn" onclick="undoSupplierLastPayment('${s.id}')">↩️ تراجع عن آخر سداد</button>`:''}
+
+      <div class="supplier-compact-bottom">
+        <button id="supDetailBtn-${key}" class="supplier-detail-toggle" onclick="toggleSupplierDetails('${key}')">تفاصيل الحساب ↓</button>
+        <div class="supplier-mini-actions">
+          ${phone?`<button class="supplier-whatsapp-mini" title="إرسال الحساب على واتساب" onclick="openWhatsApp('${phone}',debtShareMessage('${String(s.name).replace(/'/g,"\\'")}',${f.remaining},'علينا'))"><i class="fab fa-whatsapp"></i></button>`:''}
+          <button class="supplier-edit-mini" title="تعديل المورد" onclick="editSupplier('${s.id}')"><i class="fas fa-pen"></i></button>
+          <button class="supplier-delete-mini" title="حذف المورد" onclick="deleteSupplier('${s.id}')"><i class="fas fa-trash"></i></button>
+        </div>
       </div>
-      <div class="supplier-pro-invoices" style="grid-column:1/-1;display:flex;gap:6px;flex-wrap:wrap;margin-top:1px">
-        <span style="font-size:.62rem;background:color-mix(in srgb,var(--primary) 8%,transparent);color:var(--primary);padding:4px 7px;border-radius:999px">📋 ${f.invoices.length} فاتورة</span>
-        ${f.invoices.slice(0,4).map(inv=>`<span style="font-size:.61rem;color:var(--text-muted);padding:4px 6px;border:1px solid var(--border);border-radius:999px">${fmt(inv.total)}</span>`).join('')}
-      </div>
-      <div class="supplier-pro-actions">
-        <button class="btn btn-sm btn-primary" onclick="openSupplierStatement('${s.id}')"><i class="fas fa-file-invoice-dollar"></i> كشف الحساب</button>
-        ${s.phone?`<button class="btn btn-sm btn-whatsapp" onclick="openWhatsApp('${s.phone}',debtShareMessage('${String(s.name).replace(/'/g,"\\'")}',${f.remaining},'علينا'))"><i class="fab fa-whatsapp"></i> واتس</button>`:''}
-        <button class="btn btn-sm btn-outline" onclick="editSupplier('${s.id}')"><i class="fas fa-edit"></i> تعديل</button>
-        <button class="btn btn-sm btn-danger" onclick="deleteSupplier('${s.id}')"><i class="fas fa-trash"></i></button>
+
+      <div id="supDetails-${key}" class="supplier-collapsible-details">
+        <div class="supplier-detail-summary">إجمالي المشتريات ${fmt(f.totalPurchased)} • المدفوع ${fmt(f.paid)} • المتبقي ${fmt(f.remaining)}</div>
+        ${invoiceDetails||manualDetails?`<div class="supplier-details-title">تفاصيل الفواتير</div>${invoiceDetails}${manualDetails}`:'<div class="empty-state" style="padding:10px">لا توجد فواتير مسجلة</div>'}
+        <button class="btn btn-sm btn-outline btn-block" style="margin-top:7px" onclick="openSupplierStatement('${s.id}')">📋 فتح كشف الحساب الكامل</button>
       </div>
     </div>`;
   }).join('')||'<div class="empty-state"><i class="fas fa-truck-field"></i><p>لا يوجد موردون مطابقون للبحث</p></div>';
 }
+
+function toggleSupplierDetails(key){
+  const el=document.getElementById('supDetails-'+key);
+  const btn=document.getElementById('supDetailBtn-'+key);
+  if(!el||!btn)return;
+  const open=el.classList.toggle('is-open');
+  btn.textContent=open?'إخفاء التفاصيل ↑':'تفاصيل الحساب ↓';
+}
+
+function getSupplierDebtItems(supplierId){
+  const supplier=(Store.get('suppliers')||[]).find(s=>String(s.id)===String(supplierId));
+  if(!supplier)return [];
+  const name=String(supplier.name||'').trim().toLowerCase();
+  const debts=Store.get('debts')||[];
+  return debts.filter(d=>d.type==='علينا'&&(
+    (d.supplierId&&String(d.supplierId)===String(supplierId)) ||
+    (!d.supplierId&&String(d.person||'').trim().toLowerCase()===name)
+  )).filter(d=>getDebtRemaining(d)>0)
+  .sort((a,b)=>String(a.date||'9999-99-99').localeCompare(String(b.date||'9999-99-99')));
+}
+
+function getSupplierLastPaymentGroup(supplierId){
+  const supplier=(Store.get('suppliers')||[]).find(s=>String(s.id)===String(supplierId));
+  if(!supplier)return '';
+  const name=String(supplier.name||'').trim().toLowerCase();
+  const groups=[];
+  (Store.get('debts')||[]).filter(d=>d.type==='علينا'&&(
+    (d.supplierId&&String(d.supplierId)===String(supplierId)) ||
+    (!d.supplierId&&String(d.person||'').trim().toLowerCase()===name)
+  )).forEach(d=>(Array.isArray(d.paymentHistory)?d.paymentHistory:[]).forEach(h=>{
+    if(h.groupId)groups.push({groupId:h.groupId,date:h.date});
+  }));
+  groups.sort((a,b)=>String(b.date||'').localeCompare(String(a.date||'')));
+  return groups[0]?.groupId||'';
+}
+
+function openSupplierPayment(supplierId){
+  const supplier=(Store.get('suppliers')||[]).find(s=>String(s.id)===String(supplierId));
+  const items=getSupplierDebtItems(supplierId);
+  if(!supplier||!items.length)return showToast('لا يوجد مبلغ متبقي قابل للسداد','info');
+  const remaining=items.reduce((n,d)=>n+getDebtRemaining(d),0);
+  openModal(`<div class="modal-header">
+      <h2>💳 سداد من حساب المورد</h2>
+      <button class="modal-close" onclick="closeModal()">&times;</button>
+    </div>
+    <div class="group-payment-summary">
+      <div style="font-weight:950;font-size:1rem">${supplier.name}</div>
+      <div style="color:var(--text-muted);font-size:.68rem;margin-top:4px">عدد الفواتير/الحركات: ${items.length}</div>
+      <strong>${fmt(remaining)}</strong><small>إجمالي المتبقي عليك</small>
+    </div>
+    <div class="form-group">
+      <label>مبلغ السداد الآن</label>
+      <input type="number" id="supplierPayAmount" min="0.01" max="${remaining}" step="0.01" placeholder="مثال: 1000">
+    </div>
+    <div class="group-payment-note">💡 السداد يتوزع تلقائيًا على أقدم الفواتير أولًا. مثال: حساب ١٣٧٥ ودفع ١٠٠٠ → المتبقي ٣٧٥.</div>
+    <button class="btn btn-success btn-block" onclick="confirmSupplierPayment('${supplierId}')">✅ تسجيل السداد</button>`);
+}
+
+function confirmSupplierPayment(supplierId){
+  const amount=Number(document.getElementById('supplierPayAmount')?.value)||0;
+  applySupplierPayment(supplierId,amount);
+}
+
+function paySupplierFull(supplierId){
+  const items=getSupplierDebtItems(supplierId);
+  const remaining=items.reduce((n,d)=>n+getDebtRemaining(d),0);
+  const supplier=(Store.get('suppliers')||[]).find(s=>String(s.id)===String(supplierId));
+  if(!supplier||remaining<=0)return showToast('الحساب مسدد بالكامل','info');
+  if(!confirm(`تأكيد سداد كامل حساب ${supplier.name} بمبلغ ${fmt(remaining)}؟`))return;
+  applySupplierPayment(supplierId,remaining);
+}
+
+function applySupplierPayment(supplierId,amount){
+  const items=getSupplierDebtItems(supplierId);
+  const total=items.reduce((n,d)=>n+getDebtRemaining(d),0);
+  amount=Number(amount)||0;
+  if(amount<=0)return showToast('أدخل مبلغ السداد','warning');
+  if(amount>total+0.0001)return showToast(`مبلغ السداد لا يمكن أن يتجاوز إجمالي الحساب (${fmt(total)})`,'warning');
+
+  const groupId='SUPPAY-'+Date.now()+'-'+Math.random().toString(36).slice(2,7);
+  let left=amount;
+  const now=new Date().toISOString();
+
+  for(const d of items){
+    if(left<=0)break;
+    const rem=getDebtRemaining(d);
+    const pay=Math.min(rem,left);
+    const history=Array.isArray(d.paymentHistory)?d.paymentHistory.slice():[];
+    history.push({amount:pay,date:now,type:pay>=rem?'full':'partial',groupId});
+    const paidBefore=Math.max(0,Number(d.paidAmount||0));
+    const paidAfter=paidBefore+pay;
+    Store.update('debts',d.id,{
+      paidAmount:paidAfter,
+      paid:paidAfter>=Number(d.amount||0)-0.0001,
+      paymentHistory:history,
+      debtVersion:2,
+      lastPaymentAt:now
+    });
+    left-=pay;
+  }
+
+  closeModal();
+  showToast('✅ تم تسجيل السداد وتوزيعه على فواتير المورد');
+  renderSuppliersPage(document.getElementById('contentArea'));
+}
+
+function undoSupplierLastPayment(supplierId){
+  const groupId=getSupplierLastPaymentGroup(supplierId);
+  if(!groupId)return showToast('لا يوجد سداد يمكن التراجع عنه','info');
+  const supplier=(Store.get('suppliers')||[]).find(s=>String(s.id)===String(supplierId));
+  if(!supplier)return;
+  if(!confirm(`التراجع عن آخر سداد مسجل للمورد ${supplier.name}؟`))return;
+
+  const name=String(supplier.name||'').trim().toLowerCase();
+  let changed=0;
+  (Store.get('debts')||[]).filter(d=>d.type==='علينا'&&(
+    (d.supplierId&&String(d.supplierId)===String(supplierId)) ||
+    (!d.supplierId&&String(d.person||'').trim().toLowerCase()===name)
+  )).forEach(d=>{
+    const history=Array.isArray(d.paymentHistory)?d.paymentHistory.slice():[];
+    const entries=history.filter(h=>h.groupId===groupId);
+    if(!entries.length)return;
+    const amount=entries.reduce((n,h)=>n+Number(h.amount||0),0);
+    const remainingHistory=history.filter(h=>h.groupId!==groupId);
+    const paidAfter=Math.max(0,Number(d.paidAmount||0)-amount);
+    Store.update('debts',d.id,{
+      paidAmount:paidAfter,
+      paid:false,
+      paymentHistory:remainingHistory,
+      lastPaymentAt:remainingHistory.length?remainingHistory[remainingHistory.length-1].date:null,
+      debtVersion:2
+    });
+    changed++;
+  });
+  showToast(changed?'↩️ تم التراجع عن آخر سداد':'لا يوجد سداد يمكن التراجع عنه','info');
+  renderSuppliersPage(document.getElementById('contentArea'));
+}
+
 
 function openSupplierStatement(id){
   const supplier=(Store.get('suppliers')||[]).find(s=>s.id===id);
