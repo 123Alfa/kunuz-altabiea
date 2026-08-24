@@ -2070,7 +2070,7 @@ input[type="date"].sales-date-filter:focus{
   .invoice-detail-actions button{width:100%!important;min-width:0!important;max-width:none!important;padding:8px 3px!important;font-size:.60rem!important;min-height:36px!important}
   .invoice-detail-actions button:last-child{ }
 }
-/* v1.5.42 — إصلاح صفحة الخزنة وترتيب أزرار تفاصيل الفاتورة */
+/* v1.5.43 — إصلاح صفحة الخزنة وترتيب أزرار تفاصيل الفاتورة */
 @media(max-width:600px){
   .invoice-detail-actions{grid-template-columns:repeat(6,minmax(0,1fr))!important}
   .invoice-detail-actions button{grid-column:span 2!important}
@@ -2151,7 +2151,7 @@ input[type="date"].sales-date-filter:focus{
 </div>
 <script>
 // ==================== معلومات الإصدار ====================
-const APP_VERSION='v1.5.42';
+const APP_VERSION='v1.5.43';
 const APP_NAME = "كنوز الطبيعة";
 const APP_BUILD_DATE = "24 أغسطس 2026 — تطوير لوحة التحكم الاحترافية";
 
@@ -4732,81 +4732,111 @@ function deletePurchase(id){
 
 // ==================== الخزنة ====================
 function cashboxList(key){
-  const value=Store.get(key);
-  return Array.isArray(value)?value:[];
+  try{
+    const value=Store.get(key);
+    return Array.isArray(value)?value:[];
+  }catch(e){
+    console.warn('تعذر قراءة حركة الخزنة:',key,e);
+    return [];
+  }
+}
+function cashboxNum(v){
+  const n=Number(v);
+  return Number.isFinite(n)&&n>0?n:0;
 }
 function getCashboxData(){
   const movements=[];
-  const sales=cashboxList('sales');
-  const saleGroups=new Map();
-  sales.forEach(s=>{
-    const key=s?.saleBatchId?String(s.saleBatchId):'sale:'+String(s?.id||'');
-    if(!saleGroups.has(key))saleGroups.set(key,[]);
-    saleGroups.get(key).push(s||{});
-  });
-  saleGroups.forEach(lines=>{
-    const first=lines[0]||{};
-    if(String(first.paymentMethod||'cash')==='cash'){
-      const total=lines.reduce((n,x)=>n+Math.max(0,Number(x?.total||0)),0);
-      if(total>0) movements.push({date:first.date||'',time:first.time||'',kind:'in',amount:total,title:'بيع نقدي',detail:`فاتورة ${first.invoiceSeq||first.invoiceNo||first.id||''} • ${first.customerName||'عميل عادي'}`,icon:'fa-cart-shopping',ref:first.saleBatchId||first.id});
-    }
-  });
-  cashboxList('purchases').forEach(p=>{
-    const paid=Math.max(0,Number(p?.paid||0));
-    if(paid>0) movements.push({date:p?.date||'',time:'',kind:'out',amount:paid,title:'شراء مدفوع',detail:`${p?.productName||'مشتريات'} • ${p?.supplierName||'بائع/مورد'}`,icon:'fa-cart-flatbed',ref:p?.purchaseBatchId||p?.id});
-  });
-  cashboxList('expenses').forEach(e=>{
-    const amount=Math.max(0,Number(e?.amount||0));
-    if(amount>0) movements.push({date:e?.date||'',time:'',kind:'out',amount,title:'مصروف',detail:`${e?.type||'مصروف'}${e?.note?' • '+e.note:''}`,icon:'fa-receipt',ref:e?.id});
-  });
-  cashboxList('withdrawals').forEach(w=>{
-    const amount=Math.max(0,Number(w?.amount||0));
-    if(amount>0) movements.push({date:w?.date||'',time:'',kind:'out',amount,title:'سحب شخصي',detail:w?.note||'سحب من الخزنة',icon:'fa-money-bill-transfer',ref:w?.id});
-  });
-  cashboxList('debts').forEach(d=>{
-    const type=d?.type==='لنا'?'in':'out';
-    const history=Array.isArray(d?.paymentHistory)?d.paymentHistory:[];
-    history.forEach((h,i)=>{
-      const amount=Math.max(0,Number(h?.amount||0));
-      if(!amount)return;
-      const dt=String(h?.date||'');
-      movements.push({date:dt.slice(0,10)||d?.date||'',time:dt.slice(11,16)||'',kind:type,amount,title:type==='in'?'تحصيل من عميل':'سداد لمورد',detail:`${d?.person||'حساب'} • ${h?.type==='full'?'سداد كامل':'سداد جزئي'}`,icon:type==='in'?'fa-hand-holding-dollar':'fa-money-bill-wave',ref:(d?.id||'')+'-'+i});
+  try{
+    const sales=cashboxList('sales');
+    const saleGroups=new Map();
+    sales.forEach(s=>{
+      if(!s||typeof s!=='object') return;
+      const key=s.saleBatchId?String(s.saleBatchId):'sale:'+String(s.id||'');
+      if(!saleGroups.has(key)) saleGroups.set(key,[]);
+      saleGroups.get(key).push(s);
     });
-  });
+    saleGroups.forEach(lines=>{
+      const first=lines[0]||{};
+      const method=String(first.paymentMethod||'cash').toLowerCase();
+      if(method==='cash'||method==='نقدي'||method==='نقد'){
+        const total=lines.reduce((n,x)=>n+cashboxNum(x&&x.total),0);
+        if(total>0) movements.push({date:String(first.date||'').slice(0,10),time:String(first.time||'').slice(0,5),kind:'in',amount:total,title:'بيع نقدي',detail:'فاتورة '+String(first.invoiceSeq||first.invoiceNo||first.id||'')+' • '+String(first.customerName||'عميل عادي'),icon:'fa-cart-shopping',ref:first.saleBatchId||first.id});
+      }
+    });
+    cashboxList('purchases').forEach(p=>{
+      const paid=cashboxNum(p&&p.paid);
+      if(paid>0) movements.push({date:String(p&&p.date||'').slice(0,10),time:'',kind:'out',amount:paid,title:'شراء مدفوع',detail:String(p&&p.productName||'مشتريات')+' • '+String(p&&p.supplierName||'بائع/مورد'),icon:'fa-cart-flatbed',ref:p&&p.purchaseBatchId||p&&p.id});
+    });
+    cashboxList('expenses').forEach(e=>{
+      const amount=cashboxNum(e&&e.amount);
+      if(amount>0) movements.push({date:String(e&&e.date||'').slice(0,10),time:'',kind:'out',amount,title:'مصروف',detail:String(e&&e.type||'مصروف')+(e&&e.note?' • '+String(e.note):''),icon:'fa-receipt',ref:e&&e.id});
+    });
+    cashboxList('withdrawals').forEach(w=>{
+      const amount=cashboxNum(w&&w.amount);
+      if(amount>0) movements.push({date:String(w&&w.date||'').slice(0,10),time:'',kind:'out',amount,title:'سحب شخصي',detail:String(w&&w.note||'سحب من الخزنة'),icon:'fa-money-bill-transfer',ref:w&&w.id});
+    });
+    cashboxList('debts').forEach(d=>{
+      if(!d||typeof d!=='object') return;
+      const type=d.type==='لنا'?'in':'out';
+      const history=Array.isArray(d.paymentHistory)?d.paymentHistory:[];
+      history.forEach((h,i)=>{
+        const amount=cashboxNum(h&&h.amount);
+        if(!amount)return;
+        const dt=String(h&&h.date||'');
+        movements.push({date:dt.slice(0,10)||String(d.date||'').slice(0,10),time:dt.slice(11,16)||'',kind:type,amount,title:type==='in'?'تحصيل من عميل':'سداد لمورد',detail:String(d.person||'حساب')+' • '+(h&&h.type==='full'?'سداد كامل':'سداد جزئي'),icon:type==='in'?'fa-hand-holding-dollar':'fa-money-bill-wave',ref:String(d.id||'')+'-'+i});
+      });
+    });
+  }catch(e){
+    console.error('خطأ في تجهيز بيانات الخزنة:',e);
+  }
   movements.sort((a,b)=>String((b.date||'')+' '+(b.time||'')).localeCompare(String((a.date||'')+' '+(a.time||''))));
   return movements;
 }
-function getCashboxOpening(){return Math.max(0,Number(currentUser?.capital||0));}
-function cashboxEsc(v){return String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
+function getCashboxOpening(){return cashboxNum(currentUser&&currentUser.capital);}
+function cashboxEsc(v){return String(v==null?'':v).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
 function renderCashboxPage(container){
-  container.innerHTML=`<div class="fade-in cashbox-page">
-    <div class="cashbox-hero"><div><small>إدارة السيولة وحركة النقد</small><h2>💰 الخزنة</h2><p>اعرف رصيدك النقدي وحركة المقبوضات والمدفوعات في مكان واحد.</p></div><div class="cashbox-hero-icon"><i class="fas fa-vault"></i></div></div>
-    <div class="cashbox-balance"><small>الرصيد النقدي الحالي</small><strong id="cashboxBalance">0 ج.م</strong><span>رأس المال الافتتاحي + المقبوضات − المدفوعات</span></div>
-    <div class="cashbox-stats"><div class="cashbox-stat in"><i class="fas fa-arrow-down"></i><div><small>إجمالي المقبوضات</small><b id="cashboxIn">0 ج.م</b></div></div><div class="cashbox-stat out"><i class="fas fa-arrow-up"></i><div><small>إجمالي المدفوعات</small><b id="cashboxOut">0 ج.م</b></div></div><div class="cashbox-stat net"><i class="fas fa-scale-balanced"></i><div><small>صافي الحركة</small><b id="cashboxNet">0 ج.م</b></div></div></div>
-    <div class="cashbox-filter"><div class="cashbox-filter-row"><div><label>من تاريخ</label><input type="date" id="cashboxFrom" value="${today().slice(0,8)}01"></div><div><label>إلى تاريخ</label><input type="date" id="cashboxTo" value="${today()}"></div><button onclick="renderCashboxData()"><i class="fas fa-filter"></i> تحديث</button></div></div>
-    <div class="cashbox-section"><div class="cashbox-section-head"><h3><i class="fas fa-list" style="color:var(--primary);margin-left:5px"></i> حركة الخزنة</h3><small id="cashboxMovementCount">0 حركة</small></div><div id="cashboxMovements"></div></div>
-  </div>`;
-  renderCashboxData();
+  try{
+    if(!container) throw new Error('منطقة عرض الخزنة غير موجودة');
+    const t=today();
+    container.innerHTML=`<div class="fade-in cashbox-page">
+      <div class="cashbox-hero"><div><small>إدارة السيولة وحركة النقد</small><h2>💰 الخزنة</h2><p>اعرف رصيدك النقدي وحركة المقبوضات والمدفوعات في مكان واحد.</p></div><div class="cashbox-hero-icon"><i class="fas fa-vault"></i></div></div>
+      <div class="cashbox-balance"><small>الرصيد النقدي الحالي</small><strong id="cashboxBalance">0 ج.م</strong><span>رأس المال الافتتاحي + المقبوضات − المدفوعات</span></div>
+      <div class="cashbox-stats"><div class="cashbox-stat in"><i class="fas fa-arrow-down"></i><div><small>إجمالي المقبوضات</small><b id="cashboxIn">0 ج.م</b></div></div><div class="cashbox-stat out"><i class="fas fa-arrow-up"></i><div><small>إجمالي المدفوعات</small><b id="cashboxOut">0 ج.م</b></div></div><div class="cashbox-stat net"><i class="fas fa-scale-balanced"></i><div><small>صافي الحركة</small><b id="cashboxNet">0 ج.م</b></div></div></div>
+      <div class="cashbox-filter"><div class="cashbox-filter-row"><div><label>من تاريخ</label><input type="date" id="cashboxFrom" value="${t.slice(0,8)}01"></div><div><label>إلى تاريخ</label><input type="date" id="cashboxTo" value="${t}"></div><button type="button" onclick="renderCashboxData()"><i class="fas fa-filter"></i> تحديث</button></div></div>
+      <div class="cashbox-section"><div class="cashbox-section-head"><h3><i class="fas fa-list" style="color:var(--primary);margin-left:5px"></i> حركة الخزنة</h3><small id="cashboxMovementCount">0 حركة</small></div><div id="cashboxMovements"></div></div>
+    </div>`;
+    renderCashboxData();
+  }catch(e){
+    console.error('خطأ في فتح الخزنة:',e);
+    if(container) container.innerHTML='<div class="card" style="margin:20px;text-align:center;padding:30px"><div style="font-size:3rem">💰</div><h2 style="margin:10px 0">تعذر فتح الخزنة</h2><p style="color:var(--text-light)">تم تحميل البرنامج، لكن حدث خطأ بسيط أثناء قراءة حركة الخزنة.</p><button class="btn btn-primary" style="margin-top:15px" onclick="renderCashboxPage(document.getElementById(\'contentArea\'))">إعادة فتح الخزنة</button></div>';
+  }
 }
 function renderCashboxData(){
-  const from=document.getElementById('cashboxFrom')?.value||'';
-  const to=document.getElementById('cashboxTo')?.value||today();
-  const all=getCashboxData();
-  const period=all.filter(m=>(!from||m.date>=from)&&(!to||m.date<=to));
-  const allBeforeEnd=all.filter(m=>!to||m.date<=to);
-  const opening=getCashboxOpening();
-  const inPeriod=period.filter(m=>m.kind==='in').reduce((n,m)=>n+m.amount,0);
-  const outPeriod=period.filter(m=>m.kind==='out').reduce((n,m)=>n+m.amount,0);
-  const totalInToEnd=allBeforeEnd.filter(m=>m.kind==='in').reduce((n,m)=>n+m.amount,0);
-  const totalOutToEnd=allBeforeEnd.filter(m=>m.kind==='out').reduce((n,m)=>n+m.amount,0);
-  const balance=opening+totalInToEnd-totalOutToEnd;
-  document.getElementById('cashboxBalance').textContent=fmt(balance);
-  document.getElementById('cashboxIn').textContent=fmt(inPeriod);
-  document.getElementById('cashboxOut').textContent=fmt(outPeriod);
-  const net=inPeriod-outPeriod;
-  const netEl=document.getElementById('cashboxNet');netEl.textContent=fmt(net);netEl.style.color=net>=0?'#4b5fc5':'#c53b45';
-  document.getElementById('cashboxMovementCount').textContent=`${period.length} حركة`;
-  document.getElementById('cashboxMovements').innerHTML=period.map(m=>`<div class="cashbox-movement ${m.kind}"><div class="cashbox-movement-icon"><i class="fas ${m.icon}"></i></div><div class="cashbox-movement-main"><strong>${cashboxEsc(m.title)}</strong><small>${cashboxEsc(m.detail)} • ${cashboxEsc(m.date)}${m.time?' • '+esc(m.time):''}</small></div><div class="cashbox-movement-amount">${m.kind==='in'?'+':'−'} ${fmt(m.amount)}</div></div>`).join('')||'<div class="cashbox-empty"><i class="fas fa-box-open" style="font-size:1.6rem;display:block;margin-bottom:7px"></i>لا توجد حركات نقدية في الفترة المحددة</div>';
+  try{
+    const from=document.getElementById('cashboxFrom')?.value||'';
+    const to=document.getElementById('cashboxTo')?.value||today();
+    const all=getCashboxData();
+    const period=all.filter(m=>(!from||m.date>=from)&&(!to||m.date<=to));
+    const allBeforeEnd=all.filter(m=>!to||m.date<=to);
+    const opening=getCashboxOpening();
+    const inPeriod=period.filter(m=>m.kind==='in').reduce((n,m)=>n+cashboxNum(m.amount),0);
+    const outPeriod=period.filter(m=>m.kind==='out').reduce((n,m)=>n+cashboxNum(m.amount),0);
+    const totalInToEnd=allBeforeEnd.filter(m=>m.kind==='in').reduce((n,m)=>n+cashboxNum(m.amount),0);
+    const totalOutToEnd=allBeforeEnd.filter(m=>m.kind==='out').reduce((n,m)=>n+cashboxNum(m.amount),0);
+    const balance=opening+totalInToEnd-totalOutToEnd;
+    const balanceEl=document.getElementById('cashboxBalance'); if(balanceEl) balanceEl.textContent=fmt(balance);
+    const inEl=document.getElementById('cashboxIn'); if(inEl) inEl.textContent=fmt(inPeriod);
+    const outEl=document.getElementById('cashboxOut'); if(outEl) outEl.textContent=fmt(outPeriod);
+    const net=inPeriod-outPeriod;
+    const netEl=document.getElementById('cashboxNet'); if(netEl){netEl.textContent=fmt(net);netEl.style.color=net>=0?'#4b5fc5':'#c53b45';}
+    const countEl=document.getElementById('cashboxMovementCount'); if(countEl) countEl.textContent=`${period.length} حركة`;
+    const listEl=document.getElementById('cashboxMovements');
+    if(listEl) listEl.innerHTML=period.map(m=>`<div class="cashbox-movement ${m.kind}"><div class="cashbox-movement-icon"><i class="fas ${cashboxEsc(m.icon||'fa-circle')}"></i></div><div class="cashbox-movement-main"><strong>${cashboxEsc(m.title)}</strong><small>${cashboxEsc(m.detail)} • ${cashboxEsc(m.date)}${m.time?' • '+cashboxEsc(m.time):''}</small></div><div class="cashbox-movement-amount">${m.kind==='in'?'+':'−'} ${fmt(m.amount)}</div></div>`).join('')||'<div class="cashbox-empty"><i class="fas fa-box-open" style="font-size:1.6rem;display:block;margin-bottom:7px"></i>لا توجد حركات نقدية في الفترة المحددة</div>';
+  }catch(e){
+    console.error('خطأ في تحديث الخزنة:',e);
+    const listEl=document.getElementById('cashboxMovements');
+    if(listEl) listEl.innerHTML='<div class="cashbox-empty">تعذر قراءة حركات الخزنة حاليًا.</div>';
+  }
 }
 
 // ==================== المصروفات ====================
