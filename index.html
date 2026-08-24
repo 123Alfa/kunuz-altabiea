@@ -2070,7 +2070,7 @@ input[type="date"].sales-date-filter:focus{
   .invoice-detail-actions button{width:100%!important;min-width:0!important;max-width:none!important;padding:8px 3px!important;font-size:.60rem!important;min-height:36px!important}
   .invoice-detail-actions button:last-child{ }
 }
-/* v1.5.41 — ترتيب أزرار تفاصيل الفاتورة والخزنة */
+/* v1.5.42 — إصلاح صفحة الخزنة وترتيب أزرار تفاصيل الفاتورة */
 @media(max-width:600px){
   .invoice-detail-actions{grid-template-columns:repeat(6,minmax(0,1fr))!important}
   .invoice-detail-actions button{grid-column:span 2!important}
@@ -2151,7 +2151,7 @@ input[type="date"].sales-date-filter:focus{
 </div>
 <script>
 // ==================== معلومات الإصدار ====================
-const APP_VERSION='v1.5.41';
+const APP_VERSION='v1.5.42';
 const APP_NAME = "كنوز الطبيعة";
 const APP_BUILD_DATE = "24 أغسطس 2026 — تطوير لوحة التحكم الاحترافية";
 
@@ -4731,40 +4731,49 @@ function deletePurchase(id){
 }
 
 // ==================== الخزنة ====================
+function cashboxList(key){
+  const value=Store.get(key);
+  return Array.isArray(value)?value:[];
+}
 function getCashboxData(){
   const movements=[];
-  const sales=Array.isArray(Store.get('sales'))?Store.get('sales'):[];
+  const sales=cashboxList('sales');
   const saleGroups=new Map();
-  sales.forEach(s=>{const key=s.saleBatchId?String(s.saleBatchId):'sale:'+String(s.id);if(!saleGroups.has(key))saleGroups.set(key,[]);saleGroups.get(key).push(s);});
+  sales.forEach(s=>{
+    const key=s?.saleBatchId?String(s.saleBatchId):'sale:'+String(s?.id||'');
+    if(!saleGroups.has(key))saleGroups.set(key,[]);
+    saleGroups.get(key).push(s||{});
+  });
   saleGroups.forEach(lines=>{
     const first=lines[0]||{};
     if(String(first.paymentMethod||'cash')==='cash'){
-      const total=lines.reduce((n,x)=>n+Math.max(0,Number(x.total||0)),0);
-      movements.push({date:first.date||'',time:first.time||'',kind:'in',amount:total,title:'بيع نقدي',detail:`فاتورة ${first.invoiceSeq||first.invoiceNo||first.id} • ${first.customerName||'عميل عادي'}`,icon:'fa-cart-shopping',ref:first.saleBatchId||first.id});
+      const total=lines.reduce((n,x)=>n+Math.max(0,Number(x?.total||0)),0);
+      if(total>0) movements.push({date:first.date||'',time:first.time||'',kind:'in',amount:total,title:'بيع نقدي',detail:`فاتورة ${first.invoiceSeq||first.invoiceNo||first.id||''} • ${first.customerName||'عميل عادي'}`,icon:'fa-cart-shopping',ref:first.saleBatchId||first.id});
     }
   });
-  (Store.get('purchases')||[]).forEach(p=>{
-    const paid=Math.max(0,Number(p.paid||0));
-    if(paid>0) movements.push({date:p.date||'',time:'',kind:'out',amount:paid,title:'شراء مدفوع',detail:`${p.productName||'مشتريات'} • ${p.supplierName||'بائع/مورد'}`,icon:'fa-cart-flatbed',ref:p.purchaseBatchId||p.id});
+  cashboxList('purchases').forEach(p=>{
+    const paid=Math.max(0,Number(p?.paid||0));
+    if(paid>0) movements.push({date:p?.date||'',time:'',kind:'out',amount:paid,title:'شراء مدفوع',detail:`${p?.productName||'مشتريات'} • ${p?.supplierName||'بائع/مورد'}`,icon:'fa-cart-flatbed',ref:p?.purchaseBatchId||p?.id});
   });
-  (Store.get('expenses')||[]).forEach(e=>{
-    const amount=Math.max(0,Number(e.amount||0));
-    if(amount>0) movements.push({date:e.date||'',time:'',kind:'out',amount,title:'مصروف',detail:`${e.type||'مصروف'}${e.note?' • '+e.note:''}`,icon:'fa-receipt',ref:e.id});
+  cashboxList('expenses').forEach(e=>{
+    const amount=Math.max(0,Number(e?.amount||0));
+    if(amount>0) movements.push({date:e?.date||'',time:'',kind:'out',amount,title:'مصروف',detail:`${e?.type||'مصروف'}${e?.note?' • '+e.note:''}`,icon:'fa-receipt',ref:e?.id});
   });
-  (Store.get('withdrawals')||[]).forEach(w=>{
-    const amount=Math.max(0,Number(w.amount||0));
-    if(amount>0) movements.push({date:w.date||'',time:'',kind:'out',amount,title:'سحب شخصي',detail:w.note||'سحب من الخزنة',icon:'fa-money-bill-transfer',ref:w.id});
+  cashboxList('withdrawals').forEach(w=>{
+    const amount=Math.max(0,Number(w?.amount||0));
+    if(amount>0) movements.push({date:w?.date||'',time:'',kind:'out',amount,title:'سحب شخصي',detail:w?.note||'سحب من الخزنة',icon:'fa-money-bill-transfer',ref:w?.id});
   });
-  (Store.get('debts')||[]).forEach(d=>{
-    const type=d.type==='لنا'?'in':'out';
-    (Array.isArray(d.paymentHistory)?d.paymentHistory:[]).forEach((h,i)=>{
-      const amount=Math.max(0,Number(h.amount||0));
+  cashboxList('debts').forEach(d=>{
+    const type=d?.type==='لنا'?'in':'out';
+    const history=Array.isArray(d?.paymentHistory)?d.paymentHistory:[];
+    history.forEach((h,i)=>{
+      const amount=Math.max(0,Number(h?.amount||0));
       if(!amount)return;
-      const dt=String(h.date||'');
-      movements.push({date:dt.slice(0,10)||d.date||'',time:dt.slice(11,16)||'',kind:type,amount,title:type==='in'?'تحصيل من عميل':'سداد لمورد',detail:`${d.person||'حساب'} • ${h.type==='full'?'سداد كامل':'سداد جزئي'}`,icon:type==='in'?'fa-hand-holding-dollar':'fa-money-bill-wave',ref:(d.id||'')+'-'+i});
+      const dt=String(h?.date||'');
+      movements.push({date:dt.slice(0,10)||d?.date||'',time:dt.slice(11,16)||'',kind:type,amount,title:type==='in'?'تحصيل من عميل':'سداد لمورد',detail:`${d?.person||'حساب'} • ${h?.type==='full'?'سداد كامل':'سداد جزئي'}`,icon:type==='in'?'fa-hand-holding-dollar':'fa-money-bill-wave',ref:(d?.id||'')+'-'+i});
     });
   });
-  movements.sort((a,b)=>String(b.date+' '+b.time).localeCompare(String(a.date+' '+a.time)));
+  movements.sort((a,b)=>String((b.date||'')+' '+(b.time||'')).localeCompare(String((a.date||'')+' '+(a.time||''))));
   return movements;
 }
 function getCashboxOpening(){return Math.max(0,Number(currentUser?.capital||0));}
