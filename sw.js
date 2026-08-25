@@ -1,4 +1,4 @@
-const CACHE_NAME = 'matgary-v1.5.52-20260825';
+const CACHE_NAME = 'matgary-v1.5.53-20260825';
 
 const APP_SHELL = [
   './',
@@ -39,26 +39,22 @@ self.addEventListener('fetch', event => {
   const url = new URL(request.url);
   if (isFirebaseRequest(url)) return;
 
-  if (
-    request.mode === 'navigate' ||
-    url.pathname.endsWith('/index.html') ||
-    url.pathname === '/'
-  ) {
+  if (request.mode === 'navigate' ||
+      url.pathname.endsWith('/index.html') ||
+      url.pathname === '/') {
     event.respondWith(
-      fetch(request, { cache: 'no-store' })
+      fetch(request, {cache:'no-store'})
         .then(response => {
           if (response && response.ok) {
             const copy = response.clone();
             caches.open(CACHE_NAME)
               .then(cache => cache.put('./index.html', copy))
-              .catch(() => {});
+              .catch(()=>{});
           }
           return response;
         })
-        .catch(() =>
-          caches.match('./index.html')
-            .then(cached => cached || caches.match('./'))
-        )
+        .catch(() => caches.match('./index.html')
+          .then(cached => cached || caches.match('./')))
     );
     return;
   }
@@ -67,13 +63,12 @@ self.addEventListener('fetch', event => {
     event.respondWith(
       caches.match(request).then(cached => {
         if (cached) return cached;
-
         return fetch(request).then(response => {
           if (response && response.ok) {
             const copy = response.clone();
             caches.open(CACHE_NAME)
               .then(cache => cache.put(request, copy))
-              .catch(() => {});
+              .catch(()=>{});
           }
           return response;
         });
