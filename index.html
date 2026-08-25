@@ -2434,11 +2434,10 @@ async function backupToGoogle(options={}){
     // لا نفقد التغيير: نضعه دائمًا في قائمة الانتظار، ثم نحاول تجديد جلسة Google
     // ونكرر الرفع تلقائيًا. هذا مهم خصوصًا بعد إغلاق Chrome أو انتهاء Access Token.
     markCloudSyncPending();
-    if(localStorage.getItem('bm_google_connected')==='1' && navigator.onLine && !retrying){
-      requestGoogleDriveAccess({silent:true});
-      scheduleDriveAutoSyncRetry();
-    }else if(!silent){
-      requestGoogleDriveAccess({prompt:localStorage.getItem('bm_google_connected')?'':'consent'});
+    // لا نفتح Google OAuth تلقائيًا؛ هذا يمنع ظهور شاشة accounts.google.com
+    // أثناء فتح البرنامج أو أثناء العمل. التغيير يظل محفوظًا كمزامنة معلقة.
+    if(!silent){
+      showToast('☁️ التغيير محفوظ محليًا، اضغط "رفع النسخة إلى Google" لإكمال المزامنة','info');
     }
     return false;
   }
@@ -2613,11 +2612,10 @@ function scheduleDriveAutoSyncRetry(delay=5000){
       backupToGoogle({silent:true});
       return;
     }
-    driveAutoSyncRetryCount=Math.min(driveAutoSyncRetryCount+1,12);
-    requestGoogleDriveAccess({silent:true});
-    // إعادة المحاولة تدريجيًا حتى 60 ثانية كحد أقصى بين المحاولات.
-    const nextDelay=Math.min(5000*Math.max(1,driveAutoSyncRetryCount),60000);
-    scheduleDriveAutoSyncRetry(nextDelay);
+    // لا نطلب Access Token تلقائيًا حتى لا تظهر شاشة Google.
+    // نترك المزامنة معلقة إلى أن يضغط المستخدم على زر Google.
+    driveAutoSyncRetryCount=0;
+    return;
   },delay);
 }
 
@@ -2634,8 +2632,8 @@ function scheduleDriveBackup(){
       return;
     }
     if(!driveAccessTokenValid()){
-      requestGoogleDriveAccess({silent:true});
-      scheduleDriveAutoSyncRetry(3000);
+      // انتهت جلسة Google: لا نفتح شاشة تسجيل الدخول تلقائيًا.
+      // تبقى المزامنة معلقة حتى يعيد المستخدم الربط/الرفع يدويًا.
       return;
     }
     driveAutoSyncRetryCount=0;
@@ -2665,10 +2663,7 @@ window.addEventListener('visibilitychange',()=>{
   if(!navigator.onLine || localStorage.getItem('bm_google_connected')!=='1') return;
   if(localStorage.getItem(DRIVE_SYNC_PENDING_KEY)==='1'){
     if(driveAccessTokenValid()) setTimeout(()=>backupToGoogle({silent:true}),500);
-    else {
-      requestGoogleDriveAccess({silent:true});
-      scheduleDriveAutoSyncRetry(2000);
-    }
+    // لا نفتح Google تلقائيًا عند العودة للصفحة.
   }
 });
 
@@ -2944,14 +2939,14 @@ async function showApp(){
   updateSyncStatus();
   startDriveAutoSyncMonitor();
 
-  // مهم: لا نفتح نافذة Google عند كل تشغيل للبرنامج.
-  // إذا لم توجد تغييرات معلقة، يفتح البرنامج مباشرة من البيانات المحلية.
-  // عند وجود مزامنة معلقة فقط نحاول التجديد الصامت ثم نرفع التغييرات.
+  // مهم جدًا: لا نفتح Google OAuth تلقائيًا عند تشغيل البرنامج.
+  // البرنامج يفتح مباشرة من البيانات المحلية بدون أي شاشة Google.
+  // إذا كان توكن Google ما زال صالحًا في نفس الجلسة، نرفع التغييرات المعلقة فقط.
+  // إذا انتهت الجلسة، ننتظر ضغط المستخدم على زر Google بدل فتح شاشة تسجيل الدخول تلقائيًا.
   const googleConnected=localStorage.getItem('bm_google_connected')==='1';
   const cloudSyncPending=localStorage.getItem(DRIVE_SYNC_PENDING_KEY)==='1';
-  if(googleConnected && cloudSyncPending){
-    if(driveAccessTokenValid()) setTimeout(()=>backupToGoogle({silent:true}),300);
-    else setTimeout(()=>requestGoogleDriveAccess({silent:true,login_hint:localStorage.getItem('bm_google_email')||undefined}),500);
+  if(googleConnected && cloudSyncPending && driveAccessTokenValid()){
+    setTimeout(()=>backupToGoogle({silent:true}),300);
   }
 }
 
@@ -2977,10 +2972,7 @@ window.addEventListener('online',()=>{
   if(localStorage.getItem('bm_google_connected')==='1'){
     if(localStorage.getItem(DRIVE_SYNC_PENDING_KEY)==='1'){
       if(driveAccessTokenValid()) setTimeout(()=>backupToGoogle({silent:true}),300);
-      else {
-        setTimeout(()=>requestGoogleDriveAccess({silent:true}),500);
-        scheduleDriveAutoSyncRetry(1500);
-      }
+      // إذا انتهت جلسة Google لا نفتح شاشة الحساب تلقائيًا.
     }
   }
 });
