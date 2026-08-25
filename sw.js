@@ -1,4 +1,4 @@
-const CACHE_NAME = 'matgary-v1.5.51-20260825';
+const CACHE_NAME = 'matgary-v1.5.52-20260825';
 
 const APP_SHELL = [
   './',
@@ -20,9 +20,7 @@ self.addEventListener('install', event => {
 self.addEventListener('activate', event => {
   event.waitUntil(
     caches.keys().then(keys => Promise.all(
-      keys
-        .filter(key => key !== CACHE_NAME)
-        .map(key => caches.delete(key))
+      keys.filter(key => key !== CACHE_NAME).map(key => caches.delete(key))
     )).then(() => self.clients.claim())
   );
 });
@@ -39,7 +37,6 @@ self.addEventListener('fetch', event => {
   if (request.method !== 'GET') return;
 
   const url = new URL(request.url);
-
   if (isFirebaseRequest(url)) return;
 
   if (
