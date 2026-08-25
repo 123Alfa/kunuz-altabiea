@@ -2152,9 +2152,9 @@ input[type="date"].sales-date-filter:focus{
 </div>
 <script>
 // ==================== معلومات الإصدار ====================
-const APP_VERSION='v1.5.54';
+const APP_VERSION='v1.5.55';
 const APP_NAME = "متجري";
-const APP_BUILD_DATE = "25 أغسطس 2026 — مزامنة Google Drive تلقائية";
+const APP_BUILD_DATE = "25 أغسطس 2026 — مزامنة Google Drive تلقائية محسّنة";
 
 // =====================================================
 // ☁️ Google Drive — مزامنة تلقائية + نسخة محلية
@@ -2176,6 +2176,7 @@ let driveBackupInProgress = false;
 let driveBackupPending = false;
 let driveAuthRefreshInProgress = false;
 let driveSilentRefreshTimer = null;
+let driveAutoSyncInterval = null;
 const DRIVE_SYNC_PENDING_KEY = 'bm_cloud_sync_pending';
 
 function isGoogleDriveReady(){
@@ -2587,9 +2588,9 @@ function markCloudSyncPending(){
 function scheduleDriveBackup(){
   markCloudSyncPending();
   clearTimeout(driveBackupTimer);
-  // لو الحساب غير مرتبط أو التوكن منتهي، لا نزعج المستخدم.
-  // البيانات تبقى محفوظة محليًا، وسيتم رفعها تلقائيًا بعد عودة الاتصال/تجديد التوكن.
-  if(!navigator.onLine || !localStorage.getItem('bm_google_connected')) return;
+  // الحفظ المحلي يتم فورًا دائمًا. الرفع السحابي يتم تلقائيًا عند وجود
+  // حساب Google واتصال بالإنترنت، مع إعادة المحاولة إذا انتهت جلسة التوكن.
+  if(!navigator.onLine || localStorage.getItem('bm_google_connected')!=='1') return;
   driveBackupTimer=setTimeout(async()=>{
     if(!driveAccessTokenValid()){
       requestGoogleDriveAccess({silent:true});
@@ -2598,6 +2599,31 @@ function scheduleDriveBackup(){
     await backupToGoogle({silent:true});
   },1200);
 }
+
+function startDriveAutoSyncMonitor(){
+  if(driveAutoSyncInterval) return;
+  // حماية إضافية: لو حصل تغيير أثناء انشغال الرفع، أو فشل الرفع لسبب مؤقت،
+  // يعيد البرنامج المحاولة تلقائيًا بدون أي تدخل من المستخدم.
+  driveAutoSyncInterval=setInterval(()=>{
+    if(!navigator.onLine || localStorage.getItem('bm_google_connected')!=='1') return;
+    if(localStorage.getItem(DRIVE_SYNC_PENDING_KEY)!=='1') return;
+    if(driveBackupInProgress) return;
+    if(!driveAccessTokenValid()){
+      requestGoogleDriveAccess({silent:true});
+      return;
+    }
+    backupToGoogle({silent:true});
+  },45000);
+}
+
+window.addEventListener('visibilitychange',()=>{
+  if(document.visibilityState!=='visible') return;
+  if(!navigator.onLine || localStorage.getItem('bm_google_connected')!=='1') return;
+  if(localStorage.getItem(DRIVE_SYNC_PENDING_KEY)==='1'){
+    if(driveAccessTokenValid()) setTimeout(()=>backupToGoogle({silent:true}),500);
+    else requestGoogleDriveAccess({silent:true});
+  }
+});
 
 function getBackupCollections(){return ['products','sales','purchases','expenses','withdrawals','debts','customers','suppliers','offers','auditLog'];}
 
@@ -2869,6 +2895,7 @@ async function showApp(){
   // البرنامج يفتح فورًا من البيانات المحلية ولا يعتمد على الإنترنت.
   try{ navigateTo('dashboard'); }catch(e){ console.error('تعذر فتح الصفحة المحلية:',e); }
   updateSyncStatus();
+  startDriveAutoSyncMonitor();
 
   // المزامنة السحابية تلقائية: نُجدد توكن Google بصمت عند فتح البرنامج،
   // ثم نرفع أي تغييرات معلقة دون الحاجة إلى ضغط زر النسخ.
