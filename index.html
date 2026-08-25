@@ -2152,9 +2152,9 @@ input[type="date"].sales-date-filter:focus{
 </div>
 <script>
 // ==================== معلومات الإصدار ====================
-const APP_VERSION='v1.5.57';
+const APP_VERSION='v1.5.58';
 const APP_NAME = "متجري";
-const APP_BUILD_DATE = "25 أغسطس 2026 — إصلاح تسجيل Google ومنع شاشة اختيار الحساب عند فتح البرنامج";
+const APP_BUILD_DATE = "25 أغسطس 2026 — منع فتح شاشة Google تلقائيًا عند تشغيل البرنامج";
 
 // =====================================================
 // ☁️ Google Drive — مزامنة تلقائية + نسخة محلية
@@ -2434,10 +2434,11 @@ async function backupToGoogle(options={}){
     // لا نفقد التغيير: نضعه دائمًا في قائمة الانتظار، ثم نحاول تجديد جلسة Google
     // ونكرر الرفع تلقائيًا. هذا مهم خصوصًا بعد إغلاق Chrome أو انتهاء Access Token.
     markCloudSyncPending();
-    // لا نفتح Google OAuth تلقائيًا؛ هذا يمنع ظهور شاشة accounts.google.com
-    // أثناء فتح البرنامج أو أثناء العمل. التغيير يظل محفوظًا كمزامنة معلقة.
-    if(!silent){
-      showToast('☁️ التغيير محفوظ محليًا، اضغط "رفع النسخة إلى Google" لإكمال المزامنة','info');
+    if(localStorage.getItem('bm_google_connected')==='1' && navigator.onLine && !retrying){
+      // لا نفتح Google OAuth تلقائيًا؛ المستخدم يعيد الربط من الزر عند الحاجة.
+      scheduleDriveAutoSyncRetry();
+    }else if(!silent){
+      requestGoogleDriveAccess({prompt:localStorage.getItem('bm_google_connected')?'':'consent'});
     }
     return false;
   }
@@ -2490,9 +2491,9 @@ async function backupToGoogle(options={}){
     refreshGoogleBackupStatusUI();
     if(e.message==='GOOGLE_TOKEN_EXPIRED' && localStorage.getItem('bm_google_connected')==='1' && navigator.onLine && !retrying){
       markCloudSyncPending();
-      requestGoogleDriveAccess({silent:true});
+      // لا نفتح Google OAuth تلقائيًا؛ المستخدم يعيد الربط من الزر عند الحاجة.
     }else if(!silent){
-      if(e.message==='GOOGLE_TOKEN_EXPIRED') showToast('⚠️ انتهت جلسة Google، سيتم تجديدها تلقائيًا عند الإمكان','warning');
+      if(e.message==='GOOGLE_TOKEN_EXPIRED') showToast('⚠️ انتهت جلسة Google، اضغط رفع النسخة إلى Google لإعادة الاتصال','warning');
       else if(e.message==='GOOGLE_BACKUP_VERIFY_FAILED') showToast('❌ تم الرفع لكن تعذر التحقق من سلامة النسخة. لم نعتبرها نسخة ناجحة.','error');
       else showToast('❌ فشل رفع النسخة إلى Google','error');
     }
@@ -2612,10 +2613,11 @@ function scheduleDriveAutoSyncRetry(delay=5000){
       backupToGoogle({silent:true});
       return;
     }
-    // لا نطلب Access Token تلقائيًا حتى لا تظهر شاشة Google.
-    // نترك المزامنة معلقة إلى أن يضغط المستخدم على زر Google.
-    driveAutoSyncRetryCount=0;
-    return;
+    driveAutoSyncRetryCount=Math.min(driveAutoSyncRetryCount+1,12);
+    // لا نفتح Google OAuth تلقائيًا؛ المستخدم يعيد الربط من الزر عند الحاجة.
+    // إعادة المحاولة تدريجيًا حتى 60 ثانية كحد أقصى بين المحاولات.
+    const nextDelay=Math.min(5000*Math.max(1,driveAutoSyncRetryCount),60000);
+    scheduleDriveAutoSyncRetry(nextDelay);
   },delay);
 }
 
@@ -2632,8 +2634,8 @@ function scheduleDriveBackup(){
       return;
     }
     if(!driveAccessTokenValid()){
-      // انتهت جلسة Google: لا نفتح شاشة تسجيل الدخول تلقائيًا.
-      // تبقى المزامنة معلقة حتى يعيد المستخدم الربط/الرفع يدويًا.
+      // لا نفتح Google OAuth تلقائيًا؛ المستخدم يعيد الربط من الزر عند الحاجة.
+      scheduleDriveAutoSyncRetry(3000);
       return;
     }
     driveAutoSyncRetryCount=0;
@@ -2649,7 +2651,7 @@ function startDriveAutoSyncMonitor(){
     if(localStorage.getItem(DRIVE_SYNC_PENDING_KEY)!=='1') return;
     if(driveBackupInProgress) return;
     if(!driveAccessTokenValid()){
-      requestGoogleDriveAccess({silent:true});
+      // لا نفتح Google OAuth تلقائيًا؛ المستخدم يعيد الربط من الزر عند الحاجة.
       scheduleDriveAutoSyncRetry(3000);
       return;
     }
@@ -2663,7 +2665,10 @@ window.addEventListener('visibilitychange',()=>{
   if(!navigator.onLine || localStorage.getItem('bm_google_connected')!=='1') return;
   if(localStorage.getItem(DRIVE_SYNC_PENDING_KEY)==='1'){
     if(driveAccessTokenValid()) setTimeout(()=>backupToGoogle({silent:true}),500);
-    // لا نفتح Google تلقائيًا عند العودة للصفحة.
+    else {
+      // لا نفتح Google OAuth تلقائيًا؛ المستخدم يعيد الربط من الزر عند الحاجة.
+      scheduleDriveAutoSyncRetry(2000);
+    }
   }
 });
 
@@ -2939,14 +2944,14 @@ async function showApp(){
   updateSyncStatus();
   startDriveAutoSyncMonitor();
 
-  // مهم جدًا: لا نفتح Google OAuth تلقائيًا عند تشغيل البرنامج.
-  // البرنامج يفتح مباشرة من البيانات المحلية بدون أي شاشة Google.
-  // إذا كان توكن Google ما زال صالحًا في نفس الجلسة، نرفع التغييرات المعلقة فقط.
-  // إذا انتهت الجلسة، ننتظر ضغط المستخدم على زر Google بدل فتح شاشة تسجيل الدخول تلقائيًا.
+  // مهم: لا نفتح نافذة Google عند كل تشغيل للبرنامج.
+  // إذا لم توجد تغييرات معلقة، يفتح البرنامج مباشرة من البيانات المحلية.
+  // عند وجود مزامنة معلقة فقط نحاول التجديد الصامت ثم نرفع التغييرات.
   const googleConnected=localStorage.getItem('bm_google_connected')==='1';
   const cloudSyncPending=localStorage.getItem(DRIVE_SYNC_PENDING_KEY)==='1';
-  if(googleConnected && cloudSyncPending && driveAccessTokenValid()){
-    setTimeout(()=>backupToGoogle({silent:true}),300);
+  if(googleConnected && cloudSyncPending){
+    if(driveAccessTokenValid()) setTimeout(()=>backupToGoogle({silent:true}),300);
+    else setTimeout(()=>requestGoogleDriveAccess({silent:true,login_hint:localStorage.getItem('bm_google_email')||undefined}),500);
   }
 }
 
@@ -2972,7 +2977,7 @@ window.addEventListener('online',()=>{
   if(localStorage.getItem('bm_google_connected')==='1'){
     if(localStorage.getItem(DRIVE_SYNC_PENDING_KEY)==='1'){
       if(driveAccessTokenValid()) setTimeout(()=>backupToGoogle({silent:true}),300);
-      // إذا انتهت جلسة Google لا نفتح شاشة الحساب تلقائيًا.
+      // إذا انتهت جلسة Google لا نفتح شاشة تسجيل الدخول تلقائيًا عند العودة للصفحة.
     }
   }
 });
@@ -6835,10 +6840,14 @@ window.addEventListener('DOMContentLoaded', () => {
   } else {
     showAuthScreen();
   }
-  // Google Identity Services تعمل داخل الصفحة ولا تحتاج Firebase Auth أو Redirect URI.
+  // Google Identity Services تعمل داخل الصفحة ولا تحتاج Redirect URI.
+  // مهم: لا نطلب OAuth تلقائيًا عند فتح البرنامج حتى لا تظهر شاشة اختيار حساب Google.
   setTimeout(()=>{
     if(isGoogleDriveReady()) initGoogleDriveClient();
-    if(localStorage.getItem('bm_google_connected')==='1') requestGoogleDriveAccess({silent:true});
+    // المزامنة التلقائية تعمل فقط إذا كان Access Token صالحًا بالفعل.
+    if(localStorage.getItem('bm_google_connected')==='1' && localStorage.getItem(DRIVE_SYNC_PENDING_KEY)==='1' && driveAccessTokenValid()){
+      backupToGoogle({silent:true});
+    }
   },700);
 });
 async function replaceCloudDataWithLocal() {
