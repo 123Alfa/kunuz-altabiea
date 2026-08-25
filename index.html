@@ -6951,7 +6951,9 @@ if ('serviceWorker' in navigator) {
     });
     const total=list.reduce((n,x)=>n+x.total,0), paid=list.reduce((n,x)=>n+x.paid,0), profit=list.reduce((n,x)=>n+x.profit,0);
     const set=(id,v)=>{const e=document.getElementById(id);if(e)e.textContent=v;};
-    set('salesStatCount',list.length);set('salesStatTotal',fmt(total));set('salesStatPaid',fmt(paid));set('salesStatProfit',fmt(profit));
+    const invoiceSeqMax=list.reduce((m,x)=>Math.max(m,Number(x.invoiceSeq)||0),0);
+     const operationCount=Math.max(list.length,invoiceSeqMax);
+     set('salesStatCount',operationCount);set('salesStatTotal',fmt(total));set('salesStatPaid',fmt(paid));set('salesStatProfit',fmt(profit));
     const target=document.getElementById('salesTable');if(target)target.innerHTML=list.map(historyCard).join('')||'<div class="sales-empty"><div><i class="fas fa-receipt"></i></div><strong>لا توجد فواتير</strong><span>جرّب تغيير البحث أو الفلاتر</span></div>';
   };
 
