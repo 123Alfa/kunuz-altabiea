@@ -634,7 +634,7 @@ tr:hover td{background:rgba(15,118,110,.045)}
 /* ===== الخزنة - v1.5.45 ===== */
 .cashbox-page{max-width:980px!important}.cashbox-hero{display:flex;align-items:center;justify-content:space-between;gap:14px;padding:20px;margin-bottom:14px;border-radius:22px;color:#fff;background:linear-gradient(135deg,#075e54,#0f8f78 55%,#d6a928);box-shadow:0 12px 28px rgba(8,121,109,.18)}.cashbox-hero h2{margin:4px 0;font-size:1.35rem}.cashbox-hero p{margin:0;color:rgba(255,255,255,.82);font-size:.72rem}.cashbox-hero-icon{width:58px;height:58px;border-radius:18px;background:rgba(255,255,255,.14);display:grid;place-items:center;font-size:1.55rem}.cashbox-balance{background:#fff;border:1px solid #dce9e4;border-radius:20px;padding:18px;margin-bottom:12px;text-align:center;box-shadow:0 8px 22px rgba(20,70,55,.05)}.cashbox-balance small{display:block;color:#7b888c;font-weight:800}.cashbox-balance strong{display:block;margin:5px 0;color:#08796d;font-size:1.85rem;font-weight:950}.cashbox-balance span{font-size:.66rem;color:#96a1a4}.cashbox-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:12px}.cashbox-stat{background:#fff;border:1px solid #e1ebe7;border-radius:17px;padding:13px;display:flex;align-items:center;gap:10px;box-shadow:0 5px 16px rgba(20,70,55,.04)}.cashbox-stat>i{width:40px;height:40px;border-radius:12px;display:grid;place-items:center}.cashbox-stat small{display:block;color:#7b878c;font-size:.62rem;font-weight:800}.cashbox-stat b{display:block;margin-top:3px;font-size:.95rem}.cashbox-stat.in>i{background:#eaf8f1;color:#08796d}.cashbox-stat.in b{color:#08796d}.cashbox-stat.out>i{background:#fff0f0;color:#c53b45}.cashbox-stat.out b{color:#c53b45}.cashbox-stat.net>i{background:#eef3ff;color:#4b5fc5}.cashbox-stat.net b{color:#4b5fc5}.cashbox-filter{background:#fff;border:1px solid #e1ebe7;border-radius:18px;padding:12px;margin-bottom:12px}.cashbox-filter-row{display:grid;grid-template-columns:1fr 1fr auto;gap:8px;align-items:end}.cashbox-filter label{display:block;color:#77848a;font-size:.64rem;font-weight:800;margin-bottom:5px}.cashbox-filter input{width:100%;box-sizing:border-box;padding:10px;border:1px solid #dce7e3;border-radius:11px;font:inherit;font-weight:800;background:#fbfdfc}.cashbox-filter button{height:42px;border:0;border-radius:11px;padding:0 15px;background:#eef7f3;color:#08796d;font:inherit;font-weight:900;cursor:pointer}.cashbox-section{background:#fff;border:1px solid #e1ebe7;border-radius:20px;overflow:hidden;box-shadow:0 7px 20px rgba(20,70,55,.04)}.cashbox-section-head{display:flex;justify-content:space-between;align-items:center;padding:14px 16px;border-bottom:1px solid #edf2ef}.cashbox-section-head h3{margin:0;font-size:.95rem}.cashbox-section-head small{color:#8b979b;font-size:.62rem}.cashbox-movement{display:flex;align-items:center;gap:10px;padding:12px 14px;border-bottom:1px solid #f0f3f2}.cashbox-movement:last-child{border-bottom:0}.cashbox-movement-icon{width:38px;height:38px;border-radius:11px;display:grid;place-items:center;flex:0 0 auto}.cashbox-movement.in .cashbox-movement-icon{background:#eaf8f1;color:#08796d}.cashbox-movement.out .cashbox-movement-icon{background:#fff0f0;color:#c53b45}.cashbox-movement-main{min-width:0;flex:1}.cashbox-movement-main strong{display:block;font-size:.72rem}.cashbox-movement-main small{display:block;color:#8b969a;font-size:.57rem;margin-top:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.cashbox-movement-amount{font-weight:950;font-size:.72rem;white-space:nowrap}.cashbox-movement.in .cashbox-movement-amount{color:#08796d}.cashbox-movement.out .cashbox-movement-amount{color:#c53b45}.cashbox-empty{text-align:center;padding:28px;color:#9aa5a8;font-size:.72rem}@media(max-width:600px){.cashbox-stats{grid-template-columns:1fr}.cashbox-filter-row{grid-template-columns:1fr 1fr}.cashbox-filter-row button{grid-column:1/-1}.cashbox-hero{padding:16px}.cashbox-hero h2{font-size:1.15rem}.cashbox-balance strong{font-size:1.6rem}}
 </style>
-<link rel="manifest" href="manifest-v1.5.50.json">
+<link rel="manifest" href="manifest.json">
 <link rel="apple-touch-icon" href="icon-192.png">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -6731,7 +6731,7 @@ async function replaceCloudDataWithLocal() {
 <script>
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', function() {
-    navigator.serviceWorker.register('sw.js?v=10')
+    navigator.serviceWorker.register('sw.js?v=11')
       .then(function(registration) {
         registration.update().catch(function(){});
         console.log('SW registered: ', registration.scope);
@@ -6951,9 +6951,7 @@ if ('serviceWorker' in navigator) {
     });
     const total=list.reduce((n,x)=>n+x.total,0), paid=list.reduce((n,x)=>n+x.paid,0), profit=list.reduce((n,x)=>n+x.profit,0);
     const set=(id,v)=>{const e=document.getElementById(id);if(e)e.textContent=v;};
-    const invoiceSeqMax=list.reduce((m,x)=>Math.max(m,Number(x.invoiceSeq)||0),0);
-     const operationCount=Math.max(list.length,invoiceSeqMax);
-     set('salesStatCount',operationCount);set('salesStatTotal',fmt(total));set('salesStatPaid',fmt(paid));set('salesStatProfit',fmt(profit));
+    set('salesStatCount',list.length);set('salesStatTotal',fmt(total));set('salesStatPaid',fmt(paid));set('salesStatProfit',fmt(profit));
     const target=document.getElementById('salesTable');if(target)target.innerHTML=list.map(historyCard).join('')||'<div class="sales-empty"><div><i class="fas fa-receipt"></i></div><strong>لا توجد فواتير</strong><span>جرّب تغيير البحث أو الفلاتر</span></div>';
   };
 
