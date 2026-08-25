@@ -1,4 +1,4 @@
-const CACHE_NAME = 'matgary-v1.5.53-20260825';
+const CACHE_NAME = 'matgary-v1.5.54-20260825';
 
 const APP_SHELL = [
   './',
