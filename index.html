@@ -2664,7 +2664,7 @@ window.addEventListener('visibilitychange',()=>{
   }
 });
 
-function getBackupCollections(){return ['products','sales','purchases','expenses','withdrawals','debts','customers','suppliers','offers','auditLog'];}
+function getBackupCollections(){return ['products','sales','purchases','purchaseReturns','expenses','withdrawals','debts','customers','suppliers','offers','auditLog'];}
 
 // =====================================================
 // 📦 نظام التخزين المتقدم (محلي + سحابة)
@@ -2736,7 +2736,7 @@ const Store={
     scheduleDriveBackup();
   },
   getAuditLog(){return this.get('auditLog')},
-  clear(){['products','sales','purchases','expenses','withdrawals','debts','customers','suppliers','offers','auditLog','user'].forEach(k=>localStorage.removeItem('bm_'+k))}
+  clear(){['products','sales','purchases','purchaseReturns','expenses','withdrawals','debts','customers','suppliers','offers','auditLog','user'].forEach(k=>localStorage.removeItem('bm_'+k))}
 };
 
 let currentUser=null;
@@ -4994,7 +4994,10 @@ function savePurchaseReturn(id){
   }
 
   // سجل مستقل للمرتجع حتى يظهر في الحركة والتقارير ولا يتكرر أثره.
-  Store.add('purchaseReturns',{purchaseId:purchase.id,purchaseBatchId:purchase.purchaseBatchId||null,date:today(),productId:product.id,productName:product.name,qty:returnQty,price:Number(purchase.price||0),total:returnValue,supplierId:purchase.supplierId||null,supplierName:purchase.supplierName||'بدون مورد',creditReduced:reduceCredit,cashRefund:refundCash,note:document.getElementById('rpurNote')?.value||''});
+  const purchaseReturnRecord=Store.add('purchaseReturns',{purchaseId:purchase.id,purchaseBatchId:purchase.purchaseBatchId||null,date:today(),productId:product.id,productName:product.name,qty:returnQty,price:Number(purchase.price||0),total:returnValue,supplierId:purchase.supplierId||null,supplierName:purchase.supplierName||'بدون مورد',creditReduced:reduceCredit,cashRefund:refundCash,note:document.getElementById('rpurNote')?.value||''});
+
+  // تحديث الخزنة فورًا إذا كانت مفتوحة، حتى يظهر رد المورد في الرصيد والحركة بدون إعادة فتح الصفحة.
+  if(document.getElementById('cashboxBalance') || document.getElementById('cashboxMovements')) renderCashboxData();
 
   closeModal();
   showToast(refundCash>0?`↩️ تم المرتجع ورد ${fmt(refundCash)} للمورد`:`↩️ تم المرتجع وتخفيض حساب المورد ${fmt(returnValue)}`);
