@@ -5536,21 +5536,12 @@ function syncSaleInvoiceFromDebt(debt){
   const sales=Store.get('sales')||[];
   const batch=sales.filter(s=>String(s.saleBatchId)===String(debt.saleBatchId));
   if(!batch.length)return;
-  const totalPaidAfter= Math.max(0, batch.reduce((n,s)=>{
-    const initial=Object.prototype.hasOwnProperty.call(s,'initialPaid')
-      ? money(s.initialPaid)
-      : Math.max(0,money(s.paid)-money(s.returnedAmount||0));
-    return Math.max(n, initial);
-  },0) + Math.max(0,money(debt.paidAmount)));
   const invoiceTotal=batch.reduce((n,s)=>n+Math.max(0,money(s.total)),0);
-  const paid=Math.min(invoiceTotal,totalPaidAfter);
-  const remaining=Math.max(0,invoiceTotal-paid);
-  batch.forEach(s=>{
-    const initial=Object.prototype.hasOwnProperty.call(s,'initialPaid')
-      ? money(s.initialPaid)
-      : Math.max(0,money(s.paid)-money(s.returnedAmount||0));
-    Store.update('sales',s.id,{initialPaid:initial,paid,remaining});
-  });
+  // مصدر الحقيقة للفواتير الآجلة هو الدين المرتبط بالفاتورة.
+  // لو أصبح الدين مسددًا بالكامل يكون المتبقي في الفاتورة = صفر والمدفوع = إجماليها.
+  const remaining=Math.min(invoiceTotal,Math.max(0,getDebtRemaining(debt)));
+  const paid=Math.max(0,invoiceTotal-remaining);
+  batch.forEach(s=>Store.update('sales',s.id,{paid,remaining}));
 }
 
 function openDebtPayment(id){
@@ -5629,11 +5620,17 @@ function deleteDebt(id){if(!confirm('حذف الدين؟'))return;Store.delete('
 
 function getDebtRemaining(d){
   if(!d)return 0;
-  if(d.paid)return 0;
   const amount=Math.max(0,Number(d.amount||0));
+  const hasPaidAmount=Object.prototype.hasOwnProperty.call(d,'paidAmount');
+  // paidAmount هو المرجع الحقيقي للمدفوعات الحديثة. لا نعتمد على paid وحده
+  // لأن بعض السجلات القديمة/المُرحّلة قد تحمل paid:true مع بقاء مبلغ مستحق.
+  if(hasPaidAmount){
+    const paidAmount=Math.max(0,Number(d.paidAmount||0));
+    return Math.max(0,amount-paidAmount);
+  }
+  if(d.paid)return 0;
   const isLegacySource=(d.debtVersion!==2&&(d.source==='purchase'||d.source==='sale'));
-  const paidAmount=isLegacySource?0:Math.max(0,Number(d.paidAmount||0));
-  return Math.max(0,amount-paidAmount);
+  return isLegacySource?amount:Math.max(0,amount);
 }
 function normalizeWhatsAppPhone(phone){
   let p=String(phone||'').replace(/[^\d+]/g,'');
@@ -7209,8 +7206,24 @@ if ('serviceWorker' in navigator) {
       const first=lines[0];
       const total=lines.reduce((n,s)=>n+money(s.total),0);
       const profit=lines.reduce((n,s)=>n+money(s.profit),0);
-      const paid=money(first.paid);
-      const remaining=Math.max(0,total-paid);
+      // الفاتورة الآجلة مرتبطة بسجل الدين؛ لذلك حالة السداد في سجل المبيعات
+      // يجب أن تعكس المتبقي الحقيقي في الدين، وليس قيمة paid القديمة في سطر البيع.
+      // مزامنة سجل المبيعات مع سجل الديون:
+      // نبحث برقم العملية أولاً، ثم برقم الفاتورة كحل احتياطي للفواتير القديمة.
+      // لو كان الدين مسددًا بالكامل (paid=true أو paidAmount=amount) يصبح المتبقي صفرًا.
+      const debtsForSales=Store.get('debts')||[];
+      const batchId=String(first.saleBatchId||'');
+      const invoiceNo=String(first.invoiceNo||'');
+      const linkedDebts=debtsForSales.filter(d=>{
+        if(d.type!=='لنا') return false;
+        const sameBatch=batchId && String(d.saleBatchId||'')===batchId;
+        const sameInvoice=invoiceNo && String(d.invoiceNo||'')===invoiceNo;
+        return (sameBatch||sameInvoice) && (d.source==='sale' || sameBatch || sameInvoice);
+      });
+      const remaining=linkedDebts.length
+        ? linkedDebts.reduce((n,d)=>n+Math.max(0,getDebtRemaining(d)),0)
+        : Math.max(0,total-money(first.paid));
+      const paid=Math.max(0,total-remaining);
       const returnedAmount=lines.reduce((n,s)=>n+money(s.returnedAmount),0);
       const returnedQty=lines.reduce((n,s)=>n+money(s.returnedQty),0);
       const returnedLines=lines.filter(s=>money(s.returnedQty)>0);
