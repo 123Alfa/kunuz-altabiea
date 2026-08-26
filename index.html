@@ -1,7 +1,6 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
-<!-- FIX: cashbox-credit-collection-double-count v1 -->
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>متجري - نظام إدارة المبيعات والمخزون</title>
@@ -2376,6 +2375,7 @@ function buildBackupPayload(){
     purchases:Store.get('purchases'),
     expenses:Store.get('expenses'),
     withdrawals:Store.get('withdrawals'),
+    refunds:Store.get('refunds'),
     debts:Store.get('debts'),
     customers:Store.get('customers'),
     suppliers:Store.get('suppliers'),
@@ -2673,7 +2673,7 @@ window.addEventListener('visibilitychange',()=>{
   }
 });
 
-function getBackupCollections(){return ['products','sales','purchases','expenses','withdrawals','debts','customers','suppliers','offers','auditLog'];}
+function getBackupCollections(){return ['products','sales','purchases','expenses','withdrawals','refunds','debts','customers','suppliers','offers','auditLog'];}
 
 // =====================================================
 // 📦 نظام التخزين المتقدم (محلي + سحابة)
@@ -4905,14 +4905,12 @@ function getCashboxData(){
         const hasPaid=Object.prototype.hasOwnProperty.call(first,'paid');
         cashReceived=hasPaid?Math.min(total,Math.max(0,Number(first.paid)||0)):total;
       }else if(method==='credit'||method==='آجل'){
-        // في البيع الآجل نحسب فقط المبلغ المدفوع وقت إنشاء الفاتورة.
-        // التحصيلات اللاحقة تُسجل من paymentHistory مرة واحدة أسفل الخزنة.
-        // بعد التحصيل تتغير قيمة paid في الفاتورة، لذلك لا يجوز اعتبارها كلها
-        // "تحصيل مقدم" وإلا سيُحسب التحصيل مرتين.
+        // في الآجل: المدفوع وقت إنشاء الفاتورة يدخل الخزنة، أما التحصيلات اللاحقة
+        // فتُقرأ من paymentHistory أسفل الخزنة، لذلك نطرحها حتى لا تتكرر.
         const debts=cashboxList('debts');
         const debt=debts.find(d=>d&&String(d.saleBatchId||'')===String(first.saleBatchId||'')&&d.source==='sale'&&d.type==='لنا');
         const history=Array.isArray(debt?.paymentHistory)?debt.paymentHistory:[];
-        const laterCollected=history.reduce((n,h)=>n+cashboxNum(h&&h.amount),0);
+        const laterCollected=history.reduce((n,h)=>n+Math.max(0,Number(h?.amount)||0),0);
         const currentPaid=Math.max(0,Number(first.paid)||0);
         cashReceived=Math.min(total,Math.max(0,currentPaid-laterCollected));
       }
@@ -4933,6 +4931,11 @@ function getCashboxData(){
     cashboxList('withdrawals').forEach(w=>{
       const amount=cashboxNum(w&&w.amount);
       if(amount>0) movements.push({date:String(w&&w.date||'').slice(0,10),time:'',kind:'out',amount,title:'سحب شخصي',detail:String(w&&w.note||'سحب من الخزنة'),icon:'fa-money-bill-transfer',ref:w&&w.id});
+    });
+    // رد مبالغ المرتجعات النقدية: تُسجل كمصروف من الخزنة ولا تُخلط مع التحصيلات.
+    cashboxList('refunds').forEach(r=>{
+      const amount=cashboxNum(r&&r.amount);
+      if(amount>0) movements.push({date:String(r&&r.date||'').slice(0,10),time:String(r&&r.time||'').slice(0,5),kind:'out',amount,title:'رد مبلغ لعميل',detail:String(r&&r.customerName||'عميل')+' • فاتورة '+String(r&&r.invoiceNo||''),icon:'fa-rotate-left',ref:r&&r.id});
     });
     cashboxList('debts').forEach(d=>{
       if(!d||typeof d!=='object') return;
@@ -7254,39 +7257,66 @@ if ('serviceWorker' in navigator) {
     let refund=0,changed=false;
     inv.lines.forEach((s,i)=>{
       const input=document.querySelector(`[data-return-line="${i}"]`);
-      const r=Math.min(money(s.qty),Math.max(0,money(input?.value)));
+      const available=Math.max(0,money(s.qty));
+      const r=Math.min(available,Math.max(0,money(input?.value)));
       if(r<=0)return;
       changed=true;
-      const ratio=s.qty?Math.min(1,r/money(s.qty)):1;
+      const ratio=available?Math.min(1,r/available):1;
       const lineRefund=money(s.total)*ratio;
       refund+=lineRefund;
       const p=Store.get('products').find(x=>String(x.id)===String(s.productId));
       if(p)Store.update('products',p.id,{qty:money(p.qty)+r});
-      const newQty=Math.max(0,money(s.qty)-r);
+      const newQty=Math.max(0,available-r);
       const newTotal=Math.max(0,money(s.total)-lineRefund);
       const newProfit=Math.max(0,money(s.profit)-money(s.profit)*ratio);
       Store.update('sales',s.id,{qty:newQty,packages:s.weight?newQty/(money(s.weight)||1):newQty,total:newTotal,profit:newProfit,returnedQty:money(s.returnedQty)+r,returnedAmount:money(s.returnedAmount)+lineRefund});
     });
     if(!changed)return showToast('حدد كمية المرتجع أولًا','warning');
 
+    // احسب المبلغ النقدي الذي دخل الخزنة فعليًا قبل تعديل الفاتورة.
+    // في الآجل: المدفوع المقدم + التحصيلات اللاحقة.
+    let collectedAfterSale=0;
+    let debt=null;
+    if(inv.saleBatchId){
+      const debts=Store.get('debts')||[];
+      debt=debts.find(d=>String(d.saleBatchId)===String(inv.saleBatchId)&&d.source==='sale'&&d.type==='لنا');
+      if(debt){
+        const history=Array.isArray(debt.paymentHistory)?debt.paymentHistory:[];
+        collectedAfterSale=debt.debtVersion===2?Math.max(0,money(debt.paidAmount)):history.reduce((n,h)=>n+Math.max(0,money(h&&h.amount)),0);
+      }
+    }
+    const method=String(inv.paymentMethod||inv.method||'cash').toLowerCase();
+    const upfrontCash=(method==='credit'||method==='آجل')?Math.max(0,money(inv.paid)-collectedAfterSale):((method==='cash'||method==='نقدي'||method==='نقد')?Math.max(0,money(inv.paid)):0);
+    const cashActuallyReceived=Math.max(0,upfrontCash+((method==='credit'||method==='آجل')?collectedAfterSale:0));
+    const cashRefund=Math.min(refund,cashActuallyReceived);
+
     const updated=findInvoice(key);
     const newTotal=updated?money(updated.total):Math.max(0,money(inv.total)-refund);
-    const paid=Math.min(money(inv.paid),newTotal);
-    const newRemaining=Math.max(0,newTotal-paid);
+    const newPaid=Math.max(0,money(inv.paid)-cashRefund);
+    const newRemaining=Math.max(0,newTotal-newPaid);
 
     if(inv.saleBatchId){
       const batch=allSales().filter(s=>String(s.saleBatchId)===String(inv.saleBatchId));
-      batch.forEach(s=>Store.update('sales',s.id,{paid,remaining:newRemaining}));
-      const debts=Store.get('debts')||[];
-      const debt=debts.find(d=>String(d.saleBatchId)===String(inv.saleBatchId)&&d.source==='sale'&&d.type==='لنا');
+      batch.forEach(s=>Store.update('sales',s.id,{paid:newPaid,remaining:newRemaining}));
       if(debt){
         const history=Array.isArray(debt.paymentHistory)?debt.paymentHistory.slice():[];
-        const collected=debt.debtVersion===2?Math.max(0,money(debt.paidAmount)):history.reduce((n,h)=>n+Math.max(0,money(h&&h.amount)),0);
-        // نحافظ على التحصيلات السابقة. أصل الدين الجديد = المتبقي الجديد + ما تم تحصيله من الآجل.
+        const collected=Math.max(0,collectedAfterSale);
         const newDebtAmount=Math.max(0,newRemaining+collected);
         Store.update('debts',debt.id,{amount:newDebtAmount,paidAmount:Math.min(collected,newDebtAmount),paid:newRemaining<=0,paymentHistory:history,debtVersion:2,saleTotal:newTotal});
       }else if(newRemaining>0){
         Store.add('debts',{saleBatchId:inv.saleBatchId,sourceSaleId:null,customerId:inv.customerId||null,invoiceNo:inv.invoiceNo,date:inv.date,person:inv.customerName,type:'لنا',amount:newRemaining,paidAmount:0,paymentHistory:[],debtVersion:2,due:'',note:`آجل بعد مرتجع ${inv.invoiceNo}`,paid:false,source:'sale',saleTotal:newTotal});
+      }
+    }
+
+    // لو كان هناك مبلغ دخل الخزنة بالفعل، يجب رده مرة واحدة فقط.
+    // لا نضيف حركة خزنة إذا لم يكن العميل قد دفع شيئًا.
+    if(cashRefund>0){
+      const refunds=Array.isArray(Store.get('refunds'))?Store.get('refunds'):[];
+      const alreadyRefunded=refunds.filter(r=>String(r.invoiceNo||'')===String(inv.invoiceNo||'')).reduce((n,r)=>n+Math.max(0,money(r.amount)),0);
+      const refundToRecord=Math.max(0,Math.min(cashRefund,Math.max(0,cashActuallyReceived-alreadyRefunded)));
+      if(refundToRecord>0){
+        const now=new Date();
+        Store.add('refunds',{date:today(),time:now.toTimeString().slice(0,5),amount:refundToRecord,invoiceNo:inv.invoiceNo,saleBatchId:inv.saleBatchId||null,customerName:inv.customerName||'عميل',note:`رد مبلغ بسبب مرتجع الفاتورة ${inv.invoiceNo}`});
       }
     }
 
@@ -7303,7 +7333,7 @@ if ('serviceWorker' in navigator) {
     }
 
     closeIfOpen();
-    showToast(`✅ تم تسجيل المرتجع ${fmt(refund)} وتحديث المخزون والدين`,'success');
+    showToast(`✅ تم تسجيل المرتجع ${fmt(refund)}${cashRefund>0?' ورد '+fmt(cashRefund)+' من الخزنة':''} وتحديث المخزون والدين`,'success');
     renderSalesTable();
     if(document.getElementById('cashboxMovements'))renderCashboxData();
   };
