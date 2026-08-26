@@ -3036,7 +3036,7 @@ function renderDashboardPage(container){
   const outStock=products.filter(p=>Number(p.qty||0)<=0);
   const inventoryValue=products.reduce((sum,p)=>sum+Number(p.qty||0)*Number(p.purchase||0),0);
   const yesterday=new Date(); yesterday.setDate(yesterday.getDate()-1);
-  const yesterdayStr=yesterday.toISOString().split('T')[0];
+  const yesterdayStr=cairoDateISO(yesterday);
   const yesterdayTotal=sales.filter(s=>s.date===yesterdayStr).reduce((sum,s)=>sum+Number(s.total||0),0);
   const change=yesterdayTotal>0?((todayTotal-yesterdayTotal)/yesterdayTotal*100):0;
   const sold={};
@@ -3090,7 +3090,7 @@ function renderWeekChart(sales){
 
   const ctx=document.getElementById('weekChart');if(!ctx)return;
   const days=[],data=[],profitData=[];
-  for(let i=6;i>=0;i--){const d=new Date();d.setDate(d.getDate()-i);const ds=d.toISOString().split('T')[0];days.push(d.toLocaleDateString('ar-EG',{weekday:'short'}));const daySales=sales.filter(s=>s.date===ds);data.push(daySales.reduce((sum,s)=>sum+(s.total||0),0));profitData.push(daySales.reduce((sum,s)=>sum+(s.profit||0),0));}
+  for(let i=6;i>=0;i--){const d=new Date();d.setDate(d.getDate()-i);const ds=cairoDateISO(d);days.push(d.toLocaleDateString('ar-EG',{weekday:'short',timeZone:'Africa/Cairo'}));const daySales=sales.filter(s=>s.date===ds);data.push(daySales.reduce((sum,s)=>sum+(s.total||0),0));profitData.push(daySales.reduce((sum,s)=>sum+(s.profit||0),0));}
   new Chart(ctx,{type:'bar',data:{labels:days,datasets:[{label:'المبيعات',data,backgroundColor:'rgba(15,118,110,0.7)',borderColor:'#0f766e',borderWidth:1,borderRadius:7,yAxisID:'y'},{label:'المكسب',data:profitData,backgroundColor:'rgba(16,185,129,0.7)',borderColor:'#10b981',borderWidth:1,borderRadius:7,yAxisID:'y1'}]},options:{responsive:true,maintainAspectRatio:false,interaction:{mode:'index',intersect:false},plugins:{legend:{display:true,position:'top',align:'end',labels:{color:'#64748b',font:{size:9,weight:'700'},boxWidth:10,padding:10}},tooltip:{callbacks:{label:(ctx)=>`${ctx.dataset.label}: ${fmt(ctx.parsed.y||0)}`}}},scales:{x:{grid:{display:false},ticks:{color:'#94a3b8',font:{size:8,weight:'700'}}},y:{beginAtZero:true,grid:{color:'rgba(148,163,184,0.10)'},ticks:{color:'#94a3b8',font:{size:8},maxTicksLimit:5},position:'right'},y1:{beginAtZero:true,grid:{display:false},ticks:{color:'#10b981',font:{size:8},maxTicksLimit:5},position:'left'}}}});
 }
 
@@ -4140,8 +4140,36 @@ function formatInvoiceDate(dateStr){
   const parts=String(dateStr).split('-');
   return parts.length===3?`${parts[2]}/${parts[1]}/${parts[0]}`:dateStr;
 }
+// ===== التوقيت الموحد لبرنامج «متجري» — توقيت مصر =====
+function cairoDateTimeParts(date=new Date()){
+  const parts=new Intl.DateTimeFormat('en-CA',{
+    timeZone:'Africa/Cairo',year:'numeric',month:'2-digit',day:'2-digit',
+    hour:'2-digit',minute:'2-digit',second:'2-digit',hourCycle:'h23'
+  }).formatToParts(date).reduce((o,p)=>(o[p.type]=p.value,o),{});
+  return parts;
+}
+function cairoDateISO(date=new Date()){
+  const p=cairoDateTimeParts(date);
+  return `${p.year}-${p.month}-${p.day}`;
+}
+function cairoDateTimeISO(date=new Date()){
+  const p=cairoDateTimeParts(date);
+  return `${p.year}-${p.month}-${p.day}T${p.hour}:${p.minute}:${p.second}`;
+}
+function cairoTimeFromStored(value){
+  if(!value)return '';
+  const s=String(value);
+  // السجلات القديمة التي خزنت ISO UTC مثل 2026-08-26T22:43:00.000Z
+  // يتم تحويلها الآن تلقائيًا إلى توقيت القاهرة عند العرض.
+  if(/Z$|[+-]\d{2}:?\d{2}$/.test(s)){
+    const d=new Date(s);
+    if(!Number.isNaN(d.getTime())) return new Intl.DateTimeFormat('ar-EG',{hour:'2-digit',minute:'2-digit',hourCycle:'h23',timeZone:'Africa/Cairo'}).format(d);
+  }
+  const m=s.match(/T(\d{2}:\d{2})/);
+  return m?m[1]:s.slice(11,16);
+}
 function currentTimeLabel(){
-  return new Date().toLocaleTimeString('ar-EG',{hour:'2-digit',minute:'2-digit'});
+  return new Intl.DateTimeFormat('ar-EG',{hour:'2-digit',minute:'2-digit',hourCycle:'h23',timeZone:'Africa/Cairo'}).format(new Date());
 }
 
 function checkoutPOS(){
@@ -4918,7 +4946,7 @@ function getCashboxData(){
         const amount=cashboxNum(h&&h.amount);
         if(!amount)return;
         const dt=String(h&&h.date||'');
-        movements.push({date:dt.slice(0,10)||String(d.date||'').slice(0,10),time:dt.slice(11,16)||'',kind:type,amount,title:type==='in'?'تحصيل من عميل':'سداد لمورد',detail:String(d.person||'حساب')+' • '+(h&&h.type==='full'?'سداد كامل':'سداد جزئي'),icon:type==='in'?'fa-hand-holding-dollar':'fa-money-bill-wave',ref:String(d.id||'')+'-'+i});
+        movements.push({date:dt.slice(0,10)||String(d.date||'').slice(0,10),time:cairoTimeFromStored(dt),kind:type,amount,title:type==='in'?'تحصيل من عميل':'سداد لمورد',detail:String(d.person||'حساب')+' • '+(h&&h.type==='full'?'سداد كامل':'سداد جزئي'),icon:type==='in'?'fa-hand-holding-dollar':'fa-money-bill-wave',ref:String(d.id||'')+'-'+i});
       });
     });
   }catch(e){
@@ -5147,7 +5175,7 @@ function renderDebtsList(){
       const remaining=getDebtRemaining(d);
       const original=Math.max(0,Number(d.amount||0));
       const paid=Math.max(0,original-remaining);
-      const now=new Date().toISOString().split('T')[0];
+      const now=cairoDateISO();
       const isOverdue=d.due&&d.due<now&&remaining>0;
       return `<div class="debt-group-detail compact-detail" style="${isOverdue?'border-right-color:var(--warning)':''}">
         <div class="debt-group-detail-main">
@@ -5282,7 +5310,7 @@ function applyGroupDebtPayment(person,type,amount,isFull){
 
   const groupId='PAY-'+Date.now()+'-'+Math.random().toString(36).slice(2,7);
   let left=amount;
-  const now=new Date().toISOString();
+  const now=cairoDateTimeISO();
 
   for(const d of items){
     if(left<=0)break;
@@ -5370,13 +5398,13 @@ function payDebtPart(id,amount){
   const paidBefore=isLegacySource?0:Math.max(0,Number(d.paidAmount||0));
   const paidAfter=paidBefore+amount;
   const history=Array.isArray(d.paymentHistory)?d.paymentHistory.slice():[];
-  history.push({amount,date:new Date().toISOString(),type:amount>=remaining?'full':'partial'});
+  history.push({amount,date:cairoDateTimeISO(),type:amount>=remaining?'full':'partial'});
   Store.update('debts',id,{
     paidAmount:paidAfter,
     paid:paidAfter>=Number(d.amount||0)-0.0001,
     paymentHistory:history,
     debtVersion:2,
-    lastPaymentAt:new Date().toISOString()
+    lastPaymentAt:cairoDateTimeISO()
   });
   closeModal();
   const remainingAfter=Math.max(0, remaining-amount);
@@ -5893,7 +5921,7 @@ function applySupplierPayment(supplierId,amount){
 
   const groupId='SUPPAY-'+Date.now()+'-'+Math.random().toString(36).slice(2,7);
   let left=amount;
-  const now=new Date().toISOString();
+  const now=cairoDateTimeISO();
 
   for(const d of items){
     if(left<=0)break;
@@ -6825,7 +6853,7 @@ function fmt(n){
   return Number(n||0).toLocaleString('ar-EG',{minimumFractionDigits:2,maximumFractionDigits:2})+' ج.م';
 }
 function today(){
-  return new Date().toISOString().split('T')[0];
+  return cairoDateISO();
 }
 window.addEventListener('DOMContentLoaded', () => {
   applyAppTheme();
