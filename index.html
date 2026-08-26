@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
+<!-- FIX: cashbox-credit-collection-double-count v1 -->
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>متجري - نظام إدارة المبيعات والمخزون</title>
@@ -4904,7 +4905,16 @@ function getCashboxData(){
         const hasPaid=Object.prototype.hasOwnProperty.call(first,'paid');
         cashReceived=hasPaid?Math.min(total,Math.max(0,Number(first.paid)||0)):total;
       }else if(method==='credit'||method==='آجل'){
-        cashReceived=Math.min(total,Math.max(0,Number(first.paid)||0));
+        // في البيع الآجل نحسب فقط المبلغ المدفوع وقت إنشاء الفاتورة.
+        // التحصيلات اللاحقة تُسجل من paymentHistory مرة واحدة أسفل الخزنة.
+        // بعد التحصيل تتغير قيمة paid في الفاتورة، لذلك لا يجوز اعتبارها كلها
+        // "تحصيل مقدم" وإلا سيُحسب التحصيل مرتين.
+        const debts=cashboxList('debts');
+        const debt=debts.find(d=>d&&String(d.saleBatchId||'')===String(first.saleBatchId||'')&&d.source==='sale'&&d.type==='لنا');
+        const history=Array.isArray(debt?.paymentHistory)?debt.paymentHistory:[];
+        const laterCollected=history.reduce((n,h)=>n+cashboxNum(h&&h.amount),0);
+        const currentPaid=Math.max(0,Number(first.paid)||0);
+        cashReceived=Math.min(total,Math.max(0,currentPaid-laterCollected));
       }
       if(cashReceived>0){
         const title=(method==='credit'||method==='آجل')?'بيع آجل — تحصيل مقدم':'بيع نقدي';
