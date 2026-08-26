@@ -2664,7 +2664,7 @@ window.addEventListener('visibilitychange',()=>{
   }
 });
 
-function getBackupCollections(){return ['products','sales','purchases','purchaseReturns','expenses','withdrawals','debts','customers','suppliers','offers','auditLog'];}
+function getBackupCollections(){return ['products','sales','purchases','purchaseReturns','saleReturns','expenses','withdrawals','debts','customers','suppliers','offers','auditLog'];}
 
 // =====================================================
 // 📦 نظام التخزين المتقدم (محلي + سحابة)
@@ -5085,6 +5085,10 @@ function getCashboxData(){
       const amount=cashboxNum(r&&r.cashRefund);
       if(amount>0) movements.push({date:String(r&&r.date||'').slice(0,10),time:'',kind:'in',amount,title:'رد مبلغ من مورد',detail:String(r&&r.productName||'مرتجع مشتريات')+' • '+String(r&&r.supplierName||'مورد'),icon:'fa-rotate-left',ref:'PR-'+String(r&&r.id||'')});
     });
+    cashboxList('saleReturns').forEach(r=>{
+      const amount=cashboxNum(r&&r.cashRefund);
+      if(amount>0) movements.push({date:String(r&&r.date||'').slice(0,10),time:'',kind:'out',amount,title:'رد مبلغ لعميل',detail:String(r&&r.invoiceNo||'مرتجع مبيعات')+' • '+String(r&&r.customerName||'عميل'),icon:'fa-rotate-left',ref:'SR-'+String(r&&r.id||'')});
+    });
     cashboxList('expenses').forEach(e=>{
       const amount=cashboxNum(e&&e.amount);
       if(amount>0) movements.push({date:String(e&&e.date||'').slice(0,10),time:'',kind:'out',amount,title:'مصروف',detail:String(e&&e.type||'مصروف')+(e&&e.note?' • '+String(e.note):''),icon:'fa-receipt',ref:e&&e.id});
@@ -7374,11 +7378,85 @@ if ('serviceWorker' in navigator) {
   window.confirmInvoiceReturnPro=function(key){
     const inv=findInvoice(key);if(!inv)return;
     let refund=0,changed=false;
-    inv.lines.forEach((s,i)=>{const input=document.querySelector(`[data-return-line="${i}"]`);const r=Math.min(money(s.qty),Math.max(0,money(input?.value)));if(r<=0)return;changed=true;const ratio=s.qty?Math.min(1,r/money(s.qty)):1;refund+=money(s.total)*ratio;const p=Store.get('products').find(x=>String(x.id)===String(s.productId));if(p)Store.update('products',p.id,{qty:money(p.qty)+r});const newQty=Math.max(0,money(s.qty)-r);const newTotal=Math.max(0,money(s.total)-money(s.total)*ratio);const newProfit=Math.max(0,money(s.profit)-money(s.profit)*ratio);Store.update('sales',s.id,{qty:newQty,packages:s.weight?newQty/(money(s.weight)||1):newQty,total:newTotal,profit:newProfit,returnedQty:money(s.returnedQty)+r,returnedAmount:money(s.returnedAmount)+money(s.total)*ratio});});
+    inv.lines.forEach((s,i)=>{
+      const input=document.querySelector(`[data-return-line="${i}"]`);
+      const r=Math.min(money(s.qty),Math.max(0,money(input?.value)));
+      if(r<=0)return;
+      changed=true;
+      const ratio=s.qty?Math.min(1,r/money(s.qty)):1;
+      const lineRefund=money(s.total)*ratio;
+      refund+=lineRefund;
+      const p=Store.get('products').find(x=>String(x.id)===String(s.productId));
+      if(p)Store.update('products',p.id,{qty:money(p.qty)+r});
+      const newQty=Math.max(0,money(s.qty)-r);
+      const newTotal=Math.max(0,money(s.total)-lineRefund);
+      const newProfit=Math.max(0,money(s.profit)-money(s.profit)*ratio);
+      Store.update('sales',s.id,{
+        qty:newQty,
+        packages:s.weight?newQty/(money(s.weight)||1):newQty,
+        total:newTotal,
+        profit:newProfit,
+        returnedQty:money(s.returnedQty)+r,
+        returnedAmount:money(s.returnedAmount)+lineRefund
+      });
+    });
     if(!changed)return showToast('حدد كمية المرتجع أولًا','warning');
-    const updated=findInvoice(key);const newTotal=updated?updated.total:Math.max(0,inv.total-refund);const paid=Math.min(inv.paid,newTotal),remaining=Math.max(0,newTotal-paid);
-    if(inv.saleBatchId){const batch=allSales().filter(s=>s.saleBatchId===inv.saleBatchId);batch.forEach(s=>Store.update('sales',s.id,{paid,remaining}));(Store.get('debts')||[]).filter(d=>d.saleBatchId===inv.saleBatchId&&d.source==='sale').forEach(d=>Store.delete('debts',d.id));if(remaining>0)Store.add('debts',{saleBatchId:inv.saleBatchId,invoiceNo:inv.invoiceNo,date:inv.date,person:inv.customerName,type:'لنا',amount:remaining,due:'',note:`آجل بعد مرتجع ${inv.invoiceNo}`,paid:false,source:'sale',saleTotal:newTotal,paidAmount:paid});}
-    closeIfOpen();showToast('✅ تم تسجيل المرتجع '+fmt(refund)+' وتحديث المخزون','success');renderSalesTable();
+
+    const updated=findInvoice(key);
+    const newTotal=updated?updated.total:Math.max(0,inv.total-refund);
+    const oldPaid=Math.max(0,money(inv.paid));
+    const oldRemaining=Math.max(0,money(inv.remaining));
+    // المرتجع يخصم من الآجل أولًا، ثم يرد الجزء المدفوع نقدًا إذا تجاوز قيمة الآجل.
+    const creditReduced=Math.min(refund,oldRemaining);
+    const cashRefund=Math.max(0,refund-creditReduced);
+    const paid=Math.max(0,oldPaid-cashRefund);
+    const remaining=Math.max(0,newTotal-paid);
+
+    // سجل مستقل حتى يظهر رد النقد في الخزنة ولا يتكرر أثره.
+    Store.add('saleReturns',{
+      saleId:inv.id||null,
+      saleBatchId:inv.saleBatchId||null,
+      invoiceNo:inv.invoiceNo||inv.invoiceSeq||'',
+      date:today(),
+      customerId:inv.customerId||null,
+      customerName:inv.customerName||'عميل عادي',
+      total:refund,
+      creditReduced,
+      cashRefund,
+      note:'مرتجع مبيعات'
+    });
+
+    if(inv.saleBatchId){
+      const batch=allSales().filter(s=>s.saleBatchId===inv.saleBatchId);
+      batch.forEach(s=>Store.update('sales',s.id,{paid,remaining}));
+      (Store.get('debts')||[])
+        .filter(d=>d.saleBatchId===inv.saleBatchId&&d.source==='sale')
+        .forEach(d=>Store.delete('debts',d.id));
+      if(remaining>0)Store.add('debts',{
+        saleBatchId:inv.saleBatchId,
+        invoiceNo:inv.invoiceNo,
+        date:inv.date,
+        person:inv.customerName,
+        customerId:inv.customerId||null,
+        type:'لنا',
+        amount:remaining,
+        due:'',
+        note:`آجل بعد مرتجع ${inv.invoiceNo}`,
+        paid:false,
+        source:'sale',
+        saleTotal:newTotal,
+        paidAmount:paid,
+        paymentHistory:[]
+      });
+    }else{
+      Store.update('sales',inv.id,{paid,remaining});
+    }
+
+    closeIfOpen();
+    showToast(cashRefund>0
+      ? `✅ تم المرتجع ${fmt(refund)} ورد ${fmt(cashRefund)} للعميل وتحديث المخزون`
+      : `✅ تم المرتجع ${fmt(refund)} وتخفيض الآجل ${fmt(creditReduced)}`,'success');
+    renderSalesTable();
   };
 
   window.openInvoiceCollectionPro=function(key){
