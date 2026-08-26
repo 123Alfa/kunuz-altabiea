@@ -2152,7 +2152,7 @@ input[type="date"].sales-date-filter:focus{
 </div>
 <script>
 // ==================== معلومات الإصدار ====================
-const APP_VERSION='v1.5.57';
+const APP_VERSION='v1.5.56';
 const APP_NAME = "متجري";
 const APP_BUILD_DATE = "25 أغسطس 2026 — مزامنة Google Drive تلقائية محسّنة ومضمونة";
 
@@ -2664,7 +2664,7 @@ window.addEventListener('visibilitychange',()=>{
   }
 });
 
-function getBackupCollections(){return ['products','sales','purchases','purchaseReturns','saleReturns','expenses','withdrawals','debts','customers','suppliers','offers','auditLog'];}
+function getBackupCollections(){return ['products','sales','purchases','expenses','withdrawals','debts','customers','suppliers','offers','auditLog'];}
 
 // =====================================================
 // 📦 نظام التخزين المتقدم (محلي + سحابة)
@@ -2736,7 +2736,7 @@ const Store={
     scheduleDriveBackup();
   },
   getAuditLog(){return this.get('auditLog')},
-  clear(){['products','sales','purchases','purchaseReturns','expenses','withdrawals','debts','customers','suppliers','offers','auditLog','user'].forEach(k=>localStorage.removeItem('bm_'+k))}
+  clear(){['products','sales','purchases','expenses','withdrawals','debts','customers','suppliers','offers','auditLog','user'].forEach(k=>localStorage.removeItem('bm_'+k))}
 };
 
 let currentUser=null;
@@ -4183,7 +4183,7 @@ function checkoutPOS(){
       const itemDiscount=safeDiscount*ratio;
       const itemTax=tax*ratio;
       const itemTotal=Math.max(0,serviceTotal-itemDiscount+itemTax);
-      Store.add('sales',{saleBatchId,invoiceNo,invoiceSeq,date:invoiceDate,time:saleTime,productId:null,productName:item.name,customerId:customerId||null,customerName,type,qty:item.qty,packages:item.qty,weight:1,unitPrice:Number(item.price||0),price:Number(item.price||0),cost:0,discount:serviceTotal?((itemDiscount/serviceTotal)*100):0,discountAmount:itemDiscount,taxRate,taxAmount:itemTax,discountedPrice:Number(item.price||0),total:itemTotal,profit:itemTotal,paymentMethod:method,paid,initialPaid:paid,remaining,isWeightSale:false,sellUnit:String(item.unit||'خدمة'),note:note||'خدمة من الكاشير'});
+      Store.add('sales',{saleBatchId,invoiceNo,invoiceSeq,date:invoiceDate,time:saleTime,productId:null,productName:item.name,customerId:customerId||null,customerName,type,qty:item.qty,packages:item.qty,weight:1,unitPrice:Number(item.price||0),price:Number(item.price||0),cost:0,discount:serviceTotal?((itemDiscount/serviceTotal)*100):0,discountAmount:itemDiscount,taxRate,taxAmount:itemTax,discountedPrice:Number(item.price||0),total:itemTotal,profit:itemTotal,paymentMethod:method,paid,remaining,isWeightSale:false,sellUnit:String(item.unit||'خدمة'),note:note||'خدمة من الكاشير'});
       return;
     }
     const p=products.find(x=>String(x.id)===String(item.id)); if(!p)return;
@@ -4196,7 +4196,7 @@ function checkoutPOS(){
     const profit=(effectivePackPrice-(costKg*weight))*packs;
     const newQty=Math.max(0,Number(p.qty||0)-qtyKg);
     Store.update('products',p.id,{qty:newQty});
-    Store.add('sales',{saleBatchId,invoiceNo,invoiceSeq,date:invoiceDate,time:saleTime,productId:p.id,productName:p.name,customerId:customerId||null,customerName,type,qty:qtyKg,packages:packs,weight,unitPrice:price,price:effectivePackPrice,cost:costKg*weight,discount:price?((itemDiscount/gross)*100):0,discountAmount:itemDiscount,taxRate,taxAmount:itemTax,discountedPrice:effectivePackPrice,total:itemTotal,profit,paymentMethod:method,paid,initialPaid:paid,remaining,isWeightSale:isKgProduct(p),sellUnit:isKgProduct(p)?'كجم':String(p.unit||'علبة'),note:note||`بيع من الكاشير — ${saleQuantityLabel(p,packs,weight)}${method==='credit'?' — آجل':''}`});
+    Store.add('sales',{saleBatchId,invoiceNo,invoiceSeq,date:invoiceDate,time:saleTime,productId:p.id,productName:p.name,customerId:customerId||null,customerName,type,qty:qtyKg,packages:packs,weight,unitPrice:price,price:effectivePackPrice,cost:costKg*weight,discount:price?((itemDiscount/gross)*100):0,discountAmount:itemDiscount,taxRate,taxAmount:itemTax,discountedPrice:effectivePackPrice,total:itemTotal,profit,paymentMethod:method,paid,remaining,isWeightSale:isKgProduct(p),sellUnit:isKgProduct(p)?'كجم':String(p.unit||'علبة'),note:note||`بيع من الكاشير — ${saleQuantityLabel(p,packs,weight)}${method==='credit'?' — آجل':''}`});
   });
   if(customerId){const customers=Store.get('customers');const i=customers.findIndex(c=>c.id===customerId);if(i>=0){customers[i].points=(customers[i].points||0)+Math.floor(total/10);customers[i].totalSpent=(customers[i].totalSpent||0)+total;Store.set('customers',customers);}}
   if(method==='credit'&&remaining>0){Store.add('debts',{saleBatchId,invoiceNo,sourceSaleId:null,customerId:customerId||null,date:invoiceDate,person:customerName,type:'لنا',amount:remaining,paidAmount:0,paymentHistory:[],debtVersion:2,due:document.getElementById('posDueDate')?.value||'',note:`آجل من الفاتورة ${invoiceNo}${customerId?' — عميل مسجل':''}`,paid:false,source:'sale',saleTotal:total});}
@@ -4728,280 +4728,101 @@ function renderPurchasesTable(){
     const total=Number(p.total ?? (Number(p.qty||0)*Number(p.price||0)));
     return `<article class="purchase-card-v6">
       <div class="purchase-card-head-v6"><div><small>${p.date||'-'}</small><h3>${p.productName||'-'}</h3></div><strong>${fmt(total)}</strong></div>
-      <div class="purchase-card-data-v6"><div><span>الكمية</span><b>${Number(p.qty||0).toLocaleString('ar-EG',{maximumFractionDigits:3})}${Number(p.returnedQty||0)>0?` <small style="color:#b45309">(مرتجع ${Number(p.returnedQty||0).toLocaleString('ar-EG',{maximumFractionDigits:3})})</small>`:''}</b></div><div><span>سعر الوحدة</span><b>${fmt(p.price||0)}</b></div><div><span>المورد</span><b>${p.supplierName||'بدون مورد'}</b></div><div><span>السداد</span><b>${Number(p.remaining||0)>0?`آجل: ${fmt(p.remaining)}`:'مدفوع'}</b></div></div>
+      <div class="purchase-card-data-v6"><div><span>الكمية</span><b>${Number(p.qty||0).toLocaleString('ar-EG',{maximumFractionDigits:3})}</b></div><div><span>سعر الوحدة</span><b>${fmt(p.price||0)}</b></div><div><span>المورد</span><b>${p.supplierName||'بدون مورد'}</b></div><div><span>السداد</span><b>${Number(p.remaining||0)>0?`آجل: ${fmt(p.remaining)}`:'مدفوع'}</b></div></div>
       ${p.note?`<div class="purchase-note-v6"><i class="fas fa-note-sticky"></i>${p.note}</div>`:''}
-      <div class="purchase-card-actions-v6"><button type="button" onclick="editPurchase('${p.id}')"><i class="fas fa-edit"></i> تعديل</button><button type="button" style="color:#b45309" onclick="returnPurchase('${p.id}')"><i class="fas fa-rotate-left"></i> مرتجع</button><button type="button" onclick="deletePurchase('${p.id}')"><i class="fas fa-trash"></i> حذف</button></div>
+      <div class="purchase-card-actions-v6"><button type="button" onclick="editPurchase('${p.id}')"><i class="fas fa-edit"></i> تعديل</button><button type="button" onclick="deletePurchase('${p.id}')"><i class="fas fa-trash"></i> حذف</button></div>
     </article>`;
   }).join('')||`<div class="purchase-empty-v6"><i class="fas fa-box-open"></i><strong>لا توجد مشتريات</strong><span>غيّر البحث أو الفلاتر لعرض العمليات</span></div>`;
 }
 
 function editPurchase(id){
-  const purchases=Store.get('purchases')||[];
-  const purchase=purchases.find(p=>String(p.id)===String(id));
-  if(!purchase)return showToast('عملية الشراء غير موجودة','warning');
-
-  const products=Store.get('products')||[];
-  const suppliers=Store.get('suppliers')||[];
-  const esc=v=>String(v??'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
-  const productOpts=products.map(p=>`<option value="${esc(p.id)}" ${String(p.id)===String(purchase.productId)?'selected':''}>${esc(p.name)}</option>`).join('');
-  const supplierOpts=suppliers.map(s=>`<option value="${esc(s.id)}" ${String(s.id)===String(purchase.supplierId)?'selected':''}>${esc(s.name)}</option>`).join('');
+  const purchases=Store.get('purchases');
+  const purchase=purchases.find(p=>p.id===id);
+  if(!purchase)return;
+  const products=Store.get('products');
+  const suppliers=Store.get('suppliers');
+  const productOpts=products.map(p=>`<option value="${p.id}" ${p.id===purchase.productId?'selected':''}>${p.name}</option>`).join('');
+  const supplierOpts=suppliers.map(s=>`<option value="${s.id}" ${s.id===purchase.supplierId?'selected':''}>${s.name}</option>`).join('');
 
   openModal(`<div class="modal-header"><h2><i class="fas fa-edit" style="color:var(--primary);margin-left:8px"></i> تعديل عملية الشراء</h2><button class="modal-close" onclick="closeModal()">&times;</button></div>
     <div class="form-grid">
-      <div class="form-group"><label>التاريخ</label><input type="date" id="epurDate" value="${esc(purchase.date||today())}" class="sales-date-filter"></div>
+      <div class="form-group"><label>التاريخ</label><input type="date" id="epurDate" value="${purchase.date}" class="sales-date-filter"></div>
       <div class="form-group"><label>الصنف</label><select id="epurProduct">${productOpts}</select></div>
-      <div class="form-group"><label>الكمية</label><input type="number" id="epurQty" value="${esc(purchase.qty)}" step="0.001" min="0.001"></div>
-      <div class="form-group"><label>سعر الشراء (للوحدة)</label><input type="number" id="epurPrice" value="${esc(purchase.price)}" step="0.01" min="0.01"></div>
-      <div class="form-group"><label>المورد</label><select id="epurSupplier"><option value="">بدون مورد</option>${supplierOpts}</select></div>
-      <div class="form-group"><label>المبلغ المدفوع وقت الشراء</label><input type="number" id="epurPaid" value="${esc(purchase.paid||0)}" step="0.01" min="0"></div>
-      <div class="form-group"><label>ملاحظات</label><input type="text" id="epurNote" value="${esc(purchase.note||'')}"></div>
+      <div class="form-group"><label>الكمية</label><input type="number" id="epurQty" value="${purchase.qty}" step="0.01"></div>
+      <div class="form-group"><label>سعر الشراء (للوحدة)</label><input type="number" id="epurPrice" value="${purchase.price}" step="0.01"></div>
+      <div class="form-group"><label>المورد</label><select id="epurSupplier"><option value="">اختر مورد...</option>${supplierOpts}</select></div>
+      <div class="form-group"><label>المبلغ المدفوع</label><input type="number" id="epurPaid" value="${purchase.paid||0}" step="0.01" min="0"></div>
+      <div class="form-group"><label>ملاحظات</label><input type="text" id="epurNote" value="${purchase.note||''}"></div>
     </div>
-    <div id="epurSummary" style="margin:12px 0;padding:12px;border-radius:12px;background:var(--bg-soft,#f5f7f7);font-weight:700"></div>
-    <button class="btn btn-primary btn-block" onclick="savePurchaseEdit('${esc(id)}')"><i class="fas fa-save"></i> حفظ التعديلات</button>`);
-
-  const refresh=()=>{
-    const q=Number(document.getElementById('epurQty')?.value||0);
-    const pr=Number(document.getElementById('epurPrice')?.value||0);
-    const pa=Math.max(0,Number(document.getElementById('epurPaid')?.value||0));
-    const total=Math.max(0,q*pr);
-    const remaining=Math.max(0,total-pa);
-    const el=document.getElementById('epurSummary');
-    if(el)el.innerHTML=`الإجمالي: <b>${fmt(total)}</b> &nbsp; | &nbsp; المدفوع: <b>${fmt(Math.min(pa,total))}</b> &nbsp; | &nbsp; المتبقي: <b>${fmt(remaining)}</b>`;
-  };
-  ['epurQty','epurPrice','epurPaid'].forEach(id=>document.getElementById(id)?.addEventListener('input',refresh));
-  refresh();
+    <button class="btn btn-primary btn-block" onclick="savePurchaseEdit('${id}')"><i class="fas fa-save"></i> حفظ التعديلات</button>`);
 }
 
 function savePurchaseEdit(id){
-  const purchases=Store.get('purchases')||[];
-  const original=purchases.find(p=>String(p.id)===String(id));
-  if(!original)return showToast('عملية الشراء غير موجودة','warning');
+  const purchases=Store.get('purchases');
+  const original=purchases.find(p=>p.id===id);
+  if(!original)return;
 
-  const pid=document.getElementById('epurProduct')?.value||'';
-  const qty=parseFloat(document.getElementById('epurQty')?.value)||0;
-  const price=parseFloat(document.getElementById('epurPrice')?.value)||0;
+  const pid=document.getElementById('epurProduct').value;
+  const qty=parseFloat(document.getElementById('epurQty').value)||0;
+  const price=parseFloat(document.getElementById('epurPrice').value)||0;
+  const total=qty*price;
   let paid=parseFloat(document.getElementById('epurPaid')?.value)||0;
   if(paid<0)paid=0;
-  const total=Math.round((qty*price)*100)/100;
+  if(paid>total)return showToast('المبلغ المدفوع أكبر من إجمالي الشراء','warning');
+  const remaining=Math.max(0,total-paid);
 
-  if(!pid||qty<=0||price<=0)return showToast('أكمل بيانات الصنف والكمية والسعر','warning');
-  if(paid>total+0.0001)return showToast('المبلغ المدفوع أكبر من إجمالي الشراء','warning');
-  paid=Math.min(paid,total);
+  if(!pid||qty<=0||price<=0)return showToast('أكمل البيانات','warning');
 
-  const products=Store.get('products')||[];
-  const product=products.find(p=>String(p.id)===String(pid));
-  if(!product)return showToast('الصنف غير موجود','warning');
+  const product=Store.get('products').find(p=>p.id===pid);
+  if(!product)return;
 
-  const oldProduct=original.productId?products.find(p=>String(p.id)===String(original.productId)):null;
-  const oldQty=Math.max(0,Number(original.qty)||0);
-  const oldPrice=Math.max(0,Number(original.price)||0);
-  const sameProduct=oldProduct && String(oldProduct.id)===String(product.id);
-
-  // تحديث المخزون بالفرق فقط: لا نعيد إضافة الفاتورة القديمة ثم نضيف الجديدة،
-  // لأن ذلك كان يسبب أخطاء في الكمية عند تعديل الفاتورة أكثر من مرة.
-  if(sameProduct){
-    const currentQty=Math.max(0,Number(product.qty)||0);
-    const newStock=Math.max(0,currentQty-oldQty+qty);
-
-    // نحاول إعادة حساب متوسط التكلفة مع استبعاد تكلفة الفاتورة القديمة.
-    const currentAvg=Math.max(0,Number(product.purchase)||0);
-    const baseQty=currentQty-oldQty;
-    const baseCost=baseQty>=0?Math.max(0,(currentQty*currentAvg)-(oldQty*oldPrice)):0;
-    const newAvg=(baseQty+qty)>0?(baseCost+(qty*price))/(baseQty+qty):price;
-    Store.update('products',product.id,{qty:newStock,purchase:newAvg});
-  }else{
-    if(oldProduct){
-      const currentOldQty=Math.max(0,Number(oldProduct.qty)||0);
-      Store.update('products',oldProduct.id,{qty:Math.max(0,currentOldQty-oldQty)});
+  if(original.productId){
+    const origProduct=Store.get('products').find(p=>p.id===original.productId);
+    if(origProduct){
+      const restoredQty=(origProduct.qty||0)-original.qty;
+      Store.update('products',original.productId,{qty:Math.max(0,restoredQty)});
     }
-    const currentNewQty=Math.max(0,Number(product.qty)||0);
-    const currentNewAvg=Math.max(0,Number(product.purchase)||0);
-    const newTotalQty=currentNewQty+qty;
-    const newAvg=newTotalQty>0?((currentNewQty*currentNewAvg)+(qty*price))/newTotalQty:price;
-    Store.update('products',product.id,{qty:newTotalQty,purchase:newAvg});
   }
 
-  const supplierId=document.getElementById('epurSupplier')?.value||'';
-  const supplier= supplierId ? (Store.get('suppliers')||[]).find(s=>String(s.id)===String(supplierId)) : null;
-  const supplierName=supplier?.name||'';
-  const date=document.getElementById('epurDate')?.value||today();
-  const note=document.getElementById('epurNote')?.value||'';
+  const currentProduct=Store.get('products').find(p=>p.id===pid);
+  const oldQty=currentProduct.qty||0;
+  const oldPurchasePrice=currentProduct.purchase||0;
+  const totalNewQty=oldQty+qty;
+  const netUnitPrice=qty>0?total/qty:price;
+  const avgPurchasePrice=totalNewQty>0?((oldQty*oldPurchasePrice)+(qty*netUnitPrice))/totalNewQty:netUnitPrice;
+
+  Store.update('products',pid,{qty:totalNewQty,purchase:avgPurchasePrice});
+
+  const supplierId=document.getElementById('epurSupplier').value;
+  const supplierName=supplierId?(Store.get('suppliers').find(s=>s.id===supplierId)?.name||''):'';
   const purchaseBatchId=original.purchaseBatchId||('PUR-'+Date.now()+'-'+Math.random().toString(36).slice(2,8));
 
-  // أي سداد لاحق للمورد محفوظ في سجل الدين يظل محفوظًا حتى لا تختفي حركة الخزنة.
-  const allDebts=Store.get('debts')||[];
-  const linkedDebts=original.purchaseBatchId?allDebts.filter(d=>d.purchaseBatchId===original.purchaseBatchId&&d.source==='purchase'):[];
-  const linkedDebt=linkedDebts[0]||null;
-  const history=Array.isArray(linkedDebt?.paymentHistory)?linkedDebt.paymentHistory.slice():[];
-  const laterPaid=history.reduce((sum,h)=>sum+Math.max(0,Number(h?.amount)||0),0);
-  const totalSettled=paid+laterPaid;
-
-  if(totalSettled>total+0.0001){
-    // تراجع عن أثر تعديل المخزون قبل رفض العملية.
-    if(sameProduct){
-      const current=Store.get('products').find(p=>String(p.id)===String(product.id));
-      if(current)Store.update('products',product.id,{qty:Math.max(0,Number(current.qty||0)-qty+oldQty),purchase:current.purchase});
-    }else{
-      const newCurrent=Store.get('products').find(p=>String(p.id)===String(product.id));
-      if(newCurrent)Store.update('products',product.id,{qty:Math.max(0,Number(newCurrent.qty||0)-qty),purchase:newCurrent.purchase});
-      if(oldProduct){
-        const oldCurrent=Store.get('products').find(p=>String(p.id)===String(oldProduct.id));
-        if(oldCurrent)Store.update('products',oldProduct.id,{qty:(Number(oldCurrent.qty)||0)+oldQty,purchase:oldCurrent.purchase});
-      }
-    }
-    return showToast('لا يمكن أن يكون إجمالي الفاتورة أقل من المبالغ التي تم سدادها للمورد','warning');
-  }
-
-  const remaining=Math.max(0,total-totalSettled);
   Store.update('purchases',id,{
-    date,productId:product.id,productName:product.name,qty,price,total,paid,
-    remaining,paymentMethod:remaining>0?'credit':'cash',purchaseBatchId,
-    supplierId:supplierId||null,supplierName,note
+    date:document.getElementById('epurDate').value||today(),
+    productId:pid,
+    productName:product.name,
+    qty,
+    price,
+    total,
+    paid,
+    remaining,
+    paymentMethod:remaining>0?'credit':'cash',
+    purchaseBatchId:original.purchaseBatchId||('PUR-'+Date.now()+'-'+Math.random().toString(36).slice(2,8)),
+    supplierId:supplierId||null,
+    supplierName:supplierName,
+    note:document.getElementById('epurNote').value
   });
 
-  // تحديث دين المورد المرتبط بنفس الفاتورة دون فقد سجل السداد السابق.
-  if(linkedDebt){
-    Store.update('debts',linkedDebt.id,{
-      purchaseBatchId,supplierId:supplierId||null,date,person:supplierName||'بائع/مورد',
-      amount:total,paidAmount:Math.min(totalSettled,total),
-      paymentHistory:history,debtVersion:2,due:linkedDebt.due||'',
-      note:`آجل من شراء ${product.name}`,paid:remaining<=0,
-      source:'purchase',purchaseTotal:total
-    });
-  }else if(remaining>0){
-    Store.add('debts',{
-      purchaseBatchId,sourcePurchaseId:id,supplierId:supplierId||null,date,
-      person:supplierName||'بائع/مورد',type:'علينا',amount:total,
-      paidAmount:paid,paymentHistory:[],debtVersion:2,due:'',
-      note:`آجل من شراء ${product.name}`,paid:false,source:'purchase',purchaseTotal:total
-    });
+  // إعادة ضبط دين المورد المرتبط بهذه الفاتورة
+  const batchId=original.purchaseBatchId;
+  if(batchId){
+    Store.get('debts').filter(d=>d.purchaseBatchId===batchId).forEach(d=>Store.delete('debts',d.id));
+  }
+  if(remaining>0){
+    Store.add('debts',{purchaseBatchId:original.purchaseBatchId||purchaseBatchId,supplierId:supplierId||null,date:document.getElementById('epurDate').value||today(),person:supplierName||'بائع/مورد',type:'علينا',amount:remaining,paidAmount:0,paymentHistory:[],debtVersion:2,due:'',note:`آجل من شراء ${product.name}`,paid:false,source:'purchase',purchaseTotal:total});
   }
 
-  // لو لم يعد هناك متبقٍ ولم يوجد سجل سداد سابق، احذف دين الفاتورة القديم إن وجد.
-  if(linkedDebt && remaining<=0 && history.length===0)Store.delete('debts',linkedDebt.id);
-
-  closeModal();
-  showToast('✅ تم تعديل فاتورة المشتريات وتحديث المخزون وحساب المورد');
-  renderPurchasesPage(document.getElementById('contentArea'));
-}
-
-
-function returnPurchase(id){
-  const purchases=Store.get('purchases')||[];
-  const purchase=purchases.find(p=>String(p.id)===String(id));
-  if(!purchase)return showToast('عملية الشراء غير موجودة','warning');
-
-  const originalQty=Math.max(0,Number(purchase.qty)||0);
-  const alreadyReturned=Math.max(0,Number(purchase.returnedQty)||0);
-  const availableQty=Math.max(0,originalQty-alreadyReturned);
-  if(availableQty<=0)return showToast('تم إرجاع كامل كمية هذه الفاتورة بالفعل','warning');
-
-  const unitPrice=Math.max(0,Number(purchase.price)||0);
-  const defaultQty=availableQty;
-  window.__activePurchaseReturnId=id;
-  openModal(`<div class="modal-header"><h2><i class="fas fa-rotate-left" style="color:#b45309;margin-left:8px"></i> مرتجع مشتريات</h2><button class="modal-close" onclick="closeModal()">&times;</button></div>
-    <div style="padding:8px 0">
-      <div style="background:#fff7ed;border:1px solid #fed7aa;border-radius:14px;padding:12px;margin-bottom:12px">
-        <b>${String(purchase.productName||'الصنف')}</b><br>
-        <small>الفاتورة: ${fmt(purchase.total||0)} • المورد: ${String(purchase.supplierName||'بدون مورد')}</small><br>
-        <small>الكمية الأصلية: ${formatNumberAR(originalQty,3)} • تم إرجاع: ${formatNumberAR(alreadyReturned,3)} • المتاح للمرتجع: ${formatNumberAR(availableQty,3)}</small>
-      </div>
-      <div class="form-group"><label>كمية المرتجع</label><input type="number" id="rpurQty" value="${defaultQty}" min="0.001" max="${availableQty}" step="0.001" oninput="updatePurchaseReturnPreview()"></div>
-      <div class="form-group"><label>سبب/ملاحظات المرتجع</label><input type="text" id="rpurNote" placeholder="اختياري"></div>
-      <div id="rpurSummary" style="margin:12px 0;padding:12px;border-radius:12px;background:#fff7ed;border:1px solid #fed7aa;font-weight:800"></div>
-      <button class="btn btn-block" style="background:linear-gradient(135deg,#b45309,#d97706);color:#fff" onclick="savePurchaseReturn('${String(id).replace(/'/g,"\\'")}')"><i class="fas fa-rotate-left"></i> تأكيد المرتجع</button>
-    </div>`);
-  updatePurchaseReturnPreview();
-}
-
-function formatNumberAR(v,max=3){
-  const n=Number(v)||0;
-  return n.toLocaleString('ar-EG',{maximumFractionDigits:max});
-}
-
-function updatePurchaseReturnPreview(){
-  const el=document.getElementById('rpurSummary'); if(!el)return;
-  const q=Math.max(0,Number(document.getElementById('rpurQty')?.value||0));
-  const purchases=Store.get('purchases')||[];
-  const input=document.getElementById('rpurQty');
-  const id=input?.dataset?.purchaseId;
-  let p=id?purchases.find(x=>String(x.id)===String(id)):null;
-  if(!p){
-    // id is not needed for the preview; the modal is tied to the selected purchase.
-    p=purchases.find(x=>Math.max(0,Number(x.qty||0))>=q && x.id===window.__activePurchaseReturnId);
-  }
-  if(!p && window.__activePurchaseReturnId) p=purchases.find(x=>String(x.id)===String(window.__activePurchaseReturnId));
-  if(!p){el.textContent='';return;}
-  const available=Math.max(0,Number(p.qty||0)-Number(p.returnedQty||0));
-  const safeQ=Math.min(q,available);
-  if(input){input.max=available;input.dataset.purchaseId=String(p.id);}
-  const value=Math.round(safeQ*Number(p.price||0)*100)/100;
-  const paid=Math.max(0,Number(p.paid||0));
-  const remaining=Math.max(0,Number(p.remaining||0));
-  const unpaidReturn=Math.min(value,remaining);
-  const refund=Math.max(0,value-unpaidReturn);
-  el.innerHTML=`قيمة المرتجع: <b>${fmt(value)}</b> &nbsp; | &nbsp; يخفض الآجل: <b>${fmt(unpaidReturn)}</b> &nbsp; | &nbsp; رد نقدي للمورد: <b>${fmt(refund)}</b>`;
-}
-
-function savePurchaseReturn(id){
-  const purchases=Store.get('purchases')||[];
-  const purchase=purchases.find(p=>String(p.id)===String(id));
-  if(!purchase)return showToast('عملية الشراء غير موجودة','warning');
-  const originalQty=Math.max(0,Number(purchase.qty)||0);
-  const alreadyReturned=Math.max(0,Number(purchase.returnedQty)||0);
-  const availableQty=Math.max(0,originalQty-alreadyReturned);
-  let returnQty=Math.max(0,Number(document.getElementById('rpurQty')?.value||0));
-  if(returnQty<=0)return showToast('أدخل كمية المرتجع','warning');
-  if(returnQty>availableQty+0.0001)return showToast('كمية المرتجع أكبر من الكمية المتاحة','warning');
-  returnQty=Math.min(returnQty,availableQty);
-
-  const returnValue=Math.round(returnQty*Number(purchase.price||0)*100)/100;
-  const oldRemaining=Math.max(0,Number(purchase.remaining||0));
-  const reduceCredit=Math.min(returnValue,oldRemaining);
-  const refundCash=Math.max(0,returnValue-reduceCredit);
-
-  const products=Store.get('products')||[];
-  const product=products.find(p=>String(p.id)===String(purchase.productId));
-  if(!product)return showToast('الصنف غير موجود في المخزون','warning');
-
-  const currentQty=Math.max(0,Number(product.qty)||0);
-  if(returnQty>currentQty+0.0001)return showToast('لا يمكن إرجاع كمية أكبر من الموجودة حاليًا في المخزون','warning');
-
-  // خصم الكمية المرتجعة من المخزون، مع محاولة تصحيح متوسط التكلفة.
-  const currentAvg=Math.max(0,Number(product.purchase)||0);
-  const remainingStock=Math.max(0,currentQty-returnQty);
-  const remainingCost=Math.max(0,(currentQty*currentAvg)-returnValue);
-  const newAvg=remainingStock>0?remainingCost/remainingStock:currentAvg;
-  Store.update('products',product.id,{qty:remainingStock,purchase:newAvg});
-
-  const newReturned=Math.min(originalQty,alreadyReturned+returnQty);
-  const newTotal=Math.max(0,Number(purchase.total||originalQty*Number(purchase.price||0))-returnValue);
-  const newPaid=Math.max(0,Number(purchase.paid||0)-refundCash);
-  const newRemaining=Math.max(0,newTotal-newPaid);
-  Store.update('purchases',purchase.id,{returnedQty:newReturned,returnTotal:Math.max(0,Number(purchase.returnTotal||0)+returnValue),total:newTotal,paid:newPaid,remaining:newRemaining,paymentMethod:newRemaining>0?'credit':'cash'});
-
-  // تحديث دين المورد: المرتجع يقلل الآجل أولًا، ثم يرد الجزء المدفوع نقدًا.
-  const debts=Store.get('debts')||[];
-  const debt=debts.find(d=>purchase.purchaseBatchId && String(d.purchaseBatchId)===String(purchase.purchaseBatchId) && d.source==='purchase');
-  if(debt){
-    const oldAmount=Math.max(0,Number(debt.amount||purchase.total||0));
-    const oldPaid=Math.max(0,Number(debt.paidAmount||0));
-    const newAmount=Math.max(0,oldAmount-returnValue);
-    const newDebtPaid=Math.max(0,oldPaid-refundCash);
-    const debtRemaining=Math.max(0,newAmount-newDebtPaid);
-    Store.update('debts',debt.id,{amount:newAmount,paidAmount:newDebtPaid,paid:debtRemaining<=0,purchaseTotal:newAmount,returnAdjusted:true});
-    if(debtRemaining<=0 && newAmount<=0)Store.delete('debts',debt.id);
-  }
-
-  // سجل مستقل للمرتجع حتى يظهر في الحركة والتقارير ولا يتكرر أثره.
-  const purchaseReturnRecord=Store.add('purchaseReturns',{purchaseId:purchase.id,purchaseBatchId:purchase.purchaseBatchId||null,date:today(),productId:product.id,productName:product.name,qty:returnQty,price:Number(purchase.price||0),total:returnValue,supplierId:purchase.supplierId||null,supplierName:purchase.supplierName||'بدون مورد',creditReduced:reduceCredit,cashRefund:refundCash,note:document.getElementById('rpurNote')?.value||''});
-
-  // تحديث الخزنة فورًا إذا كانت مفتوحة، حتى يظهر رد المورد في الرصيد والحركة بدون إعادة فتح الصفحة.
-  if(document.getElementById('cashboxBalance') || document.getElementById('cashboxMovements')) renderCashboxData();
-
-  closeModal();
-  showToast(refundCash>0?`↩️ تم المرتجع ورد ${fmt(refundCash)} للمورد`:`↩️ تم المرتجع وتخفيض حساب المورد ${fmt(returnValue)}`);
-  renderPurchasesPage(document.getElementById('contentArea'));
+  closeModal();showToast('✅ تم التعديل');renderPurchasesPage(document.getElementById('contentArea'));
 }
 
 function deletePurchase(id){
@@ -5060,21 +4881,16 @@ function getCashboxData(){
       const first=lines[0]||{};
       const method=String(first.paymentMethod||'cash').toLowerCase();
       const total=lines.reduce((n,x)=>n+cashboxNum(x&&x.total),0);
-      // الخزنة تسجل النقد الذي دخل فعليًا وقت البيع فقط.
-      // التحصيلات اللاحقة تأتي من paymentHistory داخل الديون، والمرتجعات تأتي من saleReturns.
-      // لذلك لا نسمح لتعديل paid بعد البيع أو المرتجع بإعادة حساب المقبوض الأصلي.
+      // الخزنة تسجل النقد الذي دخل فعليًا، وليس إجمالي الفاتورة.
+      // في الفاتورة الآجلة قد يوجد دفع جزئي وقت البيع؛ هذا المبلغ يدخل الخزنة فورًا.
+      // التحويل والبطاقة لا يدخلان الخزنة النقدية.
       let cashReceived=0;
-      const batchId=first.saleBatchId?String(first.saleBatchId):'';
-      const batchReturns=cashboxList('saleReturns').filter(r=>batchId && String(r&&r.saleBatchId||'')===batchId);
-      const returnedCash=batchReturns.reduce((n,r)=>n+cashboxNum(r&&r.cashRefund),0);
-      const basePaid=Object.prototype.hasOwnProperty.call(first,'initialPaid')
-        ? Math.max(0,Number(first.initialPaid)||0)
-        : Math.max(0,Number(first.paid)||0)+returnedCash;
       if(method==='cash'||method==='نقدي'||method==='نقد'){
-        const hasPaid=Object.prototype.hasOwnProperty.call(first,'paid') || Object.prototype.hasOwnProperty.call(first,'initialPaid');
-        cashReceived=hasPaid?basePaid:total+returnedCash;
+        // الفواتير القديمة قد لا تحتوي على paid؛ عندها نعتبر الفاتورة النقدية مدفوعة بالكامل.
+        const hasPaid=Object.prototype.hasOwnProperty.call(first,'paid');
+        cashReceived=hasPaid?Math.min(total,Math.max(0,Number(first.paid)||0)):total;
       }else if(method==='credit'||method==='آجل'){
-        cashReceived=basePaid;
+        cashReceived=Math.min(total,Math.max(0,Number(first.paid)||0));
       }
       if(cashReceived>0){
         const title=(method==='credit'||method==='آجل')?'بيع آجل — تحصيل مقدم':'بيع نقدي';
@@ -5085,14 +4901,6 @@ function getCashboxData(){
     cashboxList('purchases').forEach(p=>{
       const paid=cashboxNum(p&&p.paid);
       if(paid>0) movements.push({date:String(p&&p.date||'').slice(0,10),time:'',kind:'out',amount:paid,title:'شراء مدفوع',detail:String(p&&p.productName||'مشتريات')+' • '+String(p&&p.supplierName||'بائع/مورد'),icon:'fa-cart-flatbed',ref:p&&p.purchaseBatchId||p&&p.id});
-    });
-    cashboxList('purchaseReturns').forEach(r=>{
-      const amount=cashboxNum(r&&r.cashRefund);
-      if(amount>0) movements.push({date:String(r&&r.date||'').slice(0,10),time:'',kind:'in',amount,title:'رد مبلغ من مورد',detail:String(r&&r.productName||'مرتجع مشتريات')+' • '+String(r&&r.supplierName||'مورد'),icon:'fa-rotate-left',ref:'PR-'+String(r&&r.id||'')});
-    });
-    cashboxList('saleReturns').forEach(r=>{
-      const amount=cashboxNum(r&&r.cashRefund);
-      if(amount>0) movements.push({date:String(r&&r.date||'').slice(0,10),time:'',kind:'out',amount,title:'رد مبلغ لعميل',detail:String(r&&r.invoiceNo||'مرتجع مبيعات')+' • '+String(r&&r.customerName||'عميل'),icon:'fa-rotate-left',ref:'SR-'+String(r&&r.id||'')});
     });
     cashboxList('expenses').forEach(e=>{
       const amount=cashboxNum(e&&e.amount);
@@ -5494,7 +5302,6 @@ function applyGroupDebtPayment(person,type,amount,isFull){
       debtVersion:2,
       lastPaymentAt:now
     });
-    syncSaleInvoiceFromDebt({...d,paidAmount:paidAfter});
     left-=pay;
   }
 
@@ -5528,20 +5335,6 @@ function undoGroupDebtPayment(encodedPerson,type,groupId){
 
   showToast(changed?'↩️ تم التراجع عن آخر سداد للحساب':'لا يوجد سداد يمكن التراجع عنه','info');
   renderDebtsList();
-}
-
-
-function syncSaleInvoiceFromDebt(debt){
-  if(!debt || debt.source!=='sale' || !debt.saleBatchId)return;
-  const sales=Store.get('sales')||[];
-  const batch=sales.filter(s=>String(s.saleBatchId)===String(debt.saleBatchId));
-  if(!batch.length)return;
-  const invoiceTotal=batch.reduce((n,s)=>n+Math.max(0,money(s.total)),0);
-  // مصدر الحقيقة للفواتير الآجلة هو الدين المرتبط بالفاتورة.
-  // لو أصبح الدين مسددًا بالكامل يكون المتبقي في الفاتورة = صفر والمدفوع = إجماليها.
-  const remaining=Math.min(invoiceTotal,Math.max(0,getDebtRemaining(debt)));
-  const paid=Math.max(0,invoiceTotal-remaining);
-  batch.forEach(s=>Store.update('sales',s.id,{paid,remaining}));
 }
 
 function openDebtPayment(id){
@@ -5585,9 +5378,13 @@ function payDebtPart(id,amount){
     debtVersion:2,
     lastPaymentAt:new Date().toISOString()
   });
-  syncSaleInvoiceFromDebt({...d,paidAmount:paidAfter});
   closeModal();
-  showToast(amount>=remaining?'✅ تم سداد الدين بالكامل':'✅ تم تسجيل السداد الجزئي');
+  const remainingAfter=Math.max(0, remaining-amount);
+  const isFullyPaid=remainingAfter<=0.0001;
+  showToast(isFullyPaid
+    ? `🎉 تم سداد الحساب بالكامل — المتبقي: ${fmt(remainingAfter)}`
+    : `✅ تم تسجيل السداد بنجاح — تم تحصيل ${fmt(amount)} — المتبقي: ${fmt(remainingAfter)}`
+  );
   renderDebtsList();
 }
 
@@ -5620,17 +5417,11 @@ function deleteDebt(id){if(!confirm('حذف الدين؟'))return;Store.delete('
 
 function getDebtRemaining(d){
   if(!d)return 0;
-  const amount=Math.max(0,Number(d.amount||0));
-  const hasPaidAmount=Object.prototype.hasOwnProperty.call(d,'paidAmount');
-  // paidAmount هو المرجع الحقيقي للمدفوعات الحديثة. لا نعتمد على paid وحده
-  // لأن بعض السجلات القديمة/المُرحّلة قد تحمل paid:true مع بقاء مبلغ مستحق.
-  if(hasPaidAmount){
-    const paidAmount=Math.max(0,Number(d.paidAmount||0));
-    return Math.max(0,amount-paidAmount);
-  }
   if(d.paid)return 0;
+  const amount=Math.max(0,Number(d.amount||0));
   const isLegacySource=(d.debtVersion!==2&&(d.source==='purchase'||d.source==='sale'));
-  return isLegacySource?amount:Math.max(0,amount);
+  const paidAmount=isLegacySource?0:Math.max(0,Number(d.paidAmount||0));
+  return Math.max(0,amount-paidAmount);
 }
 function normalizeWhatsAppPhone(phone){
   let p=String(phone||'').replace(/[^\d+]/g,'');
@@ -7206,24 +6997,8 @@ if ('serviceWorker' in navigator) {
       const first=lines[0];
       const total=lines.reduce((n,s)=>n+money(s.total),0);
       const profit=lines.reduce((n,s)=>n+money(s.profit),0);
-      // الفاتورة الآجلة مرتبطة بسجل الدين؛ لذلك حالة السداد في سجل المبيعات
-      // يجب أن تعكس المتبقي الحقيقي في الدين، وليس قيمة paid القديمة في سطر البيع.
-      // مزامنة سجل المبيعات مع سجل الديون:
-      // نبحث برقم العملية أولاً، ثم برقم الفاتورة كحل احتياطي للفواتير القديمة.
-      // لو كان الدين مسددًا بالكامل (paid=true أو paidAmount=amount) يصبح المتبقي صفرًا.
-      const debtsForSales=Store.get('debts')||[];
-      const batchId=String(first.saleBatchId||'');
-      const invoiceNo=String(first.invoiceNo||'');
-      const linkedDebts=debtsForSales.filter(d=>{
-        if(d.type!=='لنا') return false;
-        const sameBatch=batchId && String(d.saleBatchId||'')===batchId;
-        const sameInvoice=invoiceNo && String(d.invoiceNo||'')===invoiceNo;
-        return (sameBatch||sameInvoice) && (d.source==='sale' || sameBatch || sameInvoice);
-      });
-      const remaining=linkedDebts.length
-        ? linkedDebts.reduce((n,d)=>n+Math.max(0,getDebtRemaining(d)),0)
-        : Math.max(0,total-money(first.paid));
-      const paid=Math.max(0,total-remaining);
+      const paid=money(first.paid);
+      const remaining=Math.max(0,total-paid);
       const returnedAmount=lines.reduce((n,s)=>n+money(s.returnedAmount),0);
       const returnedQty=lines.reduce((n,s)=>n+money(s.returnedQty),0);
       const returnedLines=lines.filter(s=>money(s.returnedQty)>0);
@@ -7421,96 +7196,11 @@ if ('serviceWorker' in navigator) {
   window.confirmInvoiceReturnPro=function(key){
     const inv=findInvoice(key);if(!inv)return;
     let refund=0,changed=false;
-    inv.lines.forEach((s,i)=>{
-      const input=document.querySelector(`[data-return-line="${i}"]`);
-      const r=Math.min(money(s.qty),Math.max(0,money(input?.value)));
-      if(r<=0)return;
-      changed=true;
-      const ratio=s.qty?Math.min(1,r/money(s.qty)):1;
-      const lineRefund=money(s.total)*ratio;
-      refund+=lineRefund;
-      const p=Store.get('products').find(x=>String(x.id)===String(s.productId));
-      if(p)Store.update('products',p.id,{qty:money(p.qty)+r});
-      const newQty=Math.max(0,money(s.qty)-r);
-      const newTotal=Math.max(0,money(s.total)-lineRefund);
-      const newProfit=Math.max(0,money(s.profit)-money(s.profit)*ratio);
-      Store.update('sales',s.id,{
-        qty:newQty,
-        packages:s.weight?newQty/(money(s.weight)||1):newQty,
-        total:newTotal,
-        profit:newProfit,
-        returnedQty:money(s.returnedQty)+r,
-        returnedAmount:money(s.returnedAmount)+lineRefund
-      });
-    });
+    inv.lines.forEach((s,i)=>{const input=document.querySelector(`[data-return-line="${i}"]`);const r=Math.min(money(s.qty),Math.max(0,money(input?.value)));if(r<=0)return;changed=true;const ratio=s.qty?Math.min(1,r/money(s.qty)):1;refund+=money(s.total)*ratio;const p=Store.get('products').find(x=>String(x.id)===String(s.productId));if(p)Store.update('products',p.id,{qty:money(p.qty)+r});const newQty=Math.max(0,money(s.qty)-r);const newTotal=Math.max(0,money(s.total)-money(s.total)*ratio);const newProfit=Math.max(0,money(s.profit)-money(s.profit)*ratio);Store.update('sales',s.id,{qty:newQty,packages:s.weight?newQty/(money(s.weight)||1):newQty,total:newTotal,profit:newProfit,returnedQty:money(s.returnedQty)+r,returnedAmount:money(s.returnedAmount)+money(s.total)*ratio});});
     if(!changed)return showToast('حدد كمية المرتجع أولًا','warning');
-
-    const updated=findInvoice(key);
-    const newTotal=updated?updated.total:Math.max(0,inv.total-refund);
-    const oldPaid=Math.max(0,money(inv.paid));
-    const oldRemaining=Math.max(0,money(inv.remaining));
-    // المرتجع يخصم من الآجل أولًا، ثم يرد الجزء المدفوع نقدًا إذا تجاوز قيمة الآجل.
-    const creditReduced=Math.min(refund,oldRemaining);
-    const cashRefund=Math.max(0,refund-creditReduced);
-    const paid=Math.max(0,oldPaid-cashRefund);
-    const remaining=Math.max(0,newTotal-paid);
-
-    // سجل مستقل حتى يظهر رد النقد في الخزنة ولا يتكرر أثره.
-    Store.add('saleReturns',{
-      saleId:inv.id||null,
-      saleBatchId:inv.saleBatchId||null,
-      invoiceNo:inv.invoiceNo||inv.invoiceSeq||'',
-      date:today(),
-      customerId:inv.customerId||null,
-      customerName:inv.customerName||'عميل عادي',
-      total:refund,
-      creditReduced,
-      cashRefund,
-      note:'مرتجع مبيعات'
-    });
-
-    if(inv.saleBatchId){
-      const batch=allSales().filter(s=>s.saleBatchId===inv.saleBatchId);
-      batch.forEach(s=>Store.update('sales',s.id,{paid,remaining}));
-      (Store.get('debts')||[])
-        .filter(d=>d.saleBatchId===inv.saleBatchId&&d.source==='sale')
-        .forEach(d=>Store.delete('debts',d.id));
-      if(remaining>0){
-        // الدين = الجزء الآجل الأصلي بعد خصم قيمة المرتجع من الآجل،
-        // أما التحصيلات السابقة فتظل في paidAmount/paymentHistory.
-        const originalInitialPaid=Math.max(0,money(inv.lines[0]?.initialPaid));
-        const originalCredit=Math.max(0,money(inv.total)-originalInitialPaid);
-        const newCredit=Math.max(0,originalCredit-creditReduced);
-        const priorCollected=Math.max(0,oldPaid-originalInitialPaid);
-        const paidOnCredit=Math.min(newCredit,priorCollected);
-        const existingHistory=(Store.get('debts')||[]).filter(d=>d.saleBatchId===inv.saleBatchId&&d.source==='sale').flatMap(d=>Array.isArray(d.paymentHistory)?d.paymentHistory:[]);
-        Store.add('debts',{
-          saleBatchId:inv.saleBatchId,
-          invoiceNo:inv.invoiceNo,
-          date:inv.date,
-          person:inv.customerName,
-          customerId:inv.customerId||null,
-          type:'لنا',
-          amount:newCredit,
-          due:'',
-          note:`آجل بعد مرتجع ${inv.invoiceNo}`,
-          paid:paidOnCredit>=newCredit-0.0001,
-          source:'sale',
-          saleTotal:newTotal,
-          paidAmount:paidOnCredit,
-          paymentHistory:existingHistory,
-          debtVersion:2
-        });
-      }
-    }else{
-      Store.update('sales',inv.id,{paid,remaining});
-    }
-
-    closeIfOpen();
-    showToast(cashRefund>0
-      ? `✅ تم المرتجع ${fmt(refund)} ورد ${fmt(cashRefund)} للعميل وتحديث المخزون`
-      : `✅ تم المرتجع ${fmt(refund)} وتخفيض الآجل ${fmt(creditReduced)}`,'success');
-    renderSalesTable();
+    const updated=findInvoice(key);const newTotal=updated?updated.total:Math.max(0,inv.total-refund);const paid=Math.min(inv.paid,newTotal),remaining=Math.max(0,newTotal-paid);
+    if(inv.saleBatchId){const batch=allSales().filter(s=>s.saleBatchId===inv.saleBatchId);batch.forEach(s=>Store.update('sales',s.id,{paid,remaining}));(Store.get('debts')||[]).filter(d=>d.saleBatchId===inv.saleBatchId&&d.source==='sale').forEach(d=>Store.delete('debts',d.id));if(remaining>0)Store.add('debts',{saleBatchId:inv.saleBatchId,invoiceNo:inv.invoiceNo,date:inv.date,person:inv.customerName,type:'لنا',amount:remaining,due:'',note:`آجل بعد مرتجع ${inv.invoiceNo}`,paid:false,source:'sale',saleTotal:newTotal,paidAmount:paid});}
+    closeIfOpen();showToast('✅ تم تسجيل المرتجع '+fmt(refund)+' وتحديث المخزون','success');renderSalesTable();
   };
 
   window.openInvoiceCollectionPro=function(key){
@@ -7518,55 +7208,7 @@ if ('serviceWorker' in navigator) {
     openModal(`<div class="modal-header"><h2><i class="fas fa-money-bill-wave" style="color:var(--success);margin-left:8px"></i> تحصيل من ${esc(inv.invoiceNo)}</h2><button class="modal-close" onclick="closeModal()">&times;</button></div><div class="collection-pro-box"><small>المتبقي الحالي</small><strong>${fmt(inv.remaining)}</strong><input id="invoiceCollectionAmount" type="number" min="0" max="${inv.remaining}" step="0.01" value="${inv.remaining}"></div><button class="btn btn-success btn-block" onclick="confirmInvoiceCollectionPro('${esc(inv.key)}')"><i class="fas fa-check"></i> تسجيل التحصيل</button>`);
   };
   window.confirmInvoiceCollectionPro=function(key){
-    const inv=findInvoice(key);
-    if(!inv)return;
-    const amount=Math.min(inv.remaining,Math.max(0,money(document.getElementById('invoiceCollectionAmount')?.value)));
-    if(amount<=0)return showToast('أدخل مبلغ التحصيل','warning');
-
-    const now=new Date().toISOString();
-    const newPaid=money(inv.paid)+amount;
-    const newRemaining=Math.max(0,money(inv.total)-newPaid);
-
-    // احتفظ بالمبلغ المدفوع وقت البيع منفصلًا عن التحصيلات اللاحقة حتى لا تتكرر حركة الخزنة.
-    inv.lines.forEach(s=>{
-      const initialPaid=Object.prototype.hasOwnProperty.call(s,'initialPaid')
-        ? money(s.initialPaid)
-        : Math.max(0,money(s.paid)-money(s.returnedAmount));
-      Store.update('sales',s.id,{paid:newPaid,remaining:newRemaining,initialPaid});
-    });
-
-    if(inv.saleBatchId){
-      const linked=(Store.get('debts')||[]).filter(d=>d.saleBatchId===inv.saleBatchId&&d.source==='sale');
-      let left=amount;
-      for(const d of linked){
-        if(left<=0)break;
-        const rem=getDebtRemaining(d);
-        const pay=Math.min(rem,left);
-        if(pay<=0)continue;
-        const history=Array.isArray(d.paymentHistory)?d.paymentHistory.slice():[];
-        history.push({amount:pay,date:now,type:pay>=rem?'full':'partial',groupId:'INVCOL-'+Date.now()+'-'+Math.random().toString(36).slice(2,7)});
-        const paidAfter=Math.max(0,money(d.paidAmount)+pay);
-        Store.update('debts',d.id,{
-          paidAmount:paidAfter,
-          paid:paidAfter>=money(d.amount)-0.0001,
-          paymentHistory:history,
-          debtVersion:2,
-          lastPaymentAt:now
-        });
-        left-=pay;
-      }
-      // في حالة وجود فاتورة آجل قديمة بلا سجل دين، أنشئ سجلًا يحفظ التحصيل في الخزنة.
-      if(!linked.length && amount>0){
-        const creditOriginal=Math.max(0,money(inv.total)-money(inv.lines[0]?.initialPaid||0));
-        const paymentHistory=[{amount,date:now,type:amount>=creditOriginal?'full':'partial',groupId:'INVCOL-'+Date.now()+'-'+Math.random().toString(36).slice(2,7)}];
-        Store.add('debts',{saleBatchId:inv.saleBatchId,invoiceNo:inv.invoiceNo,date:inv.date,person:inv.customerName,customerId:inv.customerId||null,type:'لنا',amount:creditOriginal,paidAmount:amount,paymentHistory,debtVersion:2,due:'',note:`تحصيل من ${inv.invoiceNo}`,paid:amount>=creditOriginal,source:'sale',saleTotal:inv.total});
-      }
-    }
-
-    closeIfOpen();
-    if(document.getElementById('cashboxBalance') || document.getElementById('cashboxMovements')) renderCashboxData();
-    showToast('✅ تم تسجيل التحصيل '+fmt(amount)+' وتحديث حساب العميل والخزنة','success');
-    renderSalesTable();
+    const inv=findInvoice(key);if(!inv)return;const amount=Math.min(inv.remaining,Math.max(0,money(document.getElementById('invoiceCollectionAmount')?.value)));if(amount<=0)return showToast('أدخل مبلغ التحصيل','warning');const newPaid=inv.paid+amount,newRemaining=Math.max(0,inv.total-newPaid);inv.lines.forEach(s=>Store.update('sales',s.id,{paid:newPaid,remaining:newRemaining}));if(inv.saleBatchId){(Store.get('debts')||[]).filter(d=>d.saleBatchId===inv.saleBatchId&&d.source==='sale').forEach(d=>Store.delete('debts',d.id));if(newRemaining>0)Store.add('debts',{saleBatchId:inv.saleBatchId,invoiceNo:inv.invoiceNo,date:inv.date,person:inv.customerName,type:'لنا',amount:newRemaining,due:'',note:`تحصيل جزئي من ${inv.invoiceNo}`,paid:false,source:'sale',saleTotal:inv.total,paidAmount:newPaid});}closeIfOpen();showToast('✅ تم تسجيل التحصيل '+fmt(amount),'success');renderSalesTable();
   };
 
   window.deleteInvoicePro=function(key){const inv=findInvoice(key);if(!inv)return;if(!confirm(`حذف الفاتورة ${inv.invoiceNo} بالكامل؟ سيتم إعادة الكميات للمخزون.`))return;inv.lines.forEach(s=>{const p=Store.get('products').find(x=>String(x.id)===String(s.productId));if(p)Store.update('products',p.id,{qty:money(p.qty)+money(s.qty)});Store.delete('sales',s.id);});if(inv.saleBatchId)(Store.get('debts')||[]).filter(d=>d.saleBatchId===inv.saleBatchId&&d.source==='sale').forEach(d=>Store.delete('debts',d.id));closeIfOpen();showToast('🗑️ تم حذف الفاتورة وإرجاع الكميات للمخزون');renderSalesTable();};
