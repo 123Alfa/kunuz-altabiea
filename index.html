@@ -5494,6 +5494,7 @@ function applyGroupDebtPayment(person,type,amount,isFull){
       debtVersion:2,
       lastPaymentAt:now
     });
+    syncSaleInvoiceFromDebt({...d,paidAmount:paidAfter});
     left-=pay;
   }
 
@@ -5527,6 +5528,29 @@ function undoGroupDebtPayment(encodedPerson,type,groupId){
 
   showToast(changed?'↩️ تم التراجع عن آخر سداد للحساب':'لا يوجد سداد يمكن التراجع عنه','info');
   renderDebtsList();
+}
+
+
+function syncSaleInvoiceFromDebt(debt){
+  if(!debt || debt.source!=='sale' || !debt.saleBatchId)return;
+  const sales=Store.get('sales')||[];
+  const batch=sales.filter(s=>String(s.saleBatchId)===String(debt.saleBatchId));
+  if(!batch.length)return;
+  const totalPaidAfter= Math.max(0, batch.reduce((n,s)=>{
+    const initial=Object.prototype.hasOwnProperty.call(s,'initialPaid')
+      ? money(s.initialPaid)
+      : Math.max(0,money(s.paid)-money(s.returnedAmount||0));
+    return Math.max(n, initial);
+  },0) + Math.max(0,money(debt.paidAmount)));
+  const invoiceTotal=batch.reduce((n,s)=>n+Math.max(0,money(s.total)),0);
+  const paid=Math.min(invoiceTotal,totalPaidAfter);
+  const remaining=Math.max(0,invoiceTotal-paid);
+  batch.forEach(s=>{
+    const initial=Object.prototype.hasOwnProperty.call(s,'initialPaid')
+      ? money(s.initialPaid)
+      : Math.max(0,money(s.paid)-money(s.returnedAmount||0));
+    Store.update('sales',s.id,{initialPaid:initial,paid,remaining});
+  });
 }
 
 function openDebtPayment(id){
@@ -5570,6 +5594,7 @@ function payDebtPart(id,amount){
     debtVersion:2,
     lastPaymentAt:new Date().toISOString()
   });
+  syncSaleInvoiceFromDebt({...d,paidAmount:paidAfter});
   closeModal();
   showToast(amount>=remaining?'✅ تم سداد الدين بالكامل':'✅ تم تسجيل السداد الجزئي');
   renderDebtsList();
