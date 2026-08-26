@@ -4728,9 +4728,9 @@ function renderPurchasesTable(){
     const total=Number(p.total ?? (Number(p.qty||0)*Number(p.price||0)));
     return `<article class="purchase-card-v6">
       <div class="purchase-card-head-v6"><div><small>${p.date||'-'}</small><h3>${p.productName||'-'}</h3></div><strong>${fmt(total)}</strong></div>
-      <div class="purchase-card-data-v6"><div><span>الكمية</span><b>${Number(p.qty||0).toLocaleString('ar-EG',{maximumFractionDigits:3})}</b></div><div><span>سعر الوحدة</span><b>${fmt(p.price||0)}</b></div><div><span>المورد</span><b>${p.supplierName||'بدون مورد'}</b></div><div><span>السداد</span><b>${Number(p.remaining||0)>0?`آجل: ${fmt(p.remaining)}`:'مدفوع'}</b></div></div>
+      <div class="purchase-card-data-v6"><div><span>الكمية</span><b>${Number(p.qty||0).toLocaleString('ar-EG',{maximumFractionDigits:3})}${Number(p.returnedQty||0)>0?` <small style="color:#b45309">(مرتجع ${Number(p.returnedQty||0).toLocaleString('ar-EG',{maximumFractionDigits:3})})</small>`:''}</b></div><div><span>سعر الوحدة</span><b>${fmt(p.price||0)}</b></div><div><span>المورد</span><b>${p.supplierName||'بدون مورد'}</b></div><div><span>السداد</span><b>${Number(p.remaining||0)>0?`آجل: ${fmt(p.remaining)}`:'مدفوع'}</b></div></div>
       ${p.note?`<div class="purchase-note-v6"><i class="fas fa-note-sticky"></i>${p.note}</div>`:''}
-      <div class="purchase-card-actions-v6"><button type="button" onclick="editPurchase('${p.id}')"><i class="fas fa-edit"></i> تعديل</button><button type="button" onclick="deletePurchase('${p.id}')"><i class="fas fa-trash"></i> حذف</button></div>
+      <div class="purchase-card-actions-v6"><button type="button" onclick="editPurchase('${p.id}')"><i class="fas fa-edit"></i> تعديل</button><button type="button" style="color:#b45309" onclick="returnPurchase('${p.id}')"><i class="fas fa-rotate-left"></i> مرتجع</button><button type="button" onclick="deletePurchase('${p.id}')"><i class="fas fa-trash"></i> حذف</button></div>
     </article>`;
   }).join('')||`<div class="purchase-empty-v6"><i class="fas fa-box-open"></i><strong>لا توجد مشتريات</strong><span>غيّر البحث أو الفلاتر لعرض العمليات</span></div>`;
 }
@@ -4885,6 +4885,122 @@ function savePurchaseEdit(id){
   renderPurchasesPage(document.getElementById('contentArea'));
 }
 
+
+function returnPurchase(id){
+  const purchases=Store.get('purchases')||[];
+  const purchase=purchases.find(p=>String(p.id)===String(id));
+  if(!purchase)return showToast('عملية الشراء غير موجودة','warning');
+
+  const originalQty=Math.max(0,Number(purchase.qty)||0);
+  const alreadyReturned=Math.max(0,Number(purchase.returnedQty)||0);
+  const availableQty=Math.max(0,originalQty-alreadyReturned);
+  if(availableQty<=0)return showToast('تم إرجاع كامل كمية هذه الفاتورة بالفعل','warning');
+
+  const unitPrice=Math.max(0,Number(purchase.price)||0);
+  const defaultQty=availableQty;
+  window.__activePurchaseReturnId=id;
+  openModal(`<div class="modal-header"><h2><i class="fas fa-rotate-left" style="color:#b45309;margin-left:8px"></i> مرتجع مشتريات</h2><button class="modal-close" onclick="closeModal()">&times;</button></div>
+    <div style="padding:8px 0">
+      <div style="background:#fff7ed;border:1px solid #fed7aa;border-radius:14px;padding:12px;margin-bottom:12px">
+        <b>${String(purchase.productName||'الصنف')}</b><br>
+        <small>الفاتورة: ${fmt(purchase.total||0)} • المورد: ${String(purchase.supplierName||'بدون مورد')}</small><br>
+        <small>الكمية الأصلية: ${formatNumberAR(originalQty,3)} • تم إرجاع: ${formatNumberAR(alreadyReturned,3)} • المتاح للمرتجع: ${formatNumberAR(availableQty,3)}</small>
+      </div>
+      <div class="form-group"><label>كمية المرتجع</label><input type="number" id="rpurQty" value="${defaultQty}" min="0.001" max="${availableQty}" step="0.001" oninput="updatePurchaseReturnPreview()"></div>
+      <div class="form-group"><label>سبب/ملاحظات المرتجع</label><input type="text" id="rpurNote" placeholder="اختياري"></div>
+      <div id="rpurSummary" style="margin:12px 0;padding:12px;border-radius:12px;background:#fff7ed;border:1px solid #fed7aa;font-weight:800"></div>
+      <button class="btn btn-block" style="background:linear-gradient(135deg,#b45309,#d97706);color:#fff" onclick="savePurchaseReturn('${String(id).replace(/'/g,"\\'")}')"><i class="fas fa-rotate-left"></i> تأكيد المرتجع</button>
+    </div>`);
+  updatePurchaseReturnPreview();
+}
+
+function formatNumberAR(v,max=3){
+  const n=Number(v)||0;
+  return n.toLocaleString('ar-EG',{maximumFractionDigits:max});
+}
+
+function updatePurchaseReturnPreview(){
+  const el=document.getElementById('rpurSummary'); if(!el)return;
+  const q=Math.max(0,Number(document.getElementById('rpurQty')?.value||0));
+  const purchases=Store.get('purchases')||[];
+  const input=document.getElementById('rpurQty');
+  const id=input?.dataset?.purchaseId;
+  let p=id?purchases.find(x=>String(x.id)===String(id)):null;
+  if(!p){
+    // id is not needed for the preview; the modal is tied to the selected purchase.
+    p=purchases.find(x=>Math.max(0,Number(x.qty||0))>=q && x.id===window.__activePurchaseReturnId);
+  }
+  if(!p && window.__activePurchaseReturnId) p=purchases.find(x=>String(x.id)===String(window.__activePurchaseReturnId));
+  if(!p){el.textContent='';return;}
+  const available=Math.max(0,Number(p.qty||0)-Number(p.returnedQty||0));
+  const safeQ=Math.min(q,available);
+  if(input){input.max=available;input.dataset.purchaseId=String(p.id);}
+  const value=Math.round(safeQ*Number(p.price||0)*100)/100;
+  const paid=Math.max(0,Number(p.paid||0));
+  const remaining=Math.max(0,Number(p.remaining||0));
+  const unpaidReturn=Math.min(value,remaining);
+  const refund=Math.max(0,value-unpaidReturn);
+  el.innerHTML=`قيمة المرتجع: <b>${fmt(value)}</b> &nbsp; | &nbsp; يخفض الآجل: <b>${fmt(unpaidReturn)}</b> &nbsp; | &nbsp; رد نقدي للمورد: <b>${fmt(refund)}</b>`;
+}
+
+function savePurchaseReturn(id){
+  const purchases=Store.get('purchases')||[];
+  const purchase=purchases.find(p=>String(p.id)===String(id));
+  if(!purchase)return showToast('عملية الشراء غير موجودة','warning');
+  const originalQty=Math.max(0,Number(purchase.qty)||0);
+  const alreadyReturned=Math.max(0,Number(purchase.returnedQty)||0);
+  const availableQty=Math.max(0,originalQty-alreadyReturned);
+  let returnQty=Math.max(0,Number(document.getElementById('rpurQty')?.value||0));
+  if(returnQty<=0)return showToast('أدخل كمية المرتجع','warning');
+  if(returnQty>availableQty+0.0001)return showToast('كمية المرتجع أكبر من الكمية المتاحة','warning');
+  returnQty=Math.min(returnQty,availableQty);
+
+  const returnValue=Math.round(returnQty*Number(purchase.price||0)*100)/100;
+  const oldRemaining=Math.max(0,Number(purchase.remaining||0));
+  const reduceCredit=Math.min(returnValue,oldRemaining);
+  const refundCash=Math.max(0,returnValue-reduceCredit);
+
+  const products=Store.get('products')||[];
+  const product=products.find(p=>String(p.id)===String(purchase.productId));
+  if(!product)return showToast('الصنف غير موجود في المخزون','warning');
+
+  const currentQty=Math.max(0,Number(product.qty)||0);
+  if(returnQty>currentQty+0.0001)return showToast('لا يمكن إرجاع كمية أكبر من الموجودة حاليًا في المخزون','warning');
+
+  // خصم الكمية المرتجعة من المخزون، مع محاولة تصحيح متوسط التكلفة.
+  const currentAvg=Math.max(0,Number(product.purchase)||0);
+  const remainingStock=Math.max(0,currentQty-returnQty);
+  const remainingCost=Math.max(0,(currentQty*currentAvg)-returnValue);
+  const newAvg=remainingStock>0?remainingCost/remainingStock:currentAvg;
+  Store.update('products',product.id,{qty:remainingStock,purchase:newAvg});
+
+  const newReturned=Math.min(originalQty,alreadyReturned+returnQty);
+  const newTotal=Math.max(0,Number(purchase.total||originalQty*Number(purchase.price||0))-returnValue);
+  const newPaid=Math.max(0,Number(purchase.paid||0)-refundCash);
+  const newRemaining=Math.max(0,newTotal-newPaid);
+  Store.update('purchases',purchase.id,{returnedQty:newReturned,returnTotal:Math.max(0,Number(purchase.returnTotal||0)+returnValue),total:newTotal,paid:newPaid,remaining:newRemaining,paymentMethod:newRemaining>0?'credit':'cash'});
+
+  // تحديث دين المورد: المرتجع يقلل الآجل أولًا، ثم يرد الجزء المدفوع نقدًا.
+  const debts=Store.get('debts')||[];
+  const debt=debts.find(d=>purchase.purchaseBatchId && String(d.purchaseBatchId)===String(purchase.purchaseBatchId) && d.source==='purchase');
+  if(debt){
+    const oldAmount=Math.max(0,Number(debt.amount||purchase.total||0));
+    const oldPaid=Math.max(0,Number(debt.paidAmount||0));
+    const newAmount=Math.max(0,oldAmount-returnValue);
+    const newDebtPaid=Math.max(0,oldPaid-refundCash);
+    const debtRemaining=Math.max(0,newAmount-newDebtPaid);
+    Store.update('debts',debt.id,{amount:newAmount,paidAmount:newDebtPaid,paid:debtRemaining<=0,purchaseTotal:newAmount,returnAdjusted:true});
+    if(debtRemaining<=0 && newAmount<=0)Store.delete('debts',debt.id);
+  }
+
+  // سجل مستقل للمرتجع حتى يظهر في الحركة والتقارير ولا يتكرر أثره.
+  Store.add('purchaseReturns',{purchaseId:purchase.id,purchaseBatchId:purchase.purchaseBatchId||null,date:today(),productId:product.id,productName:product.name,qty:returnQty,price:Number(purchase.price||0),total:returnValue,supplierId:purchase.supplierId||null,supplierName:purchase.supplierName||'بدون مورد',creditReduced:reduceCredit,cashRefund:refundCash,note:document.getElementById('rpurNote')?.value||''});
+
+  closeModal();
+  showToast(refundCash>0?`↩️ تم المرتجع ورد ${fmt(refundCash)} للمورد`:`↩️ تم المرتجع وتخفيض حساب المورد ${fmt(returnValue)}`);
+  renderPurchasesPage(document.getElementById('contentArea'));
+}
+
 function deletePurchase(id){
   if(!confirm('حذف عملية الشراء؟ سيتم خصم الكمية من المخزون.'))return;
 
@@ -4961,6 +5077,10 @@ function getCashboxData(){
     cashboxList('purchases').forEach(p=>{
       const paid=cashboxNum(p&&p.paid);
       if(paid>0) movements.push({date:String(p&&p.date||'').slice(0,10),time:'',kind:'out',amount:paid,title:'شراء مدفوع',detail:String(p&&p.productName||'مشتريات')+' • '+String(p&&p.supplierName||'بائع/مورد'),icon:'fa-cart-flatbed',ref:p&&p.purchaseBatchId||p&&p.id});
+    });
+    cashboxList('purchaseReturns').forEach(r=>{
+      const amount=cashboxNum(r&&r.cashRefund);
+      if(amount>0) movements.push({date:String(r&&r.date||'').slice(0,10),time:'',kind:'in',amount,title:'رد مبلغ من مورد',detail:String(r&&r.productName||'مرتجع مشتريات')+' • '+String(r&&r.supplierName||'مورد'),icon:'fa-rotate-left',ref:'PR-'+String(r&&r.id||'')});
     });
     cashboxList('expenses').forEach(e=>{
       const amount=cashboxNum(e&&e.amount);
