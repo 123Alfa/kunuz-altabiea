@@ -4491,7 +4491,11 @@ function checkoutPOS(){
     Store.add('sales',{saleBatchId,invoiceNo,invoiceSeq,date:invoiceDate,time:saleTime,productId:p.id,productName:p.name,customerId:customerId||null,customerName,type,qty:qtyKg,packages:packs,weight,unitPrice:price,price:effectivePackPrice,cost:costKg*weight,discount:price?((itemDiscount/gross)*100):0,discountAmount:itemDiscount,taxRate,taxAmount:itemTax,discountedPrice:effectivePackPrice,total:itemTotal,profit,paymentMethod:method,paid,remaining,initialPaid:money(paid),collectionHistory:[],isWeightSale:isKgProduct(p),sellUnit:isKgProduct(p)?'كجم':String(p.unit||'علبة'),note:note||`بيع من الكاشير — ${saleQuantityLabel(p,packs,weight)}${method==='credit'?' — آجل':''}`});
   });
   if(customerId){const customers=Store.get('customers');const i=customers.findIndex(c=>c.id===customerId);if(i>=0){customers[i].points=(customers[i].points||0)+Math.floor(total/10);customers[i].totalSpent=(customers[i].totalSpent||0)+total;Store.set('customers',customers);}}
-  if(method==='credit'&&remaining>0){Store.add('debts',{saleBatchId,invoiceNo,sourceSaleId:null,customerId:customerId||null,date:invoiceDate,person:customerName,type:'لنا',amount:remaining,paidAmount:0,paymentHistory:[],debtVersion:2,due:document.getElementById('posDueDate')?.value||'',note:`آجل من الفاتورة ${invoiceNo}${customerId?' — عميل مسجل':''}`,paid:false,source:'sale',saleTotal:total});}
+  if(method==='credit'&&remaining>0){
+    // الدين يمثل إجمالي الفاتورة، وpaidAmount يشمل الدفعة الأولى التي تمت من شاشة المبيعات.
+    // التحصيلات اللاحقة فقط تُسجل داخل paymentHistory حتى لا تتكرر في الخزنة.
+    Store.add('debts',{saleBatchId,invoiceNo,sourceSaleId:null,customerId:customerId||null,date:invoiceDate,person:customerName,type:'لنا',amount:total,paidAmount:Math.min(total,Math.max(0,paid)),paymentHistory:[],debtVersion:2,due:document.getElementById('posDueDate')?.value||'',note:`آجل من الفاتورة ${invoiceNo}${customerId?' — عميل مسجل':''}`,paid:remaining<=0,source:'sale',saleTotal:total});
+  }
   // اكتملت تغييرات البيانات داخل العملية المحمية.
   const invoice={invoiceNo,invoiceSeq,saleBatchId,date:invoiceDate,time:saleTime,customerName,type,method,subtotal,discount:safeDiscount,taxRate,tax, total,paid,remaining,change:method==='cash'?roundPOSMoney(paid-total):0,note};
   localStorage.setItem('bm_lastPOSInvoice',JSON.stringify(invoice));
@@ -4704,7 +4708,10 @@ function saveSaleEdit(id){
   const batch=batchId?sales.filter(s=>String(s.saleBatchId)===String(batchId)):[original];
   const oldTotal=batch.reduce((n,s)=>n+Number(s.total||0),0);
   const oldPaid=Math.max(0,Number(original.paid||0));
-  const oldInitialPaid=Math.max(0,Number(original.initialPaid||0));
+  const originalHistory=Array.isArray(original.collectionHistory)?original.collectionHistory:[];
+  // لو كانت النسخة القديمة لا تحتوي initialPaid، نستنتج الدفعة الأولى من المدفوع التراكمي ناقص التحصيلات اللاحقة.
+  const historyPaidFromSale=originalHistory.reduce((n,h)=>n+money(h&&h.amount),0);
+  const oldInitialPaid=Math.max(0,Math.min(oldPaid,Number(original.initialPaid||0)||money(oldPaid-historyPaidFromSale)));
   const oldCollections=Math.max(0,oldPaid-oldInitialPaid);
 
   // Snapshot everything affected so a failed edit cannot leave stock/sales/debts inconsistent.
@@ -4769,24 +4776,19 @@ function saveSaleEdit(id){
       const debts=(Store.get('debts')||[]).filter(d=>String(d.saleBatchId)===String(batchId)&&d.source==='sale'&&d.type==='لنا');
       const base=debts[0]||{};
 
-      // احفظ كل تاريخ التحصيلات قبل إعادة بناء الدين. لا نعتمد على أول دين فقط،
-      // لأن الدين قد يكون أُنشئ/أُعيد بناؤه أكثر من مرة أثناء تعديلات سابقة.
+      // احفظ التحصيلات اللاحقة قبل إعادة بناء الدين.
       const historyMap=new Map();
       debts.forEach(d=>{
         (Array.isArray(d.paymentHistory)?d.paymentHistory:[]).forEach(h=>{
-          const amount=money(h&&h.amount);
-          if(amount<=0)return;
+          const amount=money(h&&h.amount); if(amount<=0)return;
           const key=String(h.groupId||'')+'|'+String(h.date||'')+'|'+String(amount);
           if(!historyMap.has(key))historyMap.set(key,{...h,amount});
         });
       });
-      // لو لم يعد هناك سجل دين صالح، استرجع تاريخ التحصيل من سجل الفاتورة نفسه.
-      // ده يمنع ضياع التحصيلات عند تعديل فاتورة كانت مسددة بالكامل ثم رفع إجماليها.
       if(historyMap.size===0){
         updatedBatch.forEach(line=>{
           (Array.isArray(line.collectionHistory)?line.collectionHistory:[]).forEach(h=>{
-            const amount=money(h&&h.amount);
-            if(amount<=0)return;
+            const amount=money(h&&h.amount); if(amount<=0)return;
             const key=String(h.groupId||'')+'|'+String(h.date||'')+'|'+String(amount);
             if(!historyMap.has(key))historyMap.set(key,{...h,amount});
           });
@@ -4795,11 +4797,12 @@ function saveSaleEdit(id){
       const preservedHistory=Array.from(historyMap.values()).sort((a,b)=>String(a.date||'').localeCompare(String(b.date||'')));
       debts.forEach(d=>Store.delete('debts',d.id));
 
-      // amount = أصل الدين بعد الدفعة الأولى، وpaidAmount = التحصيلات اللاحقة فقط.
-      // لا نضع remaining في amount حتى لا يتكرر خصم التحصيلات.
-      const newDebtAmount=money(Math.max(0,newTotal-oldInitialPaid));
+      // الدين الجديد = إجمالي الفاتورة، والمدفوع = الدفعة الأولى + التحصيلات اللاحقة.
       const historyTotal=money(preservedHistory.reduce((n,h)=>n+money(h.amount),0));
-      const preservedCollections=money(Math.min(oldCollections,newDebtAmount,historyTotal||oldCollections));
+      const preservedCollections=money(Math.min(Math.max(0,newTotal-oldInitialPaid),historyTotal));
+      const firstPaid=money(Math.min(newTotal,oldInitialPaid));
+      const totalPaid=money(Math.min(newTotal,firstPaid+preservedCollections));
+      const newDebtRemaining=money(Math.max(0,newTotal-totalPaid));
       const trimmedHistory=[];
       let historyLeft=preservedCollections;
       for(const h of preservedHistory){
@@ -4808,8 +4811,7 @@ function saveSaleEdit(id){
         if(take>0)trimmedHistory.push({...h,amount:take});
         historyLeft=money(historyLeft-take);
       }
-      const newDebtRemaining=money(Math.max(0,newDebtAmount-preservedCollections));
-      if(newDebtAmount>0){
+      if(newTotal>0 && (original.paymentMethod==='credit'||oldPaid>0)){
         Store.add('debts',{
           ...base,
           saleBatchId:batchId,
@@ -4818,8 +4820,8 @@ function saveSaleEdit(id){
           date:document.getElementById('esDate').value||original.date||today(),
           person:customerName||original.customerName||'عميل عادي',
           type:'لنا',
-          amount:newDebtAmount,
-          paidAmount:preservedCollections,
+          amount:newTotal,
+          paidAmount:totalPaid,
           paymentHistory:trimmedHistory,
           debtVersion:2,
           paid:newDebtRemaining<=0,
@@ -5294,6 +5296,15 @@ function getCashboxData(){
       let initialPaid;
       if(Object.prototype.hasOwnProperty.call(first,'initialPaid')){
         initialPaid=Math.min(total,Math.max(0,Number(first.initialPaid)||0));
+        // إذا كانت الدفعة الأولى قد ضاعت من سجل المبيعات بعد تعديل قديم، نستعيدها من الدين:
+        // paidAmount = الدفعة الأولى + التحصيلات اللاحقة.
+        if(isCredit && initialPaid<=0){
+          const debt=(cashboxList('debts')||[]).find(d=>d&&d.source==='sale'&&d.saleBatchId&&String(d.saleBatchId)===String(first.saleBatchId||''));
+          if(debt){
+            const later=Array.isArray(debt.paymentHistory)?debt.paymentHistory.reduce((n,h)=>n+cashboxNum(h&&h.amount),0):0;
+            initialPaid=Math.min(total,Math.max(0,Number(debt.paidAmount||0)-later));
+          }
+        }
       }else if(isCash){
         // توافق مع الفواتير القديمة: الفاتورة النقدية القديمة كانت تسجل كامل قيمتها نقدًا.
         initialPaid=Object.prototype.hasOwnProperty.call(first,'paid')?Math.min(total,Math.max(0,Number(first.paid)||0)):total;
@@ -7645,7 +7656,20 @@ if ('serviceWorker' in navigator) {
     inv.lines.forEach((s,i)=>{const input=document.querySelector(`[data-return-line="${i}"]`);const r=Math.min(money(s.qty),Math.max(0,money(input?.value)));if(r<=0)return;changed=true;const ratio=s.qty?Math.min(1,r/money(s.qty)):1;refund+=money(s.total)*ratio;const p=Store.get('products').find(x=>String(x.id)===String(s.productId));if(p)Store.update('products',p.id,{qty:money(p.qty)+r});const newQty=Math.max(0,money(s.qty)-r);const newTotal=Math.max(0,money(s.total)-money(s.total)*ratio);const newProfit=Math.max(0,money(s.profit)-money(s.profit)*ratio);Store.update('sales',s.id,{qty:newQty,packages:s.weight?newQty/(money(s.weight)||1):newQty,total:newTotal,profit:newProfit,returnedQty:money(s.returnedQty)+r,returnedAmount:money(s.returnedAmount)+money(s.total)*ratio});});
     if(!changed)return showToast('حدد كمية المرتجع أولًا','warning');
     const updated=findInvoice(key);const newTotal=updated?updated.total:Math.max(0,inv.total-refund);const paid=Math.min(inv.paid,newTotal),remaining=Math.max(0,newTotal-paid);
-    if(inv.saleBatchId){const batch=allSales().filter(s=>s.saleBatchId===inv.saleBatchId);batch.forEach(s=>Store.update('sales',s.id,{paid,remaining}));(Store.get('debts')||[]).filter(d=>d.saleBatchId===inv.saleBatchId&&d.source==='sale').forEach(d=>Store.delete('debts',d.id));if(remaining>0)Store.add('debts',{saleBatchId:inv.saleBatchId,invoiceNo:inv.invoiceNo,date:inv.date,person:inv.customerName,type:'لنا',amount:remaining,due:'',note:`آجل بعد مرتجع ${inv.invoiceNo}`,paid:false,source:'sale',saleTotal:newTotal,paidAmount:0});}
+    if(inv.saleBatchId){
+      const batch=allSales().filter(s=>s.saleBatchId===inv.saleBatchId);
+      batch.forEach(s=>Store.update('sales',s.id,{paid,remaining}));
+      const oldDebts=(Store.get('debts')||[]).filter(d=>d.saleBatchId===inv.saleBatchId&&d.source==='sale'&&d.type==='لنا');
+      const oldDebt=oldDebts[0]||{};
+      const history=(Array.isArray(oldDebt.paymentHistory)?oldDebt.paymentHistory:[]).map(h=>({...h,amount:money(h.amount)})).filter(h=>h.amount>0);
+      const laterPaid=money(history.reduce((n,h)=>n+h.amount,0));
+      const oldInitial=Math.max(0,Number(inv.lines?.[0]?.initialPaid||0));
+      const totalPaid=money(Math.min(newTotal,oldInitial+laterPaid));
+      oldDebts.forEach(d=>Store.delete('debts',d.id));
+      if(newTotal>0 && (inv.paymentMethod==='credit'||oldDebt.id)){
+        Store.add('debts',{...oldDebt,saleBatchId:inv.saleBatchId,invoiceNo:inv.invoiceNo,date:inv.date,person:inv.customerName,type:'لنا',amount:newTotal,paidAmount:totalPaid,paymentHistory:history,debtVersion:2,paid:totalPaid>=newTotal-0.0001,source:'sale',saleTotal:newTotal,note:`آجل بعد مرتجع ${inv.invoiceNo}`});
+      }
+    }
     closeIfOpen();showToast('✅ تم تسجيل المرتجع '+fmt(refund)+' وتحديث المخزون','success');renderSalesTable();
   };
 
