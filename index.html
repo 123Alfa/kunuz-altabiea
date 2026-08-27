@@ -4685,62 +4685,126 @@ function updateEditSalePrice(){
 }
 
 function saveSaleEdit(id){
-  const sales=Store.get('sales');
-  const original=sales.find(s=>s.id===id);
+  const sales=Store.get('sales')||[];
+  const original=sales.find(s=>String(s.id)===String(id));
   if(!original)return;
 
   const pid=document.getElementById('esProduct').value;
-  const qty=parseFloat(document.getElementById('esQty').value)||0;
-  const price=parseFloat(document.getElementById('esPrice').value)||0;
-  const cost=parseFloat(document.getElementById('esCost').value)||0;
-  const discountPct=parseFloat(document.getElementById('esDiscount').value)||0;
-
+  const qty=Number(document.getElementById('esQty').value)||0;
+  const price=Number(document.getElementById('esPrice').value)||0;
+  const cost=Number(document.getElementById('esCost').value)||0;
+  const discountPct=Math.max(0,Math.min(100,Number(document.getElementById('esDiscount').value)||0));
   if(!pid||qty<=0||price<=0)return showToast('أكمل البيانات','warning');
 
-  const product=Store.get('products').find(p=>p.id===pid);
-  if(!product)return;
+  const products=Store.get('products')||[];
+  const newProduct=products.find(p=>String(p.id)===String(pid));
+  if(!newProduct)return showToast('الصنف غير موجود','error');
 
-  // Restore original quantity
-  if(original.productId){
-    const origProduct=Store.get('products').find(p=>p.id===original.productId);
-    if(origProduct)Store.update('products',original.productId,{qty:(origProduct.qty||0)+original.qty});
+  const batchId=original.saleBatchId||'';
+  const batch=batchId?sales.filter(s=>String(s.saleBatchId)===String(batchId)):[original];
+  const oldTotal=batch.reduce((n,s)=>n+Number(s.total||0),0);
+  const oldPaid=Math.max(0,Number(original.paid||0));
+  const oldInitialPaid=Math.max(0,Number(original.initialPaid||0));
+  const oldCollections=Math.max(0,oldPaid-oldInitialPaid);
+
+  // Snapshot everything affected so a failed edit cannot leave stock/sales/debts inconsistent.
+  const snapshot={
+    products:localStorage.getItem('bm_products'),
+    sales:localStorage.getItem('bm_sales'),
+    debts:localStorage.getItem('bm_debts'),
+    customers:localStorage.getItem('bm_customers')
+  };
+  try{
+    // Restore the original stock first, then reserve the new quantity.
+    if(original.productId){
+      const oldProduct=products.find(p=>String(p.id)===String(original.productId));
+      if(oldProduct)Store.update('products',oldProduct.id,{qty:Number(oldProduct.qty||0)+Number(original.qty||0)});
+    }
+    const currentProduct=(Store.get('products')||[]).find(p=>String(p.id)===String(pid));
+    if(!currentProduct)throw new Error('NEW_PRODUCT_NOT_FOUND');
+    if(Number(currentProduct.qty||0)+1e-9<qty){
+      throw new Error('INSUFFICIENT_STOCK');
+    }
+    Store.update('products',currentProduct.id,{qty:Number(currentProduct.qty||0)-qty});
+
+    const discountedPrice=money(price*(1-discountPct/100));
+    const total=money(discountedPrice*qty);
+    const profit=money((discountedPrice-cost)*qty);
+    const customerId=document.getElementById('esCustomer').value||'';
+    const customCustomerName=(document.getElementById('esCustomCustomer')?.value||'').trim();
+    const customerName=customerId?
+      ((Store.get('customers')||[]).find(c=>String(c.id)===String(customerId))?.name||''):
+      (customCustomerName||'عميل عادي');
+
+    Store.update('sales',original.id,{
+      date:document.getElementById('esDate').value||today(),
+      productId:pid,
+      productName:newProduct.name,
+      customerId:customerId||null,
+      customerName,
+      type:document.getElementById('esType').value,
+      qty,
+      price:money(price),
+      cost:money(cost),
+      discount:discountPct,
+      discountedPrice,
+      total,
+      profit,
+      note:document.getElementById('esNote').value
+    });
+
+    // If this is part of an invoice, rebuild its financial totals from the whole batch.
+    if(batchId){
+      const updatedBatch=(Store.get('sales')||[]).filter(s=>String(s.saleBatchId)===String(batchId));
+      const newTotal=money(updatedBatch.reduce((n,s)=>n+Number(s.total||0),0));
+      const paid=money(Math.min(oldPaid,newTotal));
+      const remaining=money(Math.max(0,newTotal-paid));
+      updatedBatch.forEach((line,i)=>Store.update('sales',line.id,{
+        paid,
+        remaining,
+        // Keep the original first-payment amount stable; later collections remain history entries.
+        initialPaid:i===0?money(Math.min(oldInitialPaid,paid)):0
+      }));
+
+      const debts=(Store.get('debts')||[]).filter(d=>String(d.saleBatchId)===String(batchId)&&d.source==='sale'&&d.type==='لنا');
+      debts.forEach(d=>Store.delete('debts',d.id));
+      if(remaining>0){
+        const base=debts[0]||{};
+        const paidFromCollections=money(Math.min(remaining+oldCollections,Math.max(0,oldCollections)));
+        Store.add('debts',{
+          ...base,
+          saleBatchId:batchId,
+          invoiceNo:original.invoiceNo,
+          customerId:customerId||original.customerId||null,
+          date:document.getElementById('esDate').value||original.date||today(),
+          person:customerName||original.customerName||'عميل عادي',
+          type:'لنا',
+          amount:remaining,
+          paidAmount:paidFromCollections,
+          paymentHistory:Array.isArray(base.paymentHistory)?base.paymentHistory:[],
+          debtVersion:2,
+          paid:remaining<=0,
+          source:'sale',
+          saleTotal:newTotal,
+          note:`آجل من الفاتورة ${original.invoiceNo||''}`
+        });
+      }
+    }
+
+    closeModal();
+    showToast('✅ تم تعديل الفاتورة وتحديث المخزون والدين المرتبط بها','success');
+    renderSalesPage(document.getElementById('contentArea'));
+  }catch(error){
+    ['products','sales','debts','customers'].forEach(k=>{
+      try{
+        const raw=snapshot[k];
+        if(raw===null)localStorage.removeItem('bm_'+k);else localStorage.setItem('bm_'+k,raw);
+      }catch(e){}
+    });
+    if(error.message==='INSUFFICIENT_STOCK')showToast('❌ الكمية المطلوبة غير متاحة بعد استرجاع الكمية القديمة','warning');
+    else {console.error('فشل تعديل البيع وتم التراجع:',error);showToast('❌ تعذر تعديل الفاتورة — تم التراجع عن العملية','error');}
   }
-
-  // Check availability
-  const currentProduct=Store.get('products').find(p=>p.id===pid);
-  if((currentProduct.qty||0)<qty)return showToast('الكمية غير متوفرة! المتاح: '+formatProductQty(currentProduct, currentProduct.qty)+' '+currentProduct.unit,'warning');
-
-  // Deduct new quantity
-  Store.update('products',pid,{qty:(currentProduct.qty||0)-qty});
-
-  const discountedPrice=price*(1-discountPct/100);
-  const total=discountedPrice*qty;
-  const profit=(discountedPrice-cost)*qty;
-
-  const customerId=document.getElementById('esCustomer').value;
-  const customCustomerName=(document.getElementById('esCustomCustomer')?.value||'').trim();
-  const customerName=customerId?(Store.get('customers').find(c=>c.id===customerId)?.name||''):(customCustomerName||'عميل عادي');
-
-  Store.update('sales',id,{
-    date:document.getElementById('esDate').value||today(),
-    productId:pid,
-    productName:product.name,
-    customerId:customerId||null,
-    customerName:customerName,
-    type:document.getElementById('esType').value,
-    qty,
-    price,
-    cost,
-    discount:discountPct,
-    discountedPrice,
-    total,
-    profit,
-    note:document.getElementById('esNote').value
-  });
-
-  closeModal();showToast('✅ تم التعديل');renderSalesPage(document.getElementById('contentArea'));
 }
-
 
 function addSale(){
   const pid=document.getElementById('sProduct').value;
