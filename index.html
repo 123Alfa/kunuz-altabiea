@@ -4211,7 +4211,7 @@ function checkoutPOS(){
       const itemDiscount=safeDiscount*ratio;
       const itemTax=tax*ratio;
       const itemTotal=Math.max(0,serviceTotal-itemDiscount+itemTax);
-      Store.add('sales',{saleBatchId,invoiceNo,invoiceSeq,date:invoiceDate,time:saleTime,productId:null,productName:item.name,customerId:customerId||null,customerName,type,qty:item.qty,packages:item.qty,weight:1,unitPrice:Number(item.price||0),price:Number(item.price||0),cost:0,discount:serviceTotal?((itemDiscount/serviceTotal)*100):0,discountAmount:itemDiscount,taxRate,taxAmount:itemTax,discountedPrice:Number(item.price||0),total:itemTotal,profit:itemTotal,paymentMethod:method,paid,remaining,isWeightSale:false,sellUnit:String(item.unit||'خدمة'),note:note||'خدمة من الكاشير'});
+      Store.add('sales',{saleBatchId,invoiceNo,invoiceSeq,date:invoiceDate,time:saleTime,productId:null,productName:item.name,customerId:customerId||null,customerName,type,qty:item.qty,packages:item.qty,weight:1,unitPrice:Number(item.price||0),price:Number(item.price||0),cost:0,discount:serviceTotal?((itemDiscount/serviceTotal)*100):0,discountAmount:itemDiscount,taxRate,taxAmount:itemTax,discountedPrice:Number(item.price||0),total:itemTotal,profit:itemTotal,paymentMethod:method,paid,remaining,initialPaid:paid,collectionHistory:[],isWeightSale:false,sellUnit:String(item.unit||'خدمة'),note:note||'خدمة من الكاشير'});
       return;
     }
     const p=products.find(x=>String(x.id)===String(item.id)); if(!p)return;
@@ -4224,7 +4224,7 @@ function checkoutPOS(){
     const profit=(effectivePackPrice-(costKg*weight))*packs;
     const newQty=Math.max(0,Number(p.qty||0)-qtyKg);
     Store.update('products',p.id,{qty:newQty});
-    Store.add('sales',{saleBatchId,invoiceNo,invoiceSeq,date:invoiceDate,time:saleTime,productId:p.id,productName:p.name,customerId:customerId||null,customerName,type,qty:qtyKg,packages:packs,weight,unitPrice:price,price:effectivePackPrice,cost:costKg*weight,discount:price?((itemDiscount/gross)*100):0,discountAmount:itemDiscount,taxRate,taxAmount:itemTax,discountedPrice:effectivePackPrice,total:itemTotal,profit,paymentMethod:method,paid,remaining,isWeightSale:isKgProduct(p),sellUnit:isKgProduct(p)?'كجم':String(p.unit||'علبة'),note:note||`بيع من الكاشير — ${saleQuantityLabel(p,packs,weight)}${method==='credit'?' — آجل':''}`});
+    Store.add('sales',{saleBatchId,invoiceNo,invoiceSeq,date:invoiceDate,time:saleTime,productId:p.id,productName:p.name,customerId:customerId||null,customerName,type,qty:qtyKg,packages:packs,weight,unitPrice:price,price:effectivePackPrice,cost:costKg*weight,discount:price?((itemDiscount/gross)*100):0,discountAmount:itemDiscount,taxRate,taxAmount:itemTax,discountedPrice:effectivePackPrice,total:itemTotal,profit,paymentMethod:method,paid,remaining,initialPaid:paid,collectionHistory:[],isWeightSale:isKgProduct(p),sellUnit:isKgProduct(p)?'كجم':String(p.unit||'علبة'),note:note||`بيع من الكاشير — ${saleQuantityLabel(p,packs,weight)}${method==='credit'?' — آجل':''}`});
   });
   if(customerId){const customers=Store.get('customers');const i=customers.findIndex(c=>c.id===customerId);if(i>=0){customers[i].points=(customers[i].points||0)+Math.floor(total/10);customers[i].totalSpent=(customers[i].totalSpent||0)+total;Store.set('customers',customers);}}
   if(method==='credit'&&remaining>0){Store.add('debts',{saleBatchId,invoiceNo,sourceSaleId:null,customerId:customerId||null,date:invoiceDate,person:customerName,type:'لنا',amount:remaining,paidAmount:0,paymentHistory:[],debtVersion:2,due:document.getElementById('posDueDate')?.value||'',note:`آجل من الفاتورة ${invoiceNo}${customerId?' — عميل مسجل':''}`,paid:false,source:'sale',saleTotal:total});}
@@ -4909,22 +4909,34 @@ function getCashboxData(){
       const first=lines[0]||{};
       const method=String(first.paymentMethod||'cash').toLowerCase();
       const total=lines.reduce((n,x)=>n+cashboxNum(x&&x.total),0);
-      // الخزنة تسجل النقد الذي دخل فعليًا، وليس إجمالي الفاتورة.
-      // في الفاتورة الآجلة قد يوجد دفع جزئي وقت البيع؛ هذا المبلغ يدخل الخزنة فورًا.
-      // التحويل والبطاقة لا يدخلان الخزنة النقدية.
-      let cashReceived=0;
-      if(method==='cash'||method==='نقدي'||method==='نقد'){
-        // الفواتير القديمة قد لا تحتوي على paid؛ عندها نعتبر الفاتورة النقدية مدفوعة بالكامل.
-        const hasPaid=Object.prototype.hasOwnProperty.call(first,'paid');
-        cashReceived=hasPaid?Math.min(total,Math.max(0,Number(first.paid)||0)):total;
-      }else if(method==='credit'||method==='آجل'){
-        cashReceived=Math.min(total,Math.max(0,Number(first.paid)||0));
+      const isCash=method==='cash'||method==='نقدي'||method==='نقد';
+      const isCredit=method==='credit'||method==='آجل';
+      // مهم: paid في سجل المبيعات هو الرصيد المدفوع التراكمي للفواتير، وليس مبلغًا جديدًا دخل الخزنة.
+      // لذلك لا نستخدمه مباشرة بعد التحصيلات اللاحقة؛ نستخدم initialPaid للتحصيل وقت إنشاء الفاتورة،
+      // وcollectionHistory للتحصيلات التي تمت لاحقًا من سجل المبيعات.
+      let initialPaid;
+      if(Object.prototype.hasOwnProperty.call(first,'initialPaid')){
+        initialPaid=Math.min(total,Math.max(0,Number(first.initialPaid)||0));
+      }else if(isCash){
+        // توافق مع الفواتير القديمة: الفاتورة النقدية القديمة كانت تسجل كامل قيمتها نقدًا.
+        initialPaid=Object.prototype.hasOwnProperty.call(first,'paid')?Math.min(total,Math.max(0,Number(first.paid)||0)):total;
+      }else if(isCredit){
+        // للفواتير الآجلة القديمة، يمكن استنتاج الدفعة الأولى من الدين الأصلي إن كان لا يزال موجودًا.
+        const debt=(cashboxList('debts')||[]).find(d=>d&&d.source==='sale'&&d.saleBatchId&&String(d.saleBatchId)===String(first.saleBatchId||''));
+        initialPaid=debt&&Object.prototype.hasOwnProperty.call(debt,'saleTotal')?Math.min(total,Math.max(0,Number(debt.saleTotal)-Number(debt.amount||0))):0;
+      }else initialPaid=0;
+      if((isCash||isCredit)&&initialPaid>0){
+        const title=isCredit?'بيع آجل — تحصيل مقدم':'بيع نقدي';
+        const detail='فاتورة '+String(first.invoiceSeq||first.invoiceNo||first.id||'')+' • '+String(first.customerName||'عميل عادي')+(isCredit?' • إجمالي '+fmt(total):'');
+        movements.push({date:String(first.date||'').slice(0,10),time:String(first.time||'').slice(0,5),kind:'in',amount:initialPaid,title,detail,icon:'fa-cart-shopping',ref:(first.saleBatchId||first.id)+'-initial'});
       }
-      if(cashReceived>0){
-        const title=(method==='credit'||method==='آجل')?'بيع آجل — تحصيل مقدم':'بيع نقدي';
-        const detail='فاتورة '+String(first.invoiceSeq||first.invoiceNo||first.id||'')+' • '+String(first.customerName||'عميل عادي')+(method==='credit'||method==='آجل'?' • إجمالي '+fmt(total):'');
-        movements.push({date:String(first.date||'').slice(0,10),time:String(first.time||'').slice(0,5),kind:'in',amount:cashReceived,title,detail,icon:'fa-cart-shopping',ref:first.saleBatchId||first.id});
-      }
+      // تحصيلات تمت من سجل المبيعات: كل دفعة تظهر كمقبوض مستقل بالمبلغ والوقت الحقيقيين.
+      const collections=Array.isArray(first.collectionHistory)?first.collectionHistory:[];
+      collections.forEach((h,i)=>{
+        const amount=cashboxNum(h&&h.amount); if(!amount)return;
+        const dt=String(h&&h.date||'');
+        movements.push({date:dt.slice(0,10)||String(first.date||'').slice(0,10),time:cairoTimeFromStored(dt),kind:'in',amount,title:'تحصيل من عميل',detail:String(first.customerName||'عميل عادي')+' • فاتورة '+String(first.invoiceSeq||first.invoiceNo||first.id||''),icon:'fa-hand-holding-dollar',ref:String(first.saleBatchId||first.id)+'-collection-'+i});
+      });
     });
     cashboxList('purchases').forEach(p=>{
       const paid=cashboxNum(p&&p.paid);
@@ -5298,6 +5310,19 @@ function payGroupDebtFull(encodedPerson,type){
   applyGroupDebtPayment(person,type,remaining,true);
 }
 
+
+function syncSaleBatchFromDebt(d, paidAfter){
+  if(!d || d.type!=='لنا' || d.source!=='sale' || !d.saleBatchId)return;
+  const sales=Store.get('sales')||[];
+  const batch=sales.filter(s=>String(s.saleBatchId||'')===String(d.saleBatchId));
+  if(!batch.length)return;
+  const batchTotal=batch.reduce((n,s)=>n+Number(s.total||0),0);
+  const basePaid=Math.max(0,Number(d.saleTotal||batchTotal)-Number(d.amount||0));
+  const paid=Math.min(batchTotal,Math.max(0,basePaid+Number(paidAfter||0)));
+  const remaining=Math.max(0,batchTotal-paid);
+  batch.forEach(s=>Store.update('sales',s.id,{paid,remaining}));
+}
+
 function applyGroupDebtPayment(person,type,amount,isFull){
   const debts=Store.get('debts')||[];
   const items=getDebtGroup(person,type);
@@ -5330,6 +5355,7 @@ function applyGroupDebtPayment(person,type,amount,isFull){
       debtVersion:2,
       lastPaymentAt:now
     });
+    syncSaleBatchFromDebt(d,paidAfter);
     left-=pay;
   }
 
@@ -5358,6 +5384,7 @@ function undoGroupDebtPayment(encodedPerson,type,groupId){
         lastPaymentAt:remainingHistory.length?remainingHistory[remainingHistory.length-1].date:null,
         debtVersion:2
       });
+      syncSaleBatchFromDebt(d,paidAfter);
       changed++;
     });
 
@@ -5394,26 +5421,34 @@ function payDebtPart(id,amount){
   if(amount<=0)return showToast('أدخل مبلغ السداد','warning');
   if(amount>remaining+0.0001)return showToast('مبلغ السداد أكبر من المتبقي','warning');
 
+  const isSaleDebt=d.type==='لنا' && d.source==='sale' && d.saleBatchId;
   const isLegacySource=(d.debtVersion!==2&&(d.source==='purchase'||d.source==='sale'));
   const paidBefore=isLegacySource?0:Math.max(0,Number(d.paidAmount||0));
   const paidAfter=paidBefore+amount;
   const history=Array.isArray(d.paymentHistory)?d.paymentHistory.slice():[];
-  history.push({amount,date:cairoDateTimeISO(),type:amount>=remaining?'full':'partial'});
+  const now=cairoDateTimeISO();
+  history.push({amount,date:now,type:amount>=remaining?'full':'partial'});
+
+  // مزامنة تحصيل الدين مع الفاتورة الأصلية في سجل المبيعات.
+  syncSaleBatchFromDebt(d,paidAfter);
+
+  const remainingAfter=Math.max(0, remaining-(Number(document.getElementById('debtPayAmount')?.value)||0));
+  const actualRemaining=Math.max(0, remaining-Number(history[history.length-1]?.amount||0));
   Store.update('debts',id,{
     paidAmount:paidAfter,
     paid:paidAfter>=Number(d.amount||0)-0.0001,
     paymentHistory:history,
     debtVersion:2,
-    lastPaymentAt:cairoDateTimeISO()
+    lastPaymentAt:now
   });
   closeModal();
-  const remainingAfter=Math.max(0, remaining-amount);
-  const isFullyPaid=remainingAfter<=0.0001;
+  const isFullyPaid=actualRemaining<=0.0001;
   showToast(isFullyPaid
-    ? `🎉 تم سداد الحساب بالكامل — المتبقي: ${fmt(remainingAfter)}`
-    : `✅ تم تسجيل السداد بنجاح — تم تحصيل ${fmt(amount)} — المتبقي: ${fmt(remainingAfter)}`
+    ? `🎉 تم سداد الحساب بالكامل — المتبقي: ${fmt(actualRemaining)}`
+    : `✅ تم تسجيل السداد بنجاح — تم تحصيل ${fmt(history[history.length-1]?.amount||0)} — المتبقي: ${fmt(actualRemaining)}`
   );
   renderDebtsList();
+  if(typeof renderSalesTable==='function')renderSalesTable();
 }
 
 function undoLastDebtPayment(id){
@@ -5425,6 +5460,7 @@ function undoLastDebtPayment(id){
     const last=history.pop();
     const paidAfter=Math.max(0,Number(d.paidAmount||0)-Number(last.amount||0));
     Store.update('debts',id,{paidAmount:paidAfter,paid:false,paymentHistory:history,lastPaymentAt:history.length?history[history.length-1].date:null,debtVersion:2});
+    syncSaleBatchFromDebt(d,paidAfter);
     showToast('↩️ تم التراجع عن آخر سداد');
   }else if(d.paid){
     Store.update('debts',id,{paid:false,paidAmount:0,paymentHistory:[],lastPaymentAt:null,debtVersion:2});
@@ -7207,7 +7243,7 @@ if ('serviceWorker' in navigator) {
     if(inv.saleBatchId){
       newVals.forEach(v=>Store.update('sales',v.s.id,{paid,remaining}));
       (Store.get('debts')||[]).filter(d=>d.saleBatchId===inv.saleBatchId&&d.source==='sale').forEach(d=>Store.delete('debts',d.id));
-      if(remaining>0)Store.add('debts',{saleBatchId:inv.saleBatchId,invoiceNo:inv.invoiceNo,date:newDate,person:oldCustomerName,type:'لنا',amount:remaining,due:'',note:`آجل من الفاتورة ${inv.invoiceNo}`,paid:false,source:'sale',saleTotal:newTotal,paidAmount:paid});
+      if(remaining>0)Store.add('debts',{saleBatchId:inv.saleBatchId,invoiceNo:inv.invoiceNo,date:newDate,person:oldCustomerName,type:'لنا',amount:remaining,due:'',note:`آجل من الفاتورة ${inv.invoiceNo}`,paid:false,source:'sale',saleTotal:newTotal,paidAmount:0});
     }else{
       Store.update('sales',inv.id,{paid,remaining});
     }
@@ -7227,7 +7263,7 @@ if ('serviceWorker' in navigator) {
     inv.lines.forEach((s,i)=>{const input=document.querySelector(`[data-return-line="${i}"]`);const r=Math.min(money(s.qty),Math.max(0,money(input?.value)));if(r<=0)return;changed=true;const ratio=s.qty?Math.min(1,r/money(s.qty)):1;refund+=money(s.total)*ratio;const p=Store.get('products').find(x=>String(x.id)===String(s.productId));if(p)Store.update('products',p.id,{qty:money(p.qty)+r});const newQty=Math.max(0,money(s.qty)-r);const newTotal=Math.max(0,money(s.total)-money(s.total)*ratio);const newProfit=Math.max(0,money(s.profit)-money(s.profit)*ratio);Store.update('sales',s.id,{qty:newQty,packages:s.weight?newQty/(money(s.weight)||1):newQty,total:newTotal,profit:newProfit,returnedQty:money(s.returnedQty)+r,returnedAmount:money(s.returnedAmount)+money(s.total)*ratio});});
     if(!changed)return showToast('حدد كمية المرتجع أولًا','warning');
     const updated=findInvoice(key);const newTotal=updated?updated.total:Math.max(0,inv.total-refund);const paid=Math.min(inv.paid,newTotal),remaining=Math.max(0,newTotal-paid);
-    if(inv.saleBatchId){const batch=allSales().filter(s=>s.saleBatchId===inv.saleBatchId);batch.forEach(s=>Store.update('sales',s.id,{paid,remaining}));(Store.get('debts')||[]).filter(d=>d.saleBatchId===inv.saleBatchId&&d.source==='sale').forEach(d=>Store.delete('debts',d.id));if(remaining>0)Store.add('debts',{saleBatchId:inv.saleBatchId,invoiceNo:inv.invoiceNo,date:inv.date,person:inv.customerName,type:'لنا',amount:remaining,due:'',note:`آجل بعد مرتجع ${inv.invoiceNo}`,paid:false,source:'sale',saleTotal:newTotal,paidAmount:paid});}
+    if(inv.saleBatchId){const batch=allSales().filter(s=>s.saleBatchId===inv.saleBatchId);batch.forEach(s=>Store.update('sales',s.id,{paid,remaining}));(Store.get('debts')||[]).filter(d=>d.saleBatchId===inv.saleBatchId&&d.source==='sale').forEach(d=>Store.delete('debts',d.id));if(remaining>0)Store.add('debts',{saleBatchId:inv.saleBatchId,invoiceNo:inv.invoiceNo,date:inv.date,person:inv.customerName,type:'لنا',amount:remaining,due:'',note:`آجل بعد مرتجع ${inv.invoiceNo}`,paid:false,source:'sale',saleTotal:newTotal,paidAmount:0});}
     closeIfOpen();showToast('✅ تم تسجيل المرتجع '+fmt(refund)+' وتحديث المخزون','success');renderSalesTable();
   };
 
@@ -7236,7 +7272,30 @@ if ('serviceWorker' in navigator) {
     openModal(`<div class="modal-header"><h2><i class="fas fa-money-bill-wave" style="color:var(--success);margin-left:8px"></i> تحصيل من ${esc(inv.invoiceNo)}</h2><button class="modal-close" onclick="closeModal()">&times;</button></div><div class="collection-pro-box"><small>المتبقي الحالي</small><strong>${fmt(inv.remaining)}</strong><input id="invoiceCollectionAmount" type="number" min="0" max="${inv.remaining}" step="0.01" value="${inv.remaining}"></div><button class="btn btn-success btn-block" onclick="confirmInvoiceCollectionPro('${esc(inv.key)}')"><i class="fas fa-check"></i> تسجيل التحصيل</button>`);
   };
   window.confirmInvoiceCollectionPro=function(key){
-    const inv=findInvoice(key);if(!inv)return;const amount=Math.min(inv.remaining,Math.max(0,money(document.getElementById('invoiceCollectionAmount')?.value)));if(amount<=0)return showToast('أدخل مبلغ التحصيل','warning');const newPaid=inv.paid+amount,newRemaining=Math.max(0,inv.total-newPaid);inv.lines.forEach(s=>Store.update('sales',s.id,{paid:newPaid,remaining:newRemaining}));if(inv.saleBatchId){(Store.get('debts')||[]).filter(d=>d.saleBatchId===inv.saleBatchId&&d.source==='sale').forEach(d=>Store.delete('debts',d.id));if(newRemaining>0)Store.add('debts',{saleBatchId:inv.saleBatchId,invoiceNo:inv.invoiceNo,date:inv.date,person:inv.customerName,type:'لنا',amount:newRemaining,due:'',note:`تحصيل جزئي من ${inv.invoiceNo}`,paid:false,source:'sale',saleTotal:inv.total,paidAmount:newPaid});}closeIfOpen();showToast('✅ تم تسجيل التحصيل '+fmt(amount),'success');renderSalesTable();
+    const inv=findInvoice(key);if(!inv)return;
+    const amount=Math.min(inv.remaining,Math.max(0,money(document.getElementById('invoiceCollectionAmount')?.value)));
+    if(amount<=0)return showToast('أدخل مبلغ التحصيل','warning');
+    const newPaid=inv.paid+amount,newRemaining=Math.max(0,inv.total-newPaid);
+    const now=cairoDateTimeISO();
+    // سجل السداد الجديد في سجل المبيعات بشكل مستقل حتى لا تُحسب كل قيمة paid التراكمية مرة أخرى في الخزنة.
+    const firstLine=inv.lines[0];
+    const existingHistory=Array.isArray(firstLine?.collectionHistory)?firstLine.collectionHistory.slice():[];
+    existingHistory.push({amount,date:now,type:newRemaining<=0?'full':'partial'});
+    inv.lines.forEach((line,i)=>Store.update('sales',line.id,{paid:newPaid,remaining:newRemaining,initialPaid:Object.prototype.hasOwnProperty.call(line,'initialPaid')?line.initialPaid:(i===0?Math.max(0,inv.paid-(Array.isArray(line.collectionHistory)?line.collectionHistory.reduce((n,h)=>n+Number(h.amount||0),0):0)):0),collectionHistory:i===0?existingHistory:(Array.isArray(line.collectionHistory)?line.collectionHistory:[])}));
+    if(inv.saleBatchId){
+      const debts=Store.get('debts')||[];
+      const related=debts.filter(d=>d.saleBatchId===inv.saleBatchId&&d.source==='sale'&&d.type==='لنا');
+      related.forEach(d=>{
+        const debtPaidBefore=Math.max(0,Number(d.paidAmount||0));
+        const debtPaidAfter=Math.min(Number(d.amount||0),debtPaidBefore+amount);
+        const history=Array.isArray(d.paymentHistory)?d.paymentHistory.slice():[];
+        history.push({amount:Math.min(amount,Math.max(0,Number(d.amount||0)-debtPaidBefore)),date:now,type:debtPaidAfter>=Number(d.amount||0)-0.0001?'full':'partial',source:'sales'});
+        Store.update('debts',d.id,{paidAmount:debtPaidAfter,paid:debtPaidAfter>=Number(d.amount||0)-0.0001,paymentHistory:history,debtVersion:2,lastPaymentAt:now});
+      });
+    }
+    closeIfOpen();showToast(newRemaining<=0?`🎉 تم سداد الفاتورة بالكامل — ${fmt(newPaid)}`:`✅ تم تسجيل التحصيل ${fmt(amount)} — المتبقي ${fmt(newRemaining)}`,'success');
+    renderSalesTable();
+    if(typeof renderCashboxData==='function')renderCashboxData();
   };
 
   window.deleteInvoicePro=function(key){const inv=findInvoice(key);if(!inv)return;if(!confirm(`حذف الفاتورة ${inv.invoiceNo} بالكامل؟ سيتم إعادة الكميات للمخزون.`))return;inv.lines.forEach(s=>{const p=Store.get('products').find(x=>String(x.id)===String(s.productId));if(p)Store.update('products',p.id,{qty:money(p.qty)+money(s.qty)});Store.delete('sales',s.id);});if(inv.saleBatchId)(Store.get('debts')||[]).filter(d=>d.saleBatchId===inv.saleBatchId&&d.source==='sale').forEach(d=>Store.delete('debts',d.id));closeIfOpen();showToast('🗑️ تم حذف الفاتورة وإرجاع الكميات للمخزون');renderSalesTable();};
