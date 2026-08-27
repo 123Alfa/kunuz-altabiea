@@ -4768,13 +4768,46 @@ function saveSaleEdit(id){
 
       const debts=(Store.get('debts')||[]).filter(d=>String(d.saleBatchId)===String(batchId)&&d.source==='sale'&&d.type==='لنا');
       const base=debts[0]||{};
-      const preservedHistory=Array.isArray(base.paymentHistory)?base.paymentHistory.slice():[];
+
+      // احفظ كل تاريخ التحصيلات قبل إعادة بناء الدين. لا نعتمد على أول دين فقط،
+      // لأن الدين قد يكون أُنشئ/أُعيد بناؤه أكثر من مرة أثناء تعديلات سابقة.
+      const historyMap=new Map();
+      debts.forEach(d=>{
+        (Array.isArray(d.paymentHistory)?d.paymentHistory:[]).forEach(h=>{
+          const amount=money(h&&h.amount);
+          if(amount<=0)return;
+          const key=String(h.groupId||'')+'|'+String(h.date||'')+'|'+String(amount);
+          if(!historyMap.has(key))historyMap.set(key,{...h,amount});
+        });
+      });
+      // لو لم يعد هناك سجل دين صالح، استرجع تاريخ التحصيل من سجل الفاتورة نفسه.
+      // ده يمنع ضياع التحصيلات عند تعديل فاتورة كانت مسددة بالكامل ثم رفع إجماليها.
+      if(historyMap.size===0){
+        updatedBatch.forEach(line=>{
+          (Array.isArray(line.collectionHistory)?line.collectionHistory:[]).forEach(h=>{
+            const amount=money(h&&h.amount);
+            if(amount<=0)return;
+            const key=String(h.groupId||'')+'|'+String(h.date||'')+'|'+String(amount);
+            if(!historyMap.has(key))historyMap.set(key,{...h,amount});
+          });
+        });
+      }
+      const preservedHistory=Array.from(historyMap.values()).sort((a,b)=>String(a.date||'').localeCompare(String(b.date||'')));
       debts.forEach(d=>Store.delete('debts',d.id));
-      // مهم: amount في سجل الدين هو أصل المبلغ الآجل بعد الدفعة الأولى،
-      // بينما paidAmount هو مجموع التحصيلات اللاحقة. لذلك لا نضع remaining
-      // (الذي يشمل التحصيلات) في amount وإلا سيُخصم التحصيل مرتين.
+
+      // amount = أصل الدين بعد الدفعة الأولى، وpaidAmount = التحصيلات اللاحقة فقط.
+      // لا نضع remaining في amount حتى لا يتكرر خصم التحصيلات.
       const newDebtAmount=money(Math.max(0,newTotal-oldInitialPaid));
-      const preservedCollections=money(Math.min(oldCollections,newDebtAmount));
+      const historyTotal=money(preservedHistory.reduce((n,h)=>n+money(h.amount),0));
+      const preservedCollections=money(Math.min(oldCollections,newDebtAmount,historyTotal||oldCollections));
+      const trimmedHistory=[];
+      let historyLeft=preservedCollections;
+      for(const h of preservedHistory){
+        if(historyLeft<=0)break;
+        const take=money(Math.min(money(h.amount),historyLeft));
+        if(take>0)trimmedHistory.push({...h,amount:take});
+        historyLeft=money(historyLeft-take);
+      }
       const newDebtRemaining=money(Math.max(0,newDebtAmount-preservedCollections));
       if(newDebtAmount>0){
         Store.add('debts',{
@@ -4787,7 +4820,7 @@ function saveSaleEdit(id){
           type:'لنا',
           amount:newDebtAmount,
           paidAmount:preservedCollections,
-          paymentHistory:preservedHistory,
+          paymentHistory:trimmedHistory,
           debtVersion:2,
           paid:newDebtRemaining<=0,
           source:'sale',
