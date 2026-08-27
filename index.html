@@ -4767,10 +4767,16 @@ function saveSaleEdit(id){
       }));
 
       const debts=(Store.get('debts')||[]).filter(d=>String(d.saleBatchId)===String(batchId)&&d.source==='sale'&&d.type==='لنا');
+      const base=debts[0]||{};
+      const preservedHistory=Array.isArray(base.paymentHistory)?base.paymentHistory.slice():[];
       debts.forEach(d=>Store.delete('debts',d.id));
-      if(remaining>0){
-        const base=debts[0]||{};
-        const paidFromCollections=money(Math.min(remaining+oldCollections,Math.max(0,oldCollections)));
+      // مهم: amount في سجل الدين هو أصل المبلغ الآجل بعد الدفعة الأولى،
+      // بينما paidAmount هو مجموع التحصيلات اللاحقة. لذلك لا نضع remaining
+      // (الذي يشمل التحصيلات) في amount وإلا سيُخصم التحصيل مرتين.
+      const newDebtAmount=money(Math.max(0,newTotal-oldInitialPaid));
+      const preservedCollections=money(Math.min(oldCollections,newDebtAmount));
+      const newDebtRemaining=money(Math.max(0,newDebtAmount-preservedCollections));
+      if(newDebtAmount>0){
         Store.add('debts',{
           ...base,
           saleBatchId:batchId,
@@ -4779,11 +4785,11 @@ function saveSaleEdit(id){
           date:document.getElementById('esDate').value||original.date||today(),
           person:customerName||original.customerName||'عميل عادي',
           type:'لنا',
-          amount:remaining,
-          paidAmount:paidFromCollections,
-          paymentHistory:Array.isArray(base.paymentHistory)?base.paymentHistory:[],
+          amount:newDebtAmount,
+          paidAmount:preservedCollections,
+          paymentHistory:preservedHistory,
           debtVersion:2,
-          paid:remaining<=0,
+          paid:newDebtRemaining<=0,
           source:'sale',
           saleTotal:newTotal,
           note:`آجل من الفاتورة ${original.invoiceNo||''}`
