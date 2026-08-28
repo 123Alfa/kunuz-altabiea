@@ -7468,10 +7468,10 @@ window.addEventListener('DOMContentLoaded', () => {
   } else {
     showAuthScreen();
   }
-  // Google Identity Services تعمل داخل الصفحة ولا تحتاج Firebase Auth أو Redirect URI.
+  // تهيئة خدمة Google فقط عند تشغيل البرنامج بدون فتح شاشة Google تلقائيًا.
+  // تسجيل/تجديد جلسة Google يتم فقط عند طلب المستخدم للمزامنة السحابية.
   setTimeout(()=>{
     if(isGoogleDriveReady()) initGoogleDriveClient();
-    if(localStorage.getItem('bm_google_connected')==='1') requestGoogleDriveAccess({silent:true});
   },700);
 });
 async function replaceCloudDataWithLocal() {
