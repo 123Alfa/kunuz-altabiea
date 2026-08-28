@@ -2455,6 +2455,9 @@ function initGoogleDriveClient(){
 
 function requestGoogleDriveAccess(options={}){
   const silent=!!options.silent;
+  // لا نفتح نافذة Google تلقائيًا أثناء تشغيل البرنامج أو المزامنة الدورية.
+  // طلب Google لا يتم إلا من إجراء صريح للمستخدم (ربط/استعادة/نسخ).
+  if(silent) return;
   if(!isGoogleDriveReady()){
     if(!silent){
       showToast('⏳ جاري تحميل خدمة Google، حاول مرة أخرى بعد لحظات','info');
