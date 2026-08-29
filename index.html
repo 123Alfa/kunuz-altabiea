@@ -2351,9 +2351,9 @@ html,body{width:100%;max-width:100%;overflow-x:hidden}
 </div>
 <script>
 // ==================== معلومات الإصدار ====================
-const APP_VERSION='v1.5.73';
+const APP_VERSION='v1.5.75';
 const APP_NAME = "متجري";
-const APP_BUILD_DATE = "28 أغسطس 2026 — نسخة مستقرة مبنية على النسخة العاملة مع الحفاظ على الطباعة";
+const APP_BUILD_DATE = "29 أغسطس 2026 — تثبيت حساب قيمة مرتجع المشتريات بالخزنة";
 
 // =====================================================
 // ☁️ Google Drive — مزامنة تلقائية + نسخة محلية
@@ -2455,9 +2455,6 @@ function initGoogleDriveClient(){
 
 function requestGoogleDriveAccess(options={}){
   const silent=!!options.silent;
-  // لا نفتح نافذة Google تلقائيًا أثناء تشغيل البرنامج أو المزامنة الدورية.
-  // طلب Google لا يتم إلا من إجراء صريح للمستخدم (ربط/استعادة/نسخ).
-  if(silent) return;
   if(!isGoogleDriveReady()){
     if(!silent){
       showToast('⏳ جاري تحميل خدمة Google، حاول مرة أخرى بعد لحظات','info');
@@ -5218,8 +5215,16 @@ function confirmPurchaseReturn(id){
   const originalTotal=money(purchase.total ?? (originalQty*Number(purchase.price||0)));
   const alreadyReturnedAmount=Math.min(originalTotal,Math.max(0,Number(purchase.returnedAmount||0)));
   const availableAmount=Math.max(0,originalTotal-alreadyReturnedAmount);
-  const ratio=availableQty>0?Math.min(1,returnQty/availableQty):1;
-  const returnAmount=money(availableAmount*ratio);
+
+  // قيمة المرتجع تُحسب من الكمية المرتجعة وسعر الوحدة الأصلي مباشرةً.
+  // لا نعتمد على نسبة من "المبلغ المتبقي" حتى لا تنتقل أي قيمة خاطئة
+  // من مرتجع سابق إلى المرتجع التالي.
+  const originalUnitPrice=originalQty>0
+    ? money(originalTotal/originalQty)
+    : money(purchase.price||0);
+  const requestedReturnAmount=money(returnQty*originalUnitPrice);
+  const returnAmount=money(Math.min(availableAmount,requestedReturnAmount));
+
   if(returnAmount<=0)return showToast('قيمة المرتجع غير صالحة','warning');
 
   const debts=Store.get('debts')||[];
@@ -5230,7 +5235,10 @@ function confirmPurchaseReturn(id){
   const debtReduction=money(Math.min(returnAmount,currentDebtRemaining));
   const cashRefund=money(Math.max(0,returnAmount-debtReduction));
 
-  if(!confirm(`تأكيد إرجاع ${formatProductQty(product,returnQty)} ${product.unit||''} من ${purchase.productName||'الصنف'} بقيمة ${fmt(returnAmount)}؟`))return;
+  const confirmDetails=`تأكيد إرجاع ${formatProductQty(product,returnQty)} ${product.unit||''} من ${purchase.productName||'الصنف'} بقيمة ${fmt(returnAmount)}؟\n\n`+
+    `سيُخصم من رصيد المورد: ${fmt(debtReduction)}\n`+
+    `وسيُسترد نقدًا إلى الخزنة: ${fmt(cashRefund)}`;
+  if(!confirm(confirmDetails))return;
 
   const snapshot={
     products:localStorage.getItem('bm_products'),
@@ -5271,12 +5279,15 @@ function confirmPurchaseReturn(id){
 
     const now=cairoDateTimeISO();
     const returnHistory=Array.isArray(purchase.returnHistory)?purchase.returnHistory.slice():[];
+    const returnId='PR-'+Date.now()+'-'+Math.random().toString(36).slice(2,8);
     returnHistory.push({
+      id:returnId,
       date:now,
       qty:returnQty,
       amount:returnAmount,
       debtReduction,
-      cashRefund
+      cashRefund,
+      calculation:'quantity × original unit price'
     });
     Store.update('purchases',purchase.id,{
       returnedQty:newReturnedQty,
@@ -5297,6 +5308,7 @@ function confirmPurchaseReturn(id){
         detail:`المورد ${purchase.supplierName||'بائع/مورد'} • ${purchase.productName||'مشتريات'} • قيمة المرتجع ${fmt(returnAmount)}`,
         icon:'fa-rotate-left',
         source:'purchaseReturn',
+        returnId,
         purchaseId:purchase.id,
         purchaseBatchId:batchId||null
       });
@@ -7471,10 +7483,10 @@ window.addEventListener('DOMContentLoaded', () => {
   } else {
     showAuthScreen();
   }
-  // تهيئة خدمة Google فقط عند تشغيل البرنامج بدون فتح شاشة Google تلقائيًا.
-  // تسجيل/تجديد جلسة Google يتم فقط عند طلب المستخدم للمزامنة السحابية.
+  // Google Identity Services تعمل داخل الصفحة ولا تحتاج Firebase Auth أو Redirect URI.
   setTimeout(()=>{
     if(isGoogleDriveReady()) initGoogleDriveClient();
+    if(localStorage.getItem('bm_google_connected')==='1') requestGoogleDriveAccess({silent:true});
   },700);
 });
 async function replaceCloudDataWithLocal() {
