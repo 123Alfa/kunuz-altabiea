@@ -2353,7 +2353,7 @@ html,body{width:100%;max-width:100%;overflow-x:hidden}
 // ==================== معلومات الإصدار ====================
 const APP_VERSION='v1.5.75';
 const APP_NAME = "متجري";
-const APP_BUILD_DATE = "29 أغسطس 2026 — تثبيت حساب قيمة مرتجع المشتريات بالخزنة";
+const APP_BUILD_DATE = "29 أغسطس 2026 — منع فتح Google تلقائيًا مع الحفاظ على المزامنة";
 
 // =====================================================
 // ☁️ Google Drive — مزامنة تلقائية + نسخة محلية
@@ -2629,15 +2629,10 @@ async function backupToGoogle(options={}){
   const silent=!!options.silent;
   const retrying=!!options.retrying;
   if(!driveAccessTokenValid()){
-    // لا نفقد التغيير: نضعه دائمًا في قائمة الانتظار، ثم نحاول تجديد جلسة Google
-    // ونكرر الرفع تلقائيًا. هذا مهم خصوصًا بعد إغلاق Chrome أو انتهاء Access Token.
+    // لا نفتح Google تلقائيًا. نحافظ على التغيير محليًا ونترك التجديد اليدوي من الإعدادات.
     markCloudSyncPending();
-    if(localStorage.getItem('bm_google_connected')==='1' && navigator.onLine && !retrying){
-      requestGoogleDriveAccess({silent:true});
-      scheduleDriveAutoSyncRetry();
-    }else if(!silent){
-      requestGoogleDriveAccess({prompt:localStorage.getItem('bm_google_connected')?'':'consent'});
-    }
+    updateSyncStatus();
+    if(!silent) showToast('⚠️ انتهت جلسة Google، افتح الإعدادات لتجديد الربط','warning');
     return false;
   }
   if(driveBackupInProgress){
@@ -2688,9 +2683,10 @@ async function backupToGoogle(options={}){
   }catch(e){
     console.error('Google Drive backup failed:',e);
     refreshGoogleBackupStatusUI();
-    if(e.message==='GOOGLE_TOKEN_EXPIRED' && localStorage.getItem('bm_google_connected')==='1' && navigator.onLine && !retrying){
+    if(e.message==='GOOGLE_TOKEN_EXPIRED'){
       markCloudSyncPending();
-      requestGoogleDriveAccess({silent:true});
+      updateSyncStatus();
+      if(!silent) showToast('⚠️ انتهت جلسة Google، افتح الإعدادات لتجديد الربط','warning');
     }else if(!silent){
       if(e.message==='GOOGLE_TOKEN_EXPIRED') showToast('⚠️ انتهت جلسة Google، سيتم تجديدها تلقائيًا عند الإمكان','warning');
       else if(e.message==='GOOGLE_BACKUP_VERIFY_FAILED') showToast('❌ تم الرفع لكن تعذر التحقق من سلامة النسخة. لم نعتبرها نسخة ناجحة.','error');
@@ -2821,41 +2817,30 @@ async function syncFromGoogleIfNewer(options={}){
 
 function scheduleDriveAutoSyncRetry(delay=5000){
   clearTimeout(driveAutoSyncRetryTimer);
-  if(!navigator.onLine || localStorage.getItem('bm_google_connected')!=='1') return;
+  // لا توجد محاولة صامتة لتجديد Google؛ التجديد يتم يدويًا من الإعدادات.
+  if(!navigator.onLine || localStorage.getItem('bm_google_connected')!=='1' || !driveAccessTokenValid()) return;
   driveAutoSyncRetryTimer=setTimeout(()=>{
     if(localStorage.getItem(DRIVE_SYNC_PENDING_KEY)!=='1') return;
-    if(driveBackupInProgress){
-      scheduleDriveAutoSyncRetry(5000);
-      return;
-    }
-    if(driveAccessTokenValid()){
-      driveAutoSyncRetryCount=0;
-      backupToGoogle({silent:true});
-      return;
-    }
-    driveAutoSyncRetryCount=Math.min(driveAutoSyncRetryCount+1,12);
-    requestGoogleDriveAccess({silent:true});
-    // إعادة المحاولة تدريجيًا حتى 60 ثانية كحد أقصى بين المحاولات.
-    const nextDelay=Math.min(5000*Math.max(1,driveAutoSyncRetryCount),60000);
-    scheduleDriveAutoSyncRetry(nextDelay);
+    if(driveBackupInProgress){ scheduleDriveAutoSyncRetry(5000); return; }
+    if(!driveAccessTokenValid()){ updateSyncStatus(); return; }
+    driveAutoSyncRetryCount=0;
+    backupToGoogle({silent:true});
   },delay);
 }
 
 function scheduleDriveBackup(){
   markCloudSyncPending();
   clearTimeout(driveBackupTimer);
-  // الحفظ المحلي فوري. بعد كل تعديل مهم ننتظر قليلًا لتجميع عدة تغييرات،
-  // ثم نرفع تلقائيًا إلى Google إذا كان الحساب متصلًا. لا يحتاج المستخدم أي زر.
   if(!navigator.onLine || localStorage.getItem('bm_google_connected')!=='1') return;
   driveBackupTimer=setTimeout(()=>{
     if(driveBackupInProgress){
       driveBackupPending=true;
-      scheduleDriveAutoSyncRetry(5000);
+      if(driveAccessTokenValid()) scheduleDriveAutoSyncRetry(5000);
       return;
     }
     if(!driveAccessTokenValid()){
-      requestGoogleDriveAccess({silent:true});
-      scheduleDriveAutoSyncRetry(3000);
+      // لا نفتح Google Sign-in تلقائيًا.
+      updateSyncStatus();
       return;
     }
     driveAutoSyncRetryCount=0;
@@ -2865,15 +2850,10 @@ function scheduleDriveBackup(){
 
 function startDriveAutoSyncMonitor(){
   if(driveAutoSyncInterval) return;
-  // فحص دوري أقصر للتغييرات المعلقة؛ يفيد بعد انتهاء التوكن أو رجوع الإنترنت.
   driveAutoSyncInterval=setInterval(()=>{
     if(!navigator.onLine || localStorage.getItem('bm_google_connected')!=='1') return;
     if(driveBackupInProgress) return;
-    if(!driveAccessTokenValid()){
-      requestGoogleDriveAccess({silent:true});
-      scheduleDriveAutoSyncRetry(3000);
-      return;
-    }
+    if(!driveAccessTokenValid()) return;
     driveAutoSyncRetryCount=0;
     if(localStorage.getItem(DRIVE_SYNC_PENDING_KEY)==='1') backupToGoogle({silent:true});
     else syncFromGoogleIfNewer({silent:true});
@@ -2886,8 +2866,7 @@ window.addEventListener('visibilitychange',()=>{
   if(localStorage.getItem(DRIVE_SYNC_PENDING_KEY)==='1'){
     if(driveAccessTokenValid()) setTimeout(()=>backupToGoogle({silent:true}),500);
     else {
-      requestGoogleDriveAccess({silent:true});
-      scheduleDriveAutoSyncRetry(2000);
+      updateSyncStatus();
     }
   }else if(driveAccessTokenValid()){
     setTimeout(()=>syncFromGoogleIfNewer({silent:true}),500);
@@ -3216,11 +3195,10 @@ async function showApp(){
   updateSyncStatus();
   startDriveAutoSyncMonitor();
 
-  // المزامنة السحابية تلقائية: نُجدد توكن Google بصمت عند فتح البرنامج،
-  // ثم نرفع أي تغييرات معلقة دون الحاجة إلى ضغط زر النسخ.
-  if(localStorage.getItem('bm_google_connected')==='1'){
-    if(driveAccessTokenValid()) setTimeout(()=>backupToGoogle({silent:true}),300);
-    else setTimeout(()=>requestGoogleDriveAccess({silent:true}),500);
+  // المزامنة السحابية: لا نفتح Google تلقائيًا عند بدء التشغيل.
+  // نرفع التغييرات المعلقة فقط إذا كان Access Token ما زال صالحًا.
+  if(localStorage.getItem('bm_google_connected')==='1' && driveAccessTokenValid()){
+    setTimeout(()=>backupToGoogle({silent:true}),300);
   }
 }
 
@@ -3247,8 +3225,7 @@ window.addEventListener('online',()=>{
     if(localStorage.getItem(DRIVE_SYNC_PENDING_KEY)==='1'){
       if(driveAccessTokenValid()) setTimeout(()=>backupToGoogle({silent:true}),300);
       else {
-        setTimeout(()=>requestGoogleDriveAccess({silent:true}),500);
-        scheduleDriveAutoSyncRetry(1500);
+        updateSyncStatus();
       }
     }
   }
@@ -5215,16 +5192,8 @@ function confirmPurchaseReturn(id){
   const originalTotal=money(purchase.total ?? (originalQty*Number(purchase.price||0)));
   const alreadyReturnedAmount=Math.min(originalTotal,Math.max(0,Number(purchase.returnedAmount||0)));
   const availableAmount=Math.max(0,originalTotal-alreadyReturnedAmount);
-
-  // قيمة المرتجع تُحسب من الكمية المرتجعة وسعر الوحدة الأصلي مباشرةً.
-  // لا نعتمد على نسبة من "المبلغ المتبقي" حتى لا تنتقل أي قيمة خاطئة
-  // من مرتجع سابق إلى المرتجع التالي.
-  const originalUnitPrice=originalQty>0
-    ? money(originalTotal/originalQty)
-    : money(purchase.price||0);
-  const requestedReturnAmount=money(returnQty*originalUnitPrice);
-  const returnAmount=money(Math.min(availableAmount,requestedReturnAmount));
-
+  const ratio=availableQty>0?Math.min(1,returnQty/availableQty):1;
+  const returnAmount=money(availableAmount*ratio);
   if(returnAmount<=0)return showToast('قيمة المرتجع غير صالحة','warning');
 
   const debts=Store.get('debts')||[];
@@ -5286,8 +5255,7 @@ function confirmPurchaseReturn(id){
       qty:returnQty,
       amount:returnAmount,
       debtReduction,
-      cashRefund,
-      calculation:'quantity × original unit price'
+      cashRefund
     });
     Store.update('purchases',purchase.id,{
       returnedQty:newReturnedQty,
@@ -7483,10 +7451,10 @@ window.addEventListener('DOMContentLoaded', () => {
   } else {
     showAuthScreen();
   }
-  // Google Identity Services تعمل داخل الصفحة ولا تحتاج Firebase Auth أو Redirect URI.
+  // تهيئة Google فقط بدون طلب تسجيل دخول أو تجديد توكن تلقائيًا.
+  // تسجيل الدخول/التجديد يتم فقط من إجراءات المستخدم داخل الإعدادات.
   setTimeout(()=>{
     if(isGoogleDriveReady()) initGoogleDriveClient();
-    if(localStorage.getItem('bm_google_connected')==='1') requestGoogleDriveAccess({silent:true});
   },700);
 });
 async function replaceCloudDataWithLocal() {
