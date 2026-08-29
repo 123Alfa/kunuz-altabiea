@@ -3,13 +3,13 @@
   "short_name": "متجري",
   "description": "نظام إدارة المبيعات والمخزون",
   "start_url": "./",
-  "display": "standalone",
-  "background_color": "#f5f7f5",
-  "theme_color": "#0f766e",
-  "orientation": "portrait",
   "scope": "./",
-  "lang": "ar",
+  "display": "standalone",
+  "orientation": "portrait",
   "dir": "rtl",
+  "lang": "ar",
+  "theme_color": "#0f766e",
+  "background_color": "#f8faf9",
   "icons": [
     {
       "src": "icon-192.png",
