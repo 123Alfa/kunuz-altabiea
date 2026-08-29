@@ -2154,9 +2154,9 @@ input[type="date"].sales-date-filter:focus{
 </div>
 <script>
 // ==================== معلومات الإصدار ====================
-const APP_VERSION='v1.6.5';
+const APP_VERSION='v1.6.7';
 const APP_NAME = "متجري";
-const APP_BUILD_DATE = "30 أغسطس 2026 — منع فتح Google تلقائيًا وتحسين الاستقرار";
+const APP_BUILD_DATE = "30 أغسطس 2026 — إصلاح الكاش وبدء التشغيل ومنع Google التلقائي";
 
 // =====================================================
 // ☁️ Google Drive — مزامنة تلقائية + نسخة محلية
@@ -2245,6 +2245,12 @@ function initGoogleDriveClient(){
 
 function requestGoogleDriveAccess(options={}){
   const silent=!!options.silent;
+  // لا تسمح النسخة الجديدة بأي OAuth صامت/تلقائي عند فتح الصفحة.
+  // Google يُفتح فقط من إجراء صريح من المستخدم (زر ربط Google).
+  if(silent){
+    markCloudSyncPending();
+    return false;
+  }
   // ممنوع فتح/إعادة توجيه Google تلقائيًا.
   // أي تجديد أو ربط لحساب Google يتم فقط بعد ضغط المستخدم على زر Google.
   if(silent){
@@ -2258,8 +2264,8 @@ function requestGoogleDriveAccess(options={}){
       showToast('⏳ جاري تحميل خدمة Google، حاول مرة أخرى بعد لحظات','info');
     }
     clearTimeout(driveAuthRefreshInProgress?null:driveSilentRefreshTimer);
-    driveSilentRefreshTimer=setTimeout(()=>requestGoogleDriveAccess(options),700);
-    return;
+    // لا إعادة محاولة OAuth تلقائيًا. الربط يبدأ فقط من زر المستخدم.
+    return false;
   }
   initGoogleDriveClient();
   if(silent && driveAuthRefreshInProgress) return;
@@ -2479,7 +2485,7 @@ async function backupToGoogle(options={}){
     refreshGoogleBackupStatusUI();
     if(e.message==='GOOGLE_TOKEN_EXPIRED' && localStorage.getItem('bm_google_connected')==='1' && navigator.onLine && !retrying){
       markCloudSyncPending();
-      requestGoogleDriveAccess({silent:true});
+      /* لا تسجيل Google تلقائيًا */
     }else if(!silent){
       if(e.message==='GOOGLE_TOKEN_EXPIRED') showToast('⚠️ انتهت جلسة Google، سيتم تجديدها تلقائيًا عند الإمكان','warning');
       else if(e.message==='GOOGLE_BACKUP_VERIFY_FAILED') showToast('❌ تم الرفع لكن تعذر التحقق من سلامة النسخة. لم نعتبرها نسخة ناجحة.','error');
@@ -2618,7 +2624,6 @@ function scheduleDriveBackup(){
       return;
     }
     if(!driveAccessTokenValid()){
-      requestGoogleDriveAccess({silent:true});
       scheduleDriveAutoSyncRetry(3000);
       return;
     }
@@ -2634,7 +2639,6 @@ function startDriveAutoSyncMonitor(){
     if(localStorage.getItem(DRIVE_SYNC_PENDING_KEY)!=='1') return;
     if(driveBackupInProgress) return;
     if(!driveAccessTokenValid()){
-      requestGoogleDriveAccess({silent:true});
       scheduleDriveAutoSyncRetry(3000);
       return;
     }
@@ -2644,16 +2648,10 @@ function startDriveAutoSyncMonitor(){
 }
 
 window.addEventListener('visibilitychange',()=>{
-  if(document.visibilityState!=='visible') return;
-  if(!navigator.onLine || localStorage.getItem('bm_google_connected')!=='1') return;
-  if(localStorage.getItem(DRIVE_SYNC_PENDING_KEY)==='1'){
-    if(driveAccessTokenValid()) setTimeout(()=>backupToGoogle({silent:true}),500);
-    else {
-      requestGoogleDriveAccess({silent:true});
-      scheduleDriveAutoSyncRetry(2000);
-    }
-  }
+  if(document.visibilityState==='visible') updateSyncStatus();
 });
+
+
 
 function getBackupCollections(){return ['products','sales','purchases','expenses','withdrawals','debts','customers','suppliers','offers','auditLog'];}
 
@@ -2927,9 +2925,9 @@ async function showApp(){
   // إذا كان هناك token صالح داخل الجلسة، يمكن تنفيذ النسخ بصمت.
   // لا تبدأ أي مصادقة Google تلقائيًا عند فتح البرنامج.
   // النسخ السحابي يبدأ تلقائيًا فقط إذا كان هناك access token صالح بالفعل.
-  if(localStorage.getItem('bm_google_connected')==='1' && driveAccessTokenValid()){
-    setTimeout(()=>backupToGoogle({silent:true}),300);
-  }
+  // لا تبدأ مزامنة Google تلقائيًا عند تشغيل البرنامج.
+  // المزامنة السحابية تبدأ فقط بعد ضغط المستخدم على زر Google.
+  // لا مزامنة Google تلقائية عند تشغيل البرنامج.
 }
 
 function updateSyncStatus(){
@@ -2951,15 +2949,7 @@ function updateSyncStatus(){
 
 window.addEventListener('online',()=>{
   updateSyncStatus();
-  if(localStorage.getItem('bm_google_connected')==='1'){
-    if(localStorage.getItem(DRIVE_SYNC_PENDING_KEY)==='1'){
-      if(driveAccessTokenValid()) setTimeout(()=>backupToGoogle({silent:true}),300);
-      else {
-        setTimeout(()=>requestGoogleDriveAccess({silent:true}),500);
-        scheduleDriveAutoSyncRetry(1500);
-      }
-    }
-  }
+  // لا تسجيل/تجديد Google تلقائيًا عند عودة الإنترنت.
 });
 window.addEventListener('offline',updateSyncStatus);
 
@@ -3854,7 +3844,31 @@ function renderSalesPage(container){
     }
     
     // ==================== تهيئة الصفحة ====================
-    window.addEventListener('DOMContentLoaded', () => {
+    window.addEventListener('error',(e)=>{
+  console.error('متجري runtime error:',e.error||e.message);
+  const loading=document.getElementById('loading-screen');
+  if(loading){ loading.classList.add('hidden'); }
+});
+window.addEventListener('unhandledrejection',(e)=>{ console.error('متجري promise error:',e.reason); });
+
+// ==================== تحديث PWA بأمان ====================
+// تسجيل الـService Worker مع منع استخدام نسخة قديمة من sw.js.
+if('serviceWorker' in navigator){
+  navigator.serviceWorker.register('./sw.js',{updateViaCache:'none'})
+    .then(reg=>{ try{ reg.update(); }catch(e){} })
+    .catch(err=>console.warn('تعذر تسجيل Service Worker:',err));
+}
+
+setTimeout(()=>{
+  const loading=document.getElementById('loading-screen');
+  if(loading && !loading.classList.contains('hidden')){
+    console.warn('متجري: تم تجاوز شاشة التحميل الاحتياطية.');
+    loading.classList.add('hidden');
+    if(document.getElementById('auth-screen')) document.getElementById('auth-screen').style.display='flex';
+  }
+},8000);
+
+window.addEventListener('DOMContentLoaded', () => {
       applyAppTheme();
       applyAppIdentity();
       const user = Store.getUser();
