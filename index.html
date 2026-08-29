@@ -2154,9 +2154,9 @@ input[type="date"].sales-date-filter:focus{
 </div>
 <script>
 // ==================== معلومات الإصدار ====================
-const APP_VERSION='v1.5.58';
+const APP_VERSION='v1.6.5';
 const APP_NAME = "متجري";
-const APP_BUILD_DATE = "27 أغسطس 2026 — إصلاحات شاملة للمزامنة والديون والمرتجع";
+const APP_BUILD_DATE = "30 أغسطس 2026 — منع فتح Google تلقائيًا وتحسين الاستقرار";
 
 // =====================================================
 // ☁️ Google Drive — مزامنة تلقائية + نسخة محلية
@@ -2245,6 +2245,14 @@ function initGoogleDriveClient(){
 
 function requestGoogleDriveAccess(options={}){
   const silent=!!options.silent;
+  // ممنوع فتح/إعادة توجيه Google تلقائيًا.
+  // أي تجديد أو ربط لحساب Google يتم فقط بعد ضغط المستخدم على زر Google.
+  if(silent){
+    driveAuthRefreshInProgress=false;
+    window.__silentGoogleAuthRequest=false;
+    markCloudSyncPending();
+    return false;
+  }
   if(!isGoogleDriveReady()){
     if(!silent){
       showToast('⏳ جاري تحميل خدمة Google، حاول مرة أخرى بعد لحظات','info');
@@ -2917,6 +2925,8 @@ async function showApp(){
 
   // لا نفتح Google تلقائيًا عند تشغيل البرنامج؛ تتم المصادقة فقط بطلب المستخدم.
   // إذا كان هناك token صالح داخل الجلسة، يمكن تنفيذ النسخ بصمت.
+  // لا تبدأ أي مصادقة Google تلقائيًا عند فتح البرنامج.
+  // النسخ السحابي يبدأ تلقائيًا فقط إذا كان هناك access token صالح بالفعل.
   if(localStorage.getItem('bm_google_connected')==='1' && driveAccessTokenValid()){
     setTimeout(()=>backupToGoogle({silent:true}),300);
   }
