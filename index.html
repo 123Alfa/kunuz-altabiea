@@ -5389,7 +5389,12 @@ function getCashboxData(){
       // تحصيلات تمت من سجل المبيعات: كل دفعة تظهر كمقبوض مستقل بالمبلغ والوقت الحقيقيين.
       // التحصيلات اللاحقة للفاتورة الآجلة تُقرأ من paymentHistory في سجل الدين.
       // لا نعيد قراءتها من collectionHistory هنا حتى لا تدخل الخزنة مرتين.
-      const linkedSaleDebt=(cashboxList('debts')||[]).some(d=>d&&d.source==='sale'&&d.type==='لنا'&&String(d.saleBatchId||'')===String(first.saleBatchId||''));
+      // وجود دين مرتبط يمنع أي collectionHistory قديم من الظهور في الخزنة؛
+      // المطابقة تكون برقم الدفعة أو رقم الفاتورة حتى مع السجلات القديمة.
+      const linkedSaleDebt=(cashboxList('debts')||[]).some(d=>d&&d.source==='sale'&&d.type==='لنا'&&(
+        (first.saleBatchId && String(d.saleBatchId||'')===String(first.saleBatchId)) ||
+        (first.invoiceNo && String(d.invoiceNo||'')===String(first.invoiceNo))
+      ));
       if(!linkedSaleDebt){
         const collections=Array.isArray(first.collectionHistory)?first.collectionHistory:[];
         collections.forEach((h,i)=>{
@@ -5421,19 +5426,10 @@ function getCashboxData(){
         const dt=String(h&&h.date||'');
         movements.push({date:dt.slice(0,10)||String(d.date||'').slice(0,10),time:cairoTimeFromStored(dt),kind:type,amount,title:type==='in'?'تحصيل من عميل':'سداد لمورد',detail:String(d.person||'حساب')+' • '+(h&&h.type==='full'?'سداد كامل':'سداد جزئي'),icon:type==='in'?'fa-hand-holding-dollar':'fa-money-bill-wave',ref:String(d.id||'')+'-'+i});
       });
-      // توافق آمن مع السجلات القديمة: بعض الديون القديمة كانت تُعلَّم "مسدد"
-      // ويظل paidAmount فيها هو الدفعة الأولى فقط، من غير paymentHistory.
-      // في هذه الحالة نضيف فرق السداد النهائي مرة واحدة فقط، ولا نفعله
-      // إذا كان هناك paymentHistory حتى لا تتكرر الحركة.
-      if(type==='in' && history.length===0 && d.paid===true && d.source==='sale'){
-        const saleTotal=Math.max(0,Number(d.saleTotal||0));
-        const paidAmount=Math.max(0,Number(d.paidAmount||0));
-        const inferred=Math.max(0,saleTotal-paidAmount);
-        if(inferred>0){
-          const dt=String(d.paidAt||d.updatedAt||d.lastPaymentAt||d.date||'');
-          movements.push({date:dt.slice(0,10)||String(d.date||'').slice(0,10),time:cairoTimeFromStored(dt),kind:'in',amount:inferred,title:'تحصيل من عميل',detail:String(d.person||'عميل')+' • سداد نهائي لفاتورة '+String(d.invoiceNo||''),icon:'fa-hand-holding-dollar',ref:String(d.id||'')+'-legacy-final'});
-        }
-      }
+      // مهم: بعض السجلات القديمة كانت تُعلَّم "مسدد" بالخطأ، بينما paidAmount
+      // يمثل الدفعة الأولى فقط وamount يمثل المتبقي. لا نستنتج أي تحصيل إضافي
+      // من paid=true؛ وإلا ستظهر قيمة المتبقي كأنها دخلت الخزنة. التحصيل اللاحق
+      // لا يُسجل هنا إلا إذا كان موجودًا فعليًا داخل paymentHistory.
     });
     // المرتجعات النقدية تُسجل كمدفوعات مستقلة مرة واحدة.
     // لا نحسب returnedAmount من سجل المبيعات حتى لا يتكرر الخصم عند إعادة الرسم.
@@ -5836,14 +5832,13 @@ function reconcileSaleDebtsFromSales(){
     if(!related.length) return;
     const total=Math.max(0,batch.reduce((n,s)=>n+Number(s.total||0),0));
     const initialPaid=Math.max(0,Number(first.initialPaid||0));
-    const salesHistory=Array.isArray(first.collectionHistory)?first.collectionHistory:[];
-    const salesCollected=salesHistory.reduce((n,h)=>n+Math.max(0,Number(h&&h.amount||0)),0);
     related.forEach(d=>{
       const debtHistory=Array.isArray(d.paymentHistory)?d.paymentHistory.filter(h=>Number(h&&h.amount||0)>0):[];
       const debtCollected=debtHistory.reduce((n,h)=>n+Math.max(0,Number(h&&h.amount||0)),0);
-      // نفضّل سجل الدين لأنه هو المصدر المستخدم أيضًا في الخزنة، وإلا نستخدم collectionHistory للفواتير القديمة.
-      const laterPaid=debtCollected>0?debtCollected:salesCollected;
-      const paid=Math.min(total,initialPaid+laterPaid);
+      // عند وجود دين مرتبط بالفاتورة، سجل الدين هو المصدر الموثوق للتحصيلات اللاحقة.
+      // لا نستخدم collectionHistory القديمة هنا، لأنها قد تحتوي على حركة قديمة/مكررة
+      // وتؤدي إلى اعتبار الفاتورة مدفوعة أو إدخال مبلغ غير موجود فعليًا في الخزنة.
+      const paid=Math.min(total,initialPaid+debtCollected);
       const updates={
         amount:total,
         saleTotal:total,
@@ -5851,11 +5846,6 @@ function reconcileSaleDebtsFromSales(){
         paid:paid>=total-0.0001,
         debtVersion:2
       };
-      // لو كانت الفاتورة قديمة والتحصيل موجود في sales فقط، ننقله إلى paymentHistory داخل الدين
-      // من غير إنشاء حركة خزنة جديدة، لأن الخزنة تقرأ هذا السجل نفسه.
-      if(debtCollected<=0 && salesHistory.length){
-        updates.paymentHistory=salesHistory.map(h=>({amount:Math.max(0,Number(h&&h.amount||0)),date:h&&h.date||cairoDateTimeISO(),type:h&&h.type||'partial',source:'sales'})).filter(h=>h.amount>0);
-      }
       Store.update('debts',d.id,updates);
     });
   });
