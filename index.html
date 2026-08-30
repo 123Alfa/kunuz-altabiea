@@ -5389,12 +5389,7 @@ function getCashboxData(){
       // تحصيلات تمت من سجل المبيعات: كل دفعة تظهر كمقبوض مستقل بالمبلغ والوقت الحقيقيين.
       // التحصيلات اللاحقة للفاتورة الآجلة تُقرأ من paymentHistory في سجل الدين.
       // لا نعيد قراءتها من collectionHistory هنا حتى لا تدخل الخزنة مرتين.
-      // وجود دين مرتبط يمنع أي collectionHistory قديم من الظهور في الخزنة؛
-      // المطابقة تكون برقم الدفعة أو رقم الفاتورة حتى مع السجلات القديمة.
-      const linkedSaleDebt=(cashboxList('debts')||[]).some(d=>d&&d.source==='sale'&&d.type==='لنا'&&(
-        (first.saleBatchId && String(d.saleBatchId||'')===String(first.saleBatchId)) ||
-        (first.invoiceNo && String(d.invoiceNo||'')===String(first.invoiceNo))
-      ));
+      const linkedSaleDebt=(cashboxList('debts')||[]).some(d=>d&&d.source==='sale'&&d.type==='لنا'&&String(d.saleBatchId||'')===String(first.saleBatchId||''));
       if(!linkedSaleDebt){
         const collections=Array.isArray(first.collectionHistory)?first.collectionHistory:[];
         collections.forEach((h,i)=>{
@@ -5426,10 +5421,6 @@ function getCashboxData(){
         const dt=String(h&&h.date||'');
         movements.push({date:dt.slice(0,10)||String(d.date||'').slice(0,10),time:cairoTimeFromStored(dt),kind:type,amount,title:type==='in'?'تحصيل من عميل':'سداد لمورد',detail:String(d.person||'حساب')+' • '+(h&&h.type==='full'?'سداد كامل':'سداد جزئي'),icon:type==='in'?'fa-hand-holding-dollar':'fa-money-bill-wave',ref:String(d.id||'')+'-'+i});
       });
-      // مهم: بعض السجلات القديمة كانت تُعلَّم "مسدد" بالخطأ، بينما paidAmount
-      // يمثل الدفعة الأولى فقط وamount يمثل المتبقي. لا نستنتج أي تحصيل إضافي
-      // من paid=true؛ وإلا ستظهر قيمة المتبقي كأنها دخلت الخزنة. التحصيل اللاحق
-      // لا يُسجل هنا إلا إذا كان موجودًا فعليًا داخل paymentHistory.
     });
     // المرتجعات النقدية تُسجل كمدفوعات مستقلة مرة واحدة.
     // لا نحسب returnedAmount من سجل المبيعات حتى لا يتكرر الخصم عند إعادة الرسم.
@@ -5622,7 +5613,6 @@ function addDebt(){
 }
 
 function renderDebtsList(){
-  reconcileSaleDebtsFromSales();
   const allDebts=Store.get('debts')||[];
   const search=(document.getElementById('debtSearch')?.value||'').trim().toLowerCase();
   const type=(document.getElementById('debtTypeFilter')?.value||'');
@@ -5800,64 +5790,14 @@ function payGroupDebtFull(encodedPerson,type){
 }
 
 
-function getDebtTotalAmount(d){
-  if(!d)return 0;
-  if(d.source==='sale' && Number.isFinite(Number(d.saleTotal)) && Number(d.saleTotal)>0) return Math.max(0,Number(d.saleTotal));
-  return Math.max(0,Number(d.amount||0));
-}
-function getDebtPaidAmount(d){
-  if(!d)return 0;
-  return Math.max(0,Number(d.paidAmount||0));
-}
-function getDebtOutstandingAmount(d){
-  if(!d)return 0;
-  return Math.max(0,getDebtTotalAmount(d)-getDebtPaidAmount(d));
-}
-
-// إصلاح آمن لمزامنة ديون فواتير البيع مع الفاتورة نفسها.
-// لا ينشئ أي حركة خزنة جديدة؛ فقط يصحح رصيد الدين اعتمادًا على بيانات الفاتورة والتحصيلات المسجلة.
-function reconcileSaleDebtsFromSales(){
-  const sales=Store.get('sales')||[];
-  const debts=Store.get('debts')||[];
-  const groups=new Map();
-  sales.forEach(s=>{
-    if(!s || !s.saleBatchId) return;
-    const key=String(s.saleBatchId);
-    if(!groups.has(key)) groups.set(key,[]);
-    groups.get(key).push(s);
-  });
-  groups.forEach((batch,saleBatchId)=>{
-    const first=batch[0]||{};
-    const related=debts.filter(d=>d && d.source==='sale' && d.type==='لنا' && String(d.saleBatchId||'')===saleBatchId);
-    if(!related.length) return;
-    const total=Math.max(0,batch.reduce((n,s)=>n+Number(s.total||0),0));
-    const initialPaid=Math.max(0,Number(first.initialPaid||0));
-    related.forEach(d=>{
-      const debtHistory=Array.isArray(d.paymentHistory)?d.paymentHistory.filter(h=>Number(h&&h.amount||0)>0):[];
-      const debtCollected=debtHistory.reduce((n,h)=>n+Math.max(0,Number(h&&h.amount||0)),0);
-      // عند وجود دين مرتبط بالفاتورة، سجل الدين هو المصدر الموثوق للتحصيلات اللاحقة.
-      // لا نستخدم collectionHistory القديمة هنا، لأنها قد تحتوي على حركة قديمة/مكررة
-      // وتؤدي إلى اعتبار الفاتورة مدفوعة أو إدخال مبلغ غير موجود فعليًا في الخزنة.
-      const paid=Math.min(total,initialPaid+debtCollected);
-      const updates={
-        amount:total,
-        saleTotal:total,
-        paidAmount:paid,
-        paid:paid>=total-0.0001,
-        debtVersion:2
-      };
-      Store.update('debts',d.id,updates);
-    });
-  });
-}
-
 function syncSaleBatchFromDebt(d, paidAfter){
   if(!d || d.type!=='لنا' || d.source!=='sale' || !d.saleBatchId)return;
   const sales=Store.get('sales')||[];
   const batch=sales.filter(s=>String(s.saleBatchId||'')===String(d.saleBatchId));
   if(!batch.length)return;
   const batchTotal=batch.reduce((n,s)=>n+Number(s.total||0),0);
-  const paid=Math.min(batchTotal,Math.max(0,Number(paidAfter||0)));
+  const basePaid=Math.max(0,Number(d.saleTotal||batchTotal)-Number(d.amount||0));
+  const paid=Math.min(batchTotal,Math.max(0,basePaid+Number(paidAfter||0)));
   const remaining=Math.max(0,batchTotal-paid);
   batch.forEach(s=>Store.update('sales',s.id,{paid,remaining}));
 }
@@ -5882,13 +5822,14 @@ function applyGroupDebtPayment(person,type,amount,isFull){
     const pay=Math.min(rem,left);
     if(pay<=0)continue;
 
-    const paidBefore=getDebtPaidAmount(d);
+    const isLegacySource=(d.debtVersion!==2&&(d.source==='purchase'||d.source==='sale'));
+    const paidBefore=isLegacySource?0:Math.max(0,Number(d.paidAmount||0));
     const paidAfter=paidBefore+pay;
     const history=Array.isArray(d.paymentHistory)?d.paymentHistory.slice():[];
     history.push({amount:pay,date:now,type:pay>=rem?'full':'partial',groupId});
     Store.update('debts',d.id,{
       paidAmount:paidAfter,
-      paid:paidAfter>=getDebtTotalAmount(d)-0.0001,
+      paid:paidAfter>=Number(d.amount||0)-0.0001,
       paymentHistory:history,
       debtVersion:2,
       lastPaymentAt:now
@@ -5954,12 +5895,14 @@ function payDebtPart(id,amount){
   const debts=Store.get('debts')||[];
   const d=debts.find(x=>x.id===id);
   if(!d)return;
-  const remaining=getDebtOutstandingAmount(d);
+  const remaining=getDebtRemaining(d);
   amount=Number(amount)||0;
   if(amount<=0)return showToast('أدخل مبلغ السداد','warning');
   if(amount>remaining+0.0001)return showToast('مبلغ السداد أكبر من المتبقي','warning');
 
-  const paidBefore=getDebtPaidAmount(d);
+  const isSaleDebt=d.type==='لنا' && d.source==='sale' && d.saleBatchId;
+  const isLegacySource=(d.debtVersion!==2&&(d.source==='purchase'||d.source==='sale'));
+  const paidBefore=isLegacySource?0:Math.max(0,Number(d.paidAmount||0));
   const paidAfter=paidBefore+amount;
   const history=Array.isArray(d.paymentHistory)?d.paymentHistory.slice():[];
   const now=cairoDateTimeISO();
@@ -5968,10 +5911,11 @@ function payDebtPart(id,amount){
   // مزامنة تحصيل الدين مع الفاتورة الأصلية في سجل المبيعات.
   syncSaleBatchFromDebt(d,paidAfter);
 
-  const actualRemaining=Math.max(0, getDebtTotalAmount(d)-paidAfter);
+  const remainingAfter=Math.max(0, remaining-(Number(document.getElementById('debtPayAmount')?.value)||0));
+  const actualRemaining=Math.max(0, remaining-Number(history[history.length-1]?.amount||0));
   Store.update('debts',id,{
     paidAmount:paidAfter,
-    paid:paidAfter>=getDebtTotalAmount(d)-0.0001,
+    paid:paidAfter>=Number(d.amount||0)-0.0001,
     paymentHistory:history,
     debtVersion:2,
     lastPaymentAt:now
@@ -6016,7 +5960,11 @@ function deleteDebt(id){if(!confirm('حذف الدين؟'))return;Store.delete('
 
 function getDebtRemaining(d){
   if(!d)return 0;
-  return getDebtOutstandingAmount(d);
+  if(d.paid)return 0;
+  const amount=Math.max(0,Number(d.amount||0));
+  const isLegacySource=(d.debtVersion!==2&&(d.source==='purchase'||d.source==='sale'));
+  const paidAmount=isLegacySource?0:Math.max(0,Number(d.paidAmount||0));
+  return Math.max(0,amount-paidAmount);
 }
 function normalizeWhatsAppPhone(phone){
   let p=String(phone||'').replace(/[^\d+]/g,'');
@@ -6500,7 +6448,7 @@ function applySupplierPayment(supplierId,amount){
     const paidAfter=paidBefore+pay;
     Store.update('debts',d.id,{
       paidAmount:paidAfter,
-      paid:paidAfter>=getDebtTotalAmount(d)-0.0001,
+      paid:paidAfter>=Number(d.amount||0)-0.0001,
       paymentHistory:history,
       debtVersion:2,
       lastPaymentAt:now
@@ -7449,11 +7397,80 @@ async function applyBundledOriginalDataOnce(){
   }catch(e){ console.error('تعذر تطبيق البيانات الأصلية المدمجة:',e); return false; }
 }
 
+/* v1.7.2 — تصحيح حالة تحصيلات أحمد عطا وإسلام الوحدة الصحية
+   الهدف: إعادة الفواتير لحالة آجل حقيقية عندما لا توجد حركة تحصيل فعلية في الخزنة.
+   يعمل فقط عند اكتشاف الحالة القديمة المحددة، لذلك لا يعيد تصفير أي تحصيل جديد لاحقًا. */
+function restorePendingDebtStateV172(){
+  try{
+    const sales=Store.get('sales')||[];
+    const debts=Store.get('debts')||[];
+    const targets=[
+      {person:'أحمد عطا', seq:'57', invoiceNo:'INV-20260821-947970', total:500, paid:100, remaining:400},
+      {person:'اسلام الوحدة الصحية', seq:'17', invoiceNo:'', total:500, paid:500, remaining:0}
+    ];
+    let changed=false;
+    targets.forEach(target=>{
+      const matches=sales.filter(s=>{
+        const person=String(s.customerName||'').trim();
+        const seq=String(s.invoiceSeq||'');
+        const no=String(s.invoiceNo||'');
+        return person===target.person &&
+          ((target.invoiceNo && no===target.invoiceNo) || seq===target.seq);
+      });
+      if(!matches.length)return;
+      const batchIds=[...new Set(matches.map(s=>String(s.saleBatchId||s.invoiceNo||s.id||'')))].filter(Boolean);
+      batchIds.forEach(batchId=>{
+        const batch=sales.filter(s=>String(s.saleBatchId||s.invoiceNo||s.id||'')===batchId);
+        const total=Math.max(...batch.map(s=>Number(s.total||0)),0);
+        const paid=Math.max(...batch.map(s=>Number(s.paid||0)),0);
+        const remaining=Math.max(...batch.map(s=>Number(s.remaining||0)),0);
+        const isExpectedState=Math.abs(total-target.total)<0.01 &&
+          Math.abs(paid-target.paid)<0.01 && Math.abs(remaining-target.remaining)<0.01;
+        if(!isExpectedState)return;
+        batch.forEach(s=>{
+          Store.update('sales',s.id,{
+            paid:0,
+            remaining:Math.max(0,Number(s.total||0)),
+            initialPaid:0,
+            collectionHistory:[]
+          });
+        });
+        debts.filter(d=>{
+          return d && d.source==='sale' && d.type==='لنا' &&
+            String(d.saleBatchId||d.invoiceNo||'')===batchId;
+        }).forEach(d=>{
+          Store.update('debts',d.id,{
+            amount:total,
+            paidAmount:0,
+            paymentHistory:[],
+            paid:false,
+            debtVersion:2,
+            source:'sale',
+            type:'لنا',
+            person:target.person,
+            saleTotal:total
+          });
+        });
+        changed=true;
+      });
+    });
+    if(changed){
+      try{localStorage.setItem('bm_debt_state_reset_v172','1');}catch(e){}
+      console.log('v1.7.2 debt-state correction applied');
+    }
+    return changed;
+  }catch(e){
+    console.error('تعذر تصحيح حالة ديون أحمد وإسلام:',e);
+    return false;
+  }
+}
+
 window.addEventListener('DOMContentLoaded', async () => {
   applyAppTheme();
   applyAppIdentity();
   try { await initIndexedDBStore(); } catch (e) { console.warn('IndexedDB init:', e); }
   await applyBundledOriginalDataOnce();
+  restorePendingDebtStateV172();
   const user = Store.getUser();
   if (user && !isLockEnabled()) {
     currentUser = user;
@@ -7479,7 +7496,7 @@ async function replaceCloudDataWithLocal() {
 <script>
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', function() {
-    navigator.serviceWorker.register('sw.js?v=1.7.4')
+    navigator.serviceWorker.register('sw.js?v=1.7.0')
       .then(function(registration) {
         registration.update().catch(function(){});
         console.log('SW registered: ', registration.scope);
@@ -8048,16 +8065,13 @@ if ('serviceWorker' in navigator) {
     inv.lines.forEach((line,i)=>Store.update('sales',line.id,{paid:newPaid,remaining:newRemaining,initialPaid:Object.prototype.hasOwnProperty.call(line,'initialPaid')?line.initialPaid:(i===0?Math.max(0,inv.paid-(Array.isArray(line.collectionHistory)?line.collectionHistory.reduce((n,h)=>n+Number(h.amount||0),0):0)):0),collectionHistory:i===0?existingHistory:(Array.isArray(line.collectionHistory)?line.collectionHistory:[])}));
     if(inv.saleBatchId){
       const debts=Store.get('debts')||[];
-      const related=debts.filter(d=>d.source==='sale'&&d.type==='لنا'&&(
-        (inv.saleBatchId&&String(d.saleBatchId||'')===String(inv.saleBatchId)) ||
-        (inv.invoiceNo&&String(d.invoiceNo||'')===String(inv.invoiceNo))
-      ));
+      const related=debts.filter(d=>d.saleBatchId===inv.saleBatchId&&d.source==='sale'&&d.type==='لنا');
       related.forEach(d=>{
-        const debtPaidBefore=getDebtPaidAmount(d);
-        const debtPaidAfter=Math.min(getDebtTotalAmount(d),debtPaidBefore+amount);
+        const debtPaidBefore=Math.max(0,Number(d.paidAmount||0));
+        const debtPaidAfter=Math.min(Number(d.amount||0),debtPaidBefore+amount);
         const history=Array.isArray(d.paymentHistory)?d.paymentHistory.slice():[];
         history.push({amount:Math.min(amount,Math.max(0,Number(d.amount||0)-debtPaidBefore)),date:now,type:debtPaidAfter>=Number(d.amount||0)-0.0001?'full':'partial',source:'sales'});
-        Store.update('debts',d.id,{paidAmount:debtPaidAfter,paid:debtPaidAfter>=getDebtTotalAmount(d)-0.0001,paymentHistory:history,debtVersion:2,lastPaymentAt:now});
+        Store.update('debts',d.id,{paidAmount:debtPaidAfter,paid:debtPaidAfter>=Number(d.amount||0)-0.0001,paymentHistory:history,debtVersion:2,lastPaymentAt:now});
       });
     }
     closeIfOpen();showToast(newRemaining<=0?`🎉 تم سداد الفاتورة بالكامل — ${fmt(newPaid)}`:`✅ تم تسجيل التحصيل ${fmt(amount)} — المتبقي ${fmt(newRemaining)}`,'success');
@@ -8162,7 +8176,7 @@ window.addEventListener('online',()=>{try{if(typeof markCloudSyncPending==='func
 </script>
 
 <script>
-/* v1.7.4 — إصلاح توافق الديون القديمة والخزنة بدون تكرار التحصيل */
+/* v1.7.2 — إصلاح نهائي للمرتجع والخزنة وحذف الفاتورة */
 (function(){
   try{
     const rows=Store.get('returns');
