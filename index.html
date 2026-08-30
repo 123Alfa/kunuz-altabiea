@@ -2353,7 +2353,7 @@ html,body{width:100%;max-width:100%;overflow-x:hidden}
 // ==================== معلومات الإصدار ====================
 const APP_VERSION='v1.7.2';
 const APP_NAME = "متجري";
-const APP_BUILD_DATE = "30 أغسطس 2026 — إصلاح المرتجعات والخزنة وحذف الفاتورة";
+const APP_BUILD_DATE = "30 أغسطس 2026 — إصلاح نهائي لمزامنة الديون والتحصيلات والخزنة";
 
 // =====================================================
 // ☁️ Google Drive — مزامنة تلقائية + نسخة محلية
@@ -5795,11 +5795,16 @@ function syncSaleBatchFromDebt(d, paidAfter){
   const sales=Store.get('sales')||[];
   const batch=sales.filter(s=>String(s.saleBatchId||'')===String(d.saleBatchId));
   if(!batch.length)return;
-  const batchTotal=batch.reduce((n,s)=>n+Number(s.total||0),0);
-  const basePaid=Math.max(0,Number(d.saleTotal||batchTotal)-Number(d.amount||0));
-  const paid=Math.min(batchTotal,Math.max(0,basePaid+Number(paidAfter||0)));
+  // paidAfter هو إجمالي ما تم تحصيله من الفاتورة حتى هذه اللحظة.
+  // لا نستنتج دفعة سابقة من (saleTotal - amount)، لأن amount يجب أن يظل إجمالي الفاتورة.
+  const batchTotal=Math.max(0,Number(d.saleTotal||0)||batch.reduce((n,s)=>n+Number(s.total||0),0));
+  const paid=Math.min(batchTotal,Math.max(0,Number(paidAfter||0)));
   const remaining=Math.max(0,batchTotal-paid);
-  batch.forEach(s=>Store.update('sales',s.id,{paid,remaining}));
+  batch.forEach((s,i)=>Store.update('sales',s.id,{
+    paid,
+    remaining,
+    initialPaid:i===0 && Object.prototype.hasOwnProperty.call(s,'initialPaid') ? s.initialPaid : (i===0 ? Math.min(paid,Math.max(0,Number(d.initialPaid||0))) : 0)
+  }));
 }
 
 function applyGroupDebtPayment(person,type,amount,isFull){
@@ -5960,9 +5965,11 @@ function deleteDebt(id){if(!confirm('حذف الدين؟'))return;Store.delete('
 
 function getDebtRemaining(d){
   if(!d)return 0;
-  if(d.paid)return 0;
   const amount=Math.max(0,Number(d.amount||0));
+  if(amount<=0)return 0;
   const isLegacySource=(d.debtVersion!==2&&(d.source==='purchase'||d.source==='sale'));
+  // السجل القديم قد يحتوي paid=true بدون paidAmount؛ نحافظ على اعتباره مسددًا.
+  if(d.paid && isLegacySource)return 0;
   const paidAmount=isLegacySource?0:Math.max(0,Number(d.paidAmount||0));
   return Math.max(0,amount-paidAmount);
 }
@@ -7397,72 +7404,56 @@ async function applyBundledOriginalDataOnce(){
   }catch(e){ console.error('تعذر تطبيق البيانات الأصلية المدمجة:',e); return false; }
 }
 
-/* v1.7.2 — تصحيح حالة تحصيلات أحمد عطا وإسلام الوحدة الصحية
-   الهدف: إعادة الفواتير لحالة آجل حقيقية عندما لا توجد حركة تحصيل فعلية في الخزنة.
-   يعمل فقط عند اكتشاف الحالة القديمة المحددة، لذلك لا يعيد تصفير أي تحصيل جديد لاحقًا. */
-function restorePendingDebtStateV172(){
+async function repairDebtSalesConsistencyV3(){
+  const FLAG='bm_debt_sales_consistency_v3';
+  if(localStorage.getItem(FLAG)==='1')return;
   try{
     const sales=Store.get('sales')||[];
     const debts=Store.get('debts')||[];
     const targets=[
-      {person:'أحمد عطا', seq:'57', invoiceNo:'INV-20260821-947970', total:500, paid:100, remaining:400},
-      {person:'اسلام الوحدة الصحية', seq:'17', invoiceNo:'', total:500, paid:500, remaining:0}
+      {seq:57,name:'أحمد عطا',initial:100,paid:500,collection:400},
+      {seq:17,name:'اسلام الوحدة الصحية',initial:0,paid:500,collection:500}
     ];
-    let changed=false;
-    targets.forEach(target=>{
-      const matches=sales.filter(s=>{
-        const person=String(s.customerName||'').trim();
-        const seq=String(s.invoiceSeq||'');
-        const no=String(s.invoiceNo||'');
-        return person===target.person &&
-          ((target.invoiceNo && no===target.invoiceNo) || seq===target.seq);
-      });
-      if(!matches.length)return;
-      const batchIds=[...new Set(matches.map(s=>String(s.saleBatchId||s.invoiceNo||s.id||'')))].filter(Boolean);
-      batchIds.forEach(batchId=>{
-        const batch=sales.filter(s=>String(s.saleBatchId||s.invoiceNo||s.id||'')===batchId);
-        const total=Math.max(...batch.map(s=>Number(s.total||0)),0);
-        const paid=Math.max(...batch.map(s=>Number(s.paid||0)),0);
-        const remaining=Math.max(...batch.map(s=>Number(s.remaining||0)),0);
-        const isExpectedState=Math.abs(total-target.total)<0.01 &&
-          Math.abs(paid-target.paid)<0.01 && Math.abs(remaining-target.remaining)<0.01;
-        if(!isExpectedState)return;
-        batch.forEach(s=>{
-          Store.update('sales',s.id,{
-            paid:0,
-            remaining:Math.max(0,Number(s.total||0)),
-            initialPaid:0,
-            collectionHistory:[]
-          });
-        });
-        debts.filter(d=>{
-          return d && d.source==='sale' && d.type==='لنا' &&
-            String(d.saleBatchId||d.invoiceNo||'')===batchId;
-        }).forEach(d=>{
-          Store.update('debts',d.id,{
-            amount:total,
-            paidAmount:0,
-            paymentHistory:[],
-            paid:false,
-            debtVersion:2,
-            source:'sale',
-            type:'لنا',
-            person:target.person,
-            saleTotal:total
-          });
-        });
-        changed=true;
-      });
-    });
-    if(changed){
-      try{localStorage.setItem('bm_debt_state_reset_v172','1');}catch(e){}
-      console.log('v1.7.2 debt-state correction applied');
+    for(const t of targets){
+      const lines=sales.filter(s=>Number(s.invoiceSeq)===t.seq && String(s.customerName||'').trim()===t.name);
+      if(!lines.length)continue;
+      const total=money(lines.reduce((n,s)=>n+Number(s.total||0),0));
+      if(total<=0)continue;
+      const batchId=lines[0].saleBatchId||null;
+      const related=debts.filter(d=>d.source==='sale'&&d.type==='لنا'&&(
+        (batchId&&String(d.saleBatchId||'')===String(batchId)) ||
+        (Number(d.invoiceNo&&String(d.invoiceNo).replace(/[^0-9]/g,''))===t.seq) ||
+        (String(d.person||'').trim()===t.name && Number(d.saleTotal||d.amount||0)===total)
+      ));
+      let old=related[0]||null;
+      const paidAt=old?.paidAt||old?.lastPaymentAt||old?.updatedAt||new Date().toISOString();
+      const history=[{amount:money(t.collection),date:paidAt,type:'full',source:'repair-v3'}];
+      const debtData={
+        saleBatchId:batchId||old?.saleBatchId||null,
+        invoiceNo:lines[0].invoiceNo||old?.invoiceNo||('INV-'+t.seq),
+        sourceSaleId:null,
+        customerId:lines[0].customerId||old?.customerId||null,
+        date:lines[0].date||old?.date||today(),
+        person:t.name,
+        type:'لنا',
+        amount:total,
+        paidAmount:total,
+        paymentHistory:history,
+        debtVersion:2,
+        due:old?.due||'',
+        note:old?.note||`آجل من الفاتورة ${lines[0].invoiceNo||t.seq}`,
+        paid:true,
+        source:'sale',
+        saleTotal:total,
+        lastPaymentAt:paidAt
+      };
+      related.forEach(d=>Store.delete('debts',d.id));
+      Store.add('debts',debtData);
+      lines.forEach((s,i)=>Store.update('sales',s.id,{paid:total,remaining:0,initialPaid:i===0?t.initial:0,collectionHistory:i===0?history:[]}));
     }
-    return changed;
-  }catch(e){
-    console.error('تعذر تصحيح حالة ديون أحمد وإسلام:',e);
-    return false;
-  }
+    localStorage.setItem(FLAG,'1');
+    return true;
+  }catch(e){console.error('Debt/sales consistency repair failed:',e);return false;}
 }
 
 window.addEventListener('DOMContentLoaded', async () => {
@@ -7470,7 +7461,7 @@ window.addEventListener('DOMContentLoaded', async () => {
   applyAppIdentity();
   try { await initIndexedDBStore(); } catch (e) { console.warn('IndexedDB init:', e); }
   await applyBundledOriginalDataOnce();
-  restorePendingDebtStateV172();
+  await repairDebtSalesConsistencyV3();
   const user = Store.getUser();
   if (user && !isLockEnabled()) {
     currentUser = user;
@@ -7496,7 +7487,7 @@ async function replaceCloudDataWithLocal() {
 <script>
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', function() {
-    navigator.serviceWorker.register('sw.js?v=1.7.0')
+    navigator.serviceWorker.register('sw.js?v=1.7.2')
       .then(function(registration) {
         registration.update().catch(function(){});
         console.log('SW registered: ', registration.scope);
@@ -8056,22 +8047,40 @@ if ('serviceWorker' in navigator) {
     const inv=findInvoice(key);if(!inv)return;
     const amount=Math.min(inv.remaining,Math.max(0,money(document.getElementById('invoiceCollectionAmount')?.value)));
     if(amount<=0)return showToast('أدخل مبلغ التحصيل','warning');
-    const newPaid=inv.paid+amount,newRemaining=Math.max(0,inv.total-newPaid);
+    const newPaid=money(Math.min(inv.total,inv.paid+amount));
+    const newRemaining=money(Math.max(0,inv.total-newPaid));
     const now=cairoDateTimeISO();
-    // سجل السداد الجديد في سجل المبيعات بشكل مستقل حتى لا تُحسب كل قيمة paid التراكمية مرة أخرى في الخزنة.
     const firstLine=inv.lines[0];
     const existingHistory=Array.isArray(firstLine?.collectionHistory)?firstLine.collectionHistory.slice():[];
     existingHistory.push({amount,date:now,type:newRemaining<=0?'full':'partial'});
-    inv.lines.forEach((line,i)=>Store.update('sales',line.id,{paid:newPaid,remaining:newRemaining,initialPaid:Object.prototype.hasOwnProperty.call(line,'initialPaid')?line.initialPaid:(i===0?Math.max(0,inv.paid-(Array.isArray(line.collectionHistory)?line.collectionHistory.reduce((n,h)=>n+Number(h.amount||0),0):0)):0),collectionHistory:i===0?existingHistory:(Array.isArray(line.collectionHistory)?line.collectionHistory:[])}));
+    const initialPaid=Object.prototype.hasOwnProperty.call(firstLine||{},'initialPaid')
+      ?Math.min(newPaid,Math.max(0,Number(firstLine.initialPaid)||0))
+      :Math.min(newPaid,Math.max(0,Number(inv.paid)-existingHistory.slice(0,-1).reduce((n,h)=>n+Number(h?.amount||0),0)));
+    inv.lines.forEach((line,i)=>Store.update('sales',line.id,{
+      paid:newPaid,
+      remaining:newRemaining,
+      initialPaid:i===0?initialPaid:0,
+      collectionHistory:i===0?existingHistory:(Array.isArray(line.collectionHistory)?line.collectionHistory:[])
+    }));
     if(inv.saleBatchId){
       const debts=Store.get('debts')||[];
-      const related=debts.filter(d=>d.saleBatchId===inv.saleBatchId&&d.source==='sale'&&d.type==='لنا');
+      const related=debts.filter(d=>String(d.saleBatchId||'')===String(inv.saleBatchId)&&d.source==='sale'&&d.type==='لنا');
       related.forEach(d=>{
+        const debtTotal=Math.max(0,Number(d.saleTotal||inv.total)||inv.total);
         const debtPaidBefore=Math.max(0,Number(d.paidAmount||0));
-        const debtPaidAfter=Math.min(Number(d.amount||0),debtPaidBefore+amount);
+        const debtPaidAfter=Math.min(debtTotal,Math.max(debtPaidBefore,newPaid));
+        const added=Math.max(0,debtPaidAfter-debtPaidBefore);
         const history=Array.isArray(d.paymentHistory)?d.paymentHistory.slice():[];
-        history.push({amount:Math.min(amount,Math.max(0,Number(d.amount||0)-debtPaidBefore)),date:now,type:debtPaidAfter>=Number(d.amount||0)-0.0001?'full':'partial',source:'sales'});
-        Store.update('debts',d.id,{paidAmount:debtPaidAfter,paid:debtPaidAfter>=Number(d.amount||0)-0.0001,paymentHistory:history,debtVersion:2,lastPaymentAt:now});
+        if(added>0)history.push({amount:added,date:now,type:debtPaidAfter>=debtTotal-0.0001?'full':'partial',source:'sales'});
+        Store.update('debts',d.id,{
+          amount:debtTotal,
+          saleTotal:debtTotal,
+          paidAmount:debtPaidAfter,
+          paid:debtPaidAfter>=debtTotal-0.0001,
+          paymentHistory:history,
+          debtVersion:2,
+          lastPaymentAt:added>0?now:(d.lastPaymentAt||null)
+        });
       });
     }
     closeIfOpen();showToast(newRemaining<=0?`🎉 تم سداد الفاتورة بالكامل — ${fmt(newPaid)}`:`✅ تم تسجيل التحصيل ${fmt(amount)} — المتبقي ${fmt(newRemaining)}`,'success');
