@@ -4328,7 +4328,7 @@ function sharePOSOnWhatsApp(){
 function invoiceTextPro(inv,sales){
   const date=formatInvoiceDate(inv.date||'');
   const typeLabel=inv.type==='wholesale'?'جملة':'قطاعي';
-  let t=`🧾 *متجري — فاتورة بيع*
+  let t=`🧾 *كنوز الطبيعة — فاتورة بيع*
 `;
   t+=`━━━━━━━━━━━━━━
 `;
@@ -4414,7 +4414,7 @@ function openPOSReceiptPreview(invoice){
   const payLabel=({cash:'نقدي',credit:'آجل',transfer:'تحويل',card:'بطاقة'})[inv.method]||inv.method||'نقدي';
   openModal(`<div class="modal-header"><h2><i class="fas fa-file-invoice" style="color:var(--primary);margin-left:8px"></i> فاتورة بيع رقم ${inv.invoiceSeq||inv.invoiceNo}</h2><button class="modal-close" onclick="closeModal()">&times;</button></div>
     <div class="pos-receipt-preview receipt-pro-new">
-      <div class="receipt-brand">متجري</div>
+      <div class="receipt-brand">كنوز الطبيعة</div>
       <div class="receipt-title">فاتورة بيع</div>
       <div class="receipt-info-grid">
         <div><small>رقم الفاتورة</small><strong>${inv.invoiceSeq||inv.invoiceNo}</strong></div>
@@ -4444,7 +4444,7 @@ function printPOSReceipt(){
   const w=window.open('','_blank','width=760,height=900'); if(!w)return showToast('المتصفح منع نافذة الطباعة','warning');
   const doc=`<!doctype html><html lang="ar" dir="rtl"><head><meta charset="utf-8"><title>${inv.invoiceNo}</title><style>
   @page{size:A4;margin:14mm}body{font-family:Arial,sans-serif;color:#222;margin:0;background:#fff}.page{max-width:760px;margin:0 auto;padding:18px}.brand{text-align:center;font-size:24px;font-weight:900;margin-bottom:4px}.sub{text-align:center;color:#666;font-size:12px;line-height:1.8}.line{border-top:1px dashed #888;margin:14px 0}table{width:100%;border-collapse:collapse;font-size:13px}th,td{padding:9px 5px;border-bottom:1px solid #ddd;text-align:right}.r{display:flex;justify-content:space-between;padding:8px 0}.grand{font-size:19px;font-weight:900;border-top:2px solid #222;margin-top:8px;padding-top:12px}.thanks{text-align:center;margin-top:20px;font-size:12px;color:#666}@media print{.page{padding:0}}
-  </style></head><body><div class="page"><div class="brand">متجري</div><div class="sub">فاتورة بيع رقم ${inv.invoiceSeq||inv.invoiceNo}<br>${formatInvoiceDate(inv.date)}${inv.time?' • '+inv.time:''}<br>العميل: ${inv.customerName}<br>نوع البيع: ${inv.type==='wholesale'?'جملة':'قطاعي'}</div><div class="line"></div><table><thead><tr><th>الصنف</th><th>الكمية</th><th>الإجمالي</th></tr></thead><tbody>${rows}</tbody></table><div class="line"></div><div class="r"><span>الإجمالي قبل الخصم</span><b>${fmt(inv.subtotal)}</b></div><div class="r"><span>الخصم</span><b>${fmt(inv.discount)}</b></div><div class="r"><span>الضريبة</span><b>${fmt(inv.tax)}</b></div><div class="r grand"><span>الإجمالي النهائي</span><b>${fmt(inv.total)}</b></div><div class="r"><span>المدفوع</span><b>${fmt(inv.paid)}</b></div><div class="r"><span>${inv.method==='cash'?'الباقي':'المتبقي'}</span><b>${fmt(inv.method==='cash'?inv.change:inv.remaining)}</b></div><div class="r"><span>السداد</span><b>${({cash:'نقدي',credit:'آجل',transfer:'تحويل',card:'بطاقة'})[inv.method]||inv.method||'نقدي'}</b></div><div class="thanks">شكرًا لتعاملكم معنا ❤️</div></div>
+  </style></head><body><div class="page"><div class="brand">كنوز الطبيعة</div><div class="sub">فاتورة بيع رقم ${inv.invoiceSeq||inv.invoiceNo}<br>${formatInvoiceDate(inv.date)}${inv.time?' • '+inv.time:''}<br>العميل: ${inv.customerName}<br>نوع البيع: ${inv.type==='wholesale'?'جملة':'قطاعي'}</div><div class="line"></div><table><thead><tr><th>الصنف</th><th>الكمية</th><th>الإجمالي</th></tr></thead><tbody>${rows}</tbody></table><div class="line"></div><div class="r"><span>الإجمالي قبل الخصم</span><b>${fmt(inv.subtotal)}</b></div><div class="r"><span>الخصم</span><b>${fmt(inv.discount)}</b></div><div class="r"><span>الضريبة</span><b>${fmt(inv.tax)}</b></div><div class="r grand"><span>الإجمالي النهائي</span><b>${fmt(inv.total)}</b></div><div class="r"><span>المدفوع</span><b>${fmt(inv.paid)}</b></div><div class="r"><span>${inv.method==='cash'?'الباقي':'المتبقي'}</span><b>${fmt(inv.method==='cash'?inv.change:inv.remaining)}</b></div><div class="r"><span>السداد</span><b>${({cash:'نقدي',credit:'آجل',transfer:'تحويل',card:'بطاقة'})[inv.method]||inv.method||'نقدي'}</b></div><div class="thanks">شكرًا لتعاملكم معنا ❤️</div></div>
 
 </body></html>`;
   w.document.open(); w.document.write(doc); w.document.close(); w.focus(); setTimeout(()=>w.print(),300);
@@ -5421,6 +5421,19 @@ function getCashboxData(){
         const dt=String(h&&h.date||'');
         movements.push({date:dt.slice(0,10)||String(d.date||'').slice(0,10),time:cairoTimeFromStored(dt),kind:type,amount,title:type==='in'?'تحصيل من عميل':'سداد لمورد',detail:String(d.person||'حساب')+' • '+(h&&h.type==='full'?'سداد كامل':'سداد جزئي'),icon:type==='in'?'fa-hand-holding-dollar':'fa-money-bill-wave',ref:String(d.id||'')+'-'+i});
       });
+      // توافق آمن مع السجلات القديمة: بعض الديون القديمة كانت تُعلَّم "مسدد"
+      // ويظل paidAmount فيها هو الدفعة الأولى فقط، من غير paymentHistory.
+      // في هذه الحالة نضيف فرق السداد النهائي مرة واحدة فقط، ولا نفعله
+      // إذا كان هناك paymentHistory حتى لا تتكرر الحركة.
+      if(type==='in' && history.length===0 && d.paid===true && d.source==='sale'){
+        const saleTotal=Math.max(0,Number(d.saleTotal||0));
+        const paidAmount=Math.max(0,Number(d.paidAmount||0));
+        const inferred=Math.max(0,saleTotal-paidAmount);
+        if(inferred>0){
+          const dt=String(d.paidAt||d.updatedAt||d.lastPaymentAt||d.date||'');
+          movements.push({date:dt.slice(0,10)||String(d.date||'').slice(0,10),time:cairoTimeFromStored(dt),kind:'in',amount:inferred,title:'تحصيل من عميل',detail:String(d.person||'عميل')+' • سداد نهائي لفاتورة '+String(d.invoiceNo||''),icon:'fa-hand-holding-dollar',ref:String(d.id||'')+'-legacy-final'});
+        }
+      }
     });
     // المرتجعات النقدية تُسجل كمدفوعات مستقلة مرة واحدة.
     // لا نحسب returnedAmount من سجل المبيعات حتى لا يتكرر الخصم عند إعادة الرسم.
@@ -5613,6 +5626,7 @@ function addDebt(){
 }
 
 function renderDebtsList(){
+  reconcileSaleDebtsFromSales();
   const allDebts=Store.get('debts')||[];
   const search=(document.getElementById('debtSearch')?.value||'').trim().toLowerCase();
   const type=(document.getElementById('debtTypeFilter')?.value||'');
@@ -5790,14 +5804,70 @@ function payGroupDebtFull(encodedPerson,type){
 }
 
 
+function getDebtTotalAmount(d){
+  if(!d)return 0;
+  if(d.source==='sale' && Number.isFinite(Number(d.saleTotal)) && Number(d.saleTotal)>0) return Math.max(0,Number(d.saleTotal));
+  return Math.max(0,Number(d.amount||0));
+}
+function getDebtPaidAmount(d){
+  if(!d)return 0;
+  return Math.max(0,Number(d.paidAmount||0));
+}
+function getDebtOutstandingAmount(d){
+  if(!d)return 0;
+  return Math.max(0,getDebtTotalAmount(d)-getDebtPaidAmount(d));
+}
+
+// إصلاح آمن لمزامنة ديون فواتير البيع مع الفاتورة نفسها.
+// لا ينشئ أي حركة خزنة جديدة؛ فقط يصحح رصيد الدين اعتمادًا على بيانات الفاتورة والتحصيلات المسجلة.
+function reconcileSaleDebtsFromSales(){
+  const sales=Store.get('sales')||[];
+  const debts=Store.get('debts')||[];
+  const groups=new Map();
+  sales.forEach(s=>{
+    if(!s || !s.saleBatchId) return;
+    const key=String(s.saleBatchId);
+    if(!groups.has(key)) groups.set(key,[]);
+    groups.get(key).push(s);
+  });
+  groups.forEach((batch,saleBatchId)=>{
+    const first=batch[0]||{};
+    const related=debts.filter(d=>d && d.source==='sale' && d.type==='لنا' && String(d.saleBatchId||'')===saleBatchId);
+    if(!related.length) return;
+    const total=Math.max(0,batch.reduce((n,s)=>n+Number(s.total||0),0));
+    const initialPaid=Math.max(0,Number(first.initialPaid||0));
+    const salesHistory=Array.isArray(first.collectionHistory)?first.collectionHistory:[];
+    const salesCollected=salesHistory.reduce((n,h)=>n+Math.max(0,Number(h&&h.amount||0)),0);
+    related.forEach(d=>{
+      const debtHistory=Array.isArray(d.paymentHistory)?d.paymentHistory.filter(h=>Number(h&&h.amount||0)>0):[];
+      const debtCollected=debtHistory.reduce((n,h)=>n+Math.max(0,Number(h&&h.amount||0)),0);
+      // نفضّل سجل الدين لأنه هو المصدر المستخدم أيضًا في الخزنة، وإلا نستخدم collectionHistory للفواتير القديمة.
+      const laterPaid=debtCollected>0?debtCollected:salesCollected;
+      const paid=Math.min(total,initialPaid+laterPaid);
+      const updates={
+        amount:total,
+        saleTotal:total,
+        paidAmount:paid,
+        paid:paid>=total-0.0001,
+        debtVersion:2
+      };
+      // لو كانت الفاتورة قديمة والتحصيل موجود في sales فقط، ننقله إلى paymentHistory داخل الدين
+      // من غير إنشاء حركة خزنة جديدة، لأن الخزنة تقرأ هذا السجل نفسه.
+      if(debtCollected<=0 && salesHistory.length){
+        updates.paymentHistory=salesHistory.map(h=>({amount:Math.max(0,Number(h&&h.amount||0)),date:h&&h.date||cairoDateTimeISO(),type:h&&h.type||'partial',source:'sales'})).filter(h=>h.amount>0);
+      }
+      Store.update('debts',d.id,updates);
+    });
+  });
+}
+
 function syncSaleBatchFromDebt(d, paidAfter){
   if(!d || d.type!=='لنا' || d.source!=='sale' || !d.saleBatchId)return;
   const sales=Store.get('sales')||[];
   const batch=sales.filter(s=>String(s.saleBatchId||'')===String(d.saleBatchId));
   if(!batch.length)return;
   const batchTotal=batch.reduce((n,s)=>n+Number(s.total||0),0);
-  const basePaid=Math.max(0,Number(d.saleTotal||batchTotal)-Number(d.amount||0));
-  const paid=Math.min(batchTotal,Math.max(0,basePaid+Number(paidAfter||0)));
+  const paid=Math.min(batchTotal,Math.max(0,Number(paidAfter||0)));
   const remaining=Math.max(0,batchTotal-paid);
   batch.forEach(s=>Store.update('sales',s.id,{paid,remaining}));
 }
@@ -5822,14 +5892,13 @@ function applyGroupDebtPayment(person,type,amount,isFull){
     const pay=Math.min(rem,left);
     if(pay<=0)continue;
 
-    const isLegacySource=(d.debtVersion!==2&&(d.source==='purchase'||d.source==='sale'));
-    const paidBefore=isLegacySource?0:Math.max(0,Number(d.paidAmount||0));
+    const paidBefore=getDebtPaidAmount(d);
     const paidAfter=paidBefore+pay;
     const history=Array.isArray(d.paymentHistory)?d.paymentHistory.slice():[];
     history.push({amount:pay,date:now,type:pay>=rem?'full':'partial',groupId});
     Store.update('debts',d.id,{
       paidAmount:paidAfter,
-      paid:paidAfter>=Number(d.amount||0)-0.0001,
+      paid:paidAfter>=getDebtTotalAmount(d)-0.0001,
       paymentHistory:history,
       debtVersion:2,
       lastPaymentAt:now
@@ -5895,14 +5964,12 @@ function payDebtPart(id,amount){
   const debts=Store.get('debts')||[];
   const d=debts.find(x=>x.id===id);
   if(!d)return;
-  const remaining=getDebtRemaining(d);
+  const remaining=getDebtOutstandingAmount(d);
   amount=Number(amount)||0;
   if(amount<=0)return showToast('أدخل مبلغ السداد','warning');
   if(amount>remaining+0.0001)return showToast('مبلغ السداد أكبر من المتبقي','warning');
 
-  const isSaleDebt=d.type==='لنا' && d.source==='sale' && d.saleBatchId;
-  const isLegacySource=(d.debtVersion!==2&&(d.source==='purchase'||d.source==='sale'));
-  const paidBefore=isLegacySource?0:Math.max(0,Number(d.paidAmount||0));
+  const paidBefore=getDebtPaidAmount(d);
   const paidAfter=paidBefore+amount;
   const history=Array.isArray(d.paymentHistory)?d.paymentHistory.slice():[];
   const now=cairoDateTimeISO();
@@ -5911,11 +5978,10 @@ function payDebtPart(id,amount){
   // مزامنة تحصيل الدين مع الفاتورة الأصلية في سجل المبيعات.
   syncSaleBatchFromDebt(d,paidAfter);
 
-  const remainingAfter=Math.max(0, remaining-(Number(document.getElementById('debtPayAmount')?.value)||0));
-  const actualRemaining=Math.max(0, remaining-Number(history[history.length-1]?.amount||0));
+  const actualRemaining=Math.max(0, getDebtTotalAmount(d)-paidAfter);
   Store.update('debts',id,{
     paidAmount:paidAfter,
-    paid:paidAfter>=Number(d.amount||0)-0.0001,
+    paid:paidAfter>=getDebtTotalAmount(d)-0.0001,
     paymentHistory:history,
     debtVersion:2,
     lastPaymentAt:now
@@ -5960,11 +6026,7 @@ function deleteDebt(id){if(!confirm('حذف الدين؟'))return;Store.delete('
 
 function getDebtRemaining(d){
   if(!d)return 0;
-  if(d.paid)return 0;
-  const amount=Math.max(0,Number(d.amount||0));
-  const isLegacySource=(d.debtVersion!==2&&(d.source==='purchase'||d.source==='sale'));
-  const paidAmount=isLegacySource?0:Math.max(0,Number(d.paidAmount||0));
-  return Math.max(0,amount-paidAmount);
+  return getDebtOutstandingAmount(d);
 }
 function normalizeWhatsAppPhone(phone){
   let p=String(phone||'').replace(/[^\d+]/g,'');
@@ -6448,7 +6510,7 @@ function applySupplierPayment(supplierId,amount){
     const paidAfter=paidBefore+pay;
     Store.update('debts',d.id,{
       paidAmount:paidAfter,
-      paid:paidAfter>=Number(d.amount||0)-0.0001,
+      paid:paidAfter>=getDebtTotalAmount(d)-0.0001,
       paymentHistory:history,
       debtVersion:2,
       lastPaymentAt:now
@@ -7427,7 +7489,7 @@ async function replaceCloudDataWithLocal() {
 <script>
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', function() {
-    navigator.serviceWorker.register('sw.js?v=1.7.0')
+    navigator.serviceWorker.register('sw.js?v=1.7.4')
       .then(function(registration) {
         registration.update().catch(function(){});
         console.log('SW registered: ', registration.scope);
@@ -7581,7 +7643,7 @@ if ('serviceWorker' in navigator) {
   function esc(v){return String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
   function invoiceTotalText(inv){return fmt(inv.total);}
   function invoiceText(inv){
-    let t=`🧾 *متجري — فاتورة بيع*\n`;
+    let t=`🧾 *كنوز الطبيعة — فاتورة بيع*\n`;
     t+=`━━━━━━━━━━━━━━\n`;
     t+=`🔢 رقم الفاتورة: *${inv.invoiceSeq||inv.invoiceNo}*\n`;
     t+=`📅 التاريخ: *${formatInvoiceDate(inv.date)}${inv.time?' — '+inv.time:''}*\n`;
@@ -7721,7 +7783,7 @@ if ('serviceWorker' in navigator) {
     const inv=findInvoice(key);if(!inv)return;
     const rows=inv.lines.map(s=>{const q=money(s.packages||s.qty||1),w=money(s.weight||1);const p=productForSaleLine(s);const qty=isKgProduct(p)||s.isWeightSale?saleQuantityLabel(p,q,w):`${q} ${isFixedPackProduct(p)?'علبة':(s.sellUnit||p?.unit||'علبة')}`;return `<tr><td>${esc(s.productName||'صنف')}</td><td>${esc(qty)}</td><td>${fmt(s.price||0)}</td><td>${fmt(s.total)}</td></tr>`}).join('');
     const w=window.open('','_blank','width=900,height=800');if(!w){showToast('اسمح بفتح نافذة الطباعة','warning');return;}
-    const html='<!doctype html><html lang="ar" dir="rtl"><head><meta charset="UTF-8"><title>'+esc(inv.invoiceNo)+'</title><style>@page{size:A4;margin:12mm}body{margin:0;font-family:Arial,Tahoma,sans-serif;color:#173b32;background:#fff}.page{width:100%;max-width:190mm;margin:auto;padding:6mm;box-sizing:border-box}.brand{text-align:center;font-size:28px;font-weight:900;color:#0f766e;margin-bottom:4px}.sub{text-align:center;color:#66756f;font-size:12px;line-height:1.8}.line{border-top:1px solid #dce8e3;margin:14px 0}table{width:100%;border-collapse:collapse;margin:10px 0;font-size:12px}th{background:#eef7f3;color:#0f766e}th,td{padding:9px 7px;border-bottom:1px solid #e6eeeb;text-align:right}.r{display:flex;justify-content:space-between;padding:6px 0;font-size:13px}.grand{font-size:19px;font-weight:900;border-top:2px solid #0f766e;margin-top:8px;padding-top:10px}.thanks{text-align:center;margin-top:25px;color:#71827b;font-size:12px}.meta{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px}.meta div{border:1px solid #dfeae5;border-radius:10px;padding:8px}.meta small{display:block;color:#778780;font-size:10px}.meta b{display:block;margin-top:3px;font-size:12px}@media print{button{display:none}}</style></head><body><div class="page"><div class="brand">متجري</div><div class="sub">فاتورة بيع — '+esc(inv.invoiceNo)+'<br>'+esc(inv.date)+' '+esc(inv.time)+'</div><div class="line"></div><div class="meta"><div><small>العميل</small><b>'+esc(inv.customerName)+'</b></div><div><small>نوع البيع</small><b>'+(inv.type==='wholesale'?'جملة':'قطاعي')+'</b></div><div><small>السداد</small><b>'+paymentLabel(inv.paymentMethod)+'</b></div></div><div class="line"></div><table><thead><tr><th>الصنف</th><th>الكمية</th><th>السعر</th><th>الإجمالي</th></tr></thead><tbody>'+rows+'</tbody></table><div class="line"></div><div class="r"><span>الإجمالي</span><b>'+fmt(inv.total)+'</b></div><div class="r"><span>المدفوع</span><b>'+fmt(inv.paid)+'</b></div><div class="r grand"><span>المتبقي</span><b>'+fmt(inv.remaining)+'</b></div>'+(inv.note?'<div class="line"></div><div class="r"><span>ملاحظات</span><b>'+esc(inv.note)+'</b></div>':'')+'<div class="thanks">شكرًا لتعاملكم معنا ❤️</div></div></body></html>';
+    const html='<!doctype html><html lang="ar" dir="rtl"><head><meta charset="UTF-8"><title>'+esc(inv.invoiceNo)+'</title><style>@page{size:A4;margin:12mm}body{margin:0;font-family:Arial,Tahoma,sans-serif;color:#173b32;background:#fff}.page{width:100%;max-width:190mm;margin:auto;padding:6mm;box-sizing:border-box}.brand{text-align:center;font-size:28px;font-weight:900;color:#0f766e;margin-bottom:4px}.sub{text-align:center;color:#66756f;font-size:12px;line-height:1.8}.line{border-top:1px solid #dce8e3;margin:14px 0}table{width:100%;border-collapse:collapse;margin:10px 0;font-size:12px}th{background:#eef7f3;color:#0f766e}th,td{padding:9px 7px;border-bottom:1px solid #e6eeeb;text-align:right}.r{display:flex;justify-content:space-between;padding:6px 0;font-size:13px}.grand{font-size:19px;font-weight:900;border-top:2px solid #0f766e;margin-top:8px;padding-top:10px}.thanks{text-align:center;margin-top:25px;color:#71827b;font-size:12px}.meta{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px}.meta div{border:1px solid #dfeae5;border-radius:10px;padding:8px}.meta small{display:block;color:#778780;font-size:10px}.meta b{display:block;margin-top:3px;font-size:12px}@media print{button{display:none}}</style></head><body><div class="page"><div class="brand">كنوز الطبيعة</div><div class="sub">فاتورة بيع — '+esc(inv.invoiceNo)+'<br>'+esc(inv.date)+' '+esc(inv.time)+'</div><div class="line"></div><div class="meta"><div><small>العميل</small><b>'+esc(inv.customerName)+'</b></div><div><small>نوع البيع</small><b>'+(inv.type==='wholesale'?'جملة':'قطاعي')+'</b></div><div><small>السداد</small><b>'+paymentLabel(inv.paymentMethod)+'</b></div></div><div class="line"></div><table><thead><tr><th>الصنف</th><th>الكمية</th><th>السعر</th><th>الإجمالي</th></tr></thead><tbody>'+rows+'</tbody></table><div class="line"></div><div class="r"><span>الإجمالي</span><b>'+fmt(inv.total)+'</b></div><div class="r"><span>المدفوع</span><b>'+fmt(inv.paid)+'</b></div><div class="r grand"><span>المتبقي</span><b>'+fmt(inv.remaining)+'</b></div>'+(inv.note?'<div class="line"></div><div class="r"><span>ملاحظات</span><b>'+esc(inv.note)+'</b></div>':'')+'<div class="thanks">شكرًا لتعاملكم معنا ❤️</div></div></body></html>';
     w.document.open();w.document.write(html);w.document.close();w.focus();setTimeout(()=>w.print(),350);
   };
 
@@ -7996,13 +8058,16 @@ if ('serviceWorker' in navigator) {
     inv.lines.forEach((line,i)=>Store.update('sales',line.id,{paid:newPaid,remaining:newRemaining,initialPaid:Object.prototype.hasOwnProperty.call(line,'initialPaid')?line.initialPaid:(i===0?Math.max(0,inv.paid-(Array.isArray(line.collectionHistory)?line.collectionHistory.reduce((n,h)=>n+Number(h.amount||0),0):0)):0),collectionHistory:i===0?existingHistory:(Array.isArray(line.collectionHistory)?line.collectionHistory:[])}));
     if(inv.saleBatchId){
       const debts=Store.get('debts')||[];
-      const related=debts.filter(d=>d.saleBatchId===inv.saleBatchId&&d.source==='sale'&&d.type==='لنا');
+      const related=debts.filter(d=>d.source==='sale'&&d.type==='لنا'&&(
+        (inv.saleBatchId&&String(d.saleBatchId||'')===String(inv.saleBatchId)) ||
+        (inv.invoiceNo&&String(d.invoiceNo||'')===String(inv.invoiceNo))
+      ));
       related.forEach(d=>{
-        const debtPaidBefore=Math.max(0,Number(d.paidAmount||0));
-        const debtPaidAfter=Math.min(Number(d.amount||0),debtPaidBefore+amount);
+        const debtPaidBefore=getDebtPaidAmount(d);
+        const debtPaidAfter=Math.min(getDebtTotalAmount(d),debtPaidBefore+amount);
         const history=Array.isArray(d.paymentHistory)?d.paymentHistory.slice():[];
         history.push({amount:Math.min(amount,Math.max(0,Number(d.amount||0)-debtPaidBefore)),date:now,type:debtPaidAfter>=Number(d.amount||0)-0.0001?'full':'partial',source:'sales'});
-        Store.update('debts',d.id,{paidAmount:debtPaidAfter,paid:debtPaidAfter>=Number(d.amount||0)-0.0001,paymentHistory:history,debtVersion:2,lastPaymentAt:now});
+        Store.update('debts',d.id,{paidAmount:debtPaidAfter,paid:debtPaidAfter>=getDebtTotalAmount(d)-0.0001,paymentHistory:history,debtVersion:2,lastPaymentAt:now});
       });
     }
     closeIfOpen();showToast(newRemaining<=0?`🎉 تم سداد الفاتورة بالكامل — ${fmt(newPaid)}`:`✅ تم تسجيل التحصيل ${fmt(amount)} — المتبقي ${fmt(newRemaining)}`,'success');
@@ -8107,7 +8172,7 @@ window.addEventListener('online',()=>{try{if(typeof markCloudSyncPending==='func
 </script>
 
 <script>
-/* v1.7.2 — إصلاح نهائي للمرتجع والخزنة وحذف الفاتورة */
+/* v1.7.4 — إصلاح توافق الديون القديمة والخزنة بدون تكرار التحصيل */
 (function(){
   try{
     const rows=Store.get('returns');
