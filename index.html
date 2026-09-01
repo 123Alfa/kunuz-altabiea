@@ -2285,6 +2285,53 @@ html,body{width:100%;max-width:100%;overflow-x:hidden}
 <style id="inventory-count-v173">
 .inventory-count-note{display:flex;gap:9px;align-items:flex-start;background:#f7faf9;border:1px solid var(--border);border-radius:13px;padding:11px 12px;margin-bottom:14px;color:var(--text-muted);font-size:.68rem;line-height:1.7}.inventory-count-note i{color:var(--primary);margin-top:2px}.inventory-adjustment-row{display:flex;justify-content:space-between;gap:12px;align-items:center;padding:12px 0;border-bottom:1px solid var(--border)}.inventory-adjustment-row:last-child{border-bottom:0}.inventory-adjustment-row strong,.inventory-adjustment-row small{display:block}.inventory-adjustment-row strong{font-size:.78rem}.inventory-adjustment-row small{font-size:.6rem;color:var(--text-muted);margin-top:3px}.inventory-adjustment-values{display:flex;align-items:center;gap:8px;flex-wrap:wrap;justify-content:flex-end;font-size:.58rem;color:var(--text-muted)}.inventory-adjustment-values b{font-size:.72rem;padding:5px 8px;border-radius:999px}.inventory-adjustment-values b.up{background:#ecfdf5;color:#087443}.inventory-adjustment-values b.down{background:#fff1f2;color:#b42318}@media(max-width:600px){.inventory-adjustment-row{align-items:flex-start;flex-direction:column}.inventory-adjustment-values{justify-content:flex-start}.inventory-count-page .products-hero{gap:10px}}
 </style>
+
+<style id="matgary-stock-ledger-mobile-final">
+@media (max-width: 760px) {
+  .stock-ledger-page,.stock-ledger-page .stock-ledger-table-wrap,
+  .stock-ledger-page .stock-ledger-table,.stock-ledger-page .stock-ledger-table tbody {
+    width:100%!important;max-width:100%!important;min-width:0!important;box-sizing:border-box!important;
+  }
+  .stock-ledger-page .stock-ledger-table-wrap{overflow:visible!important;border:0!important}
+  .stock-ledger-page .stock-ledger-table{display:block!important;table-layout:fixed!important;border-collapse:separate!important}
+  .stock-ledger-page .stock-ledger-table thead{display:none!important}
+  .stock-ledger-page .stock-ledger-table tbody{display:block!important}
+  .stock-ledger-page .stock-ledger-table tr{
+    display:grid!important;grid-template-columns:1fr 1fr!important;gap:0 10px!important;
+    width:100%!important;margin:0 0 10px!important;padding:10px!important;box-sizing:border-box!important;
+    background:#fff!important;border:1px solid var(--border)!important;border-radius:14px!important;
+    box-shadow:0 3px 12px rgba(31,55,48,.05)!important;
+  }
+  .stock-ledger-page .stock-ledger-table td{
+    display:flex!important;align-items:center!important;justify-content:space-between!important;gap:8px!important;
+    width:auto!important;min-width:0!important;max-width:100%!important;padding:7px 2px!important;margin:0!important;
+    border:0!important;white-space:normal!important;overflow:hidden!important;text-align:right!important;
+    font-size:.72rem!important;line-height:1.45!important;box-sizing:border-box!important;
+  }
+  .stock-ledger-page .stock-ledger-table td::before{
+    flex:0 0 auto!important;color:var(--text-muted)!important;font-size:.62rem!important;font-weight:800!important;
+  }
+  .stock-ledger-page .stock-ledger-table td:nth-child(1){display:none!important}
+  .stock-ledger-page .stock-ledger-table td:nth-child(2)::before{content:"التاريخ"!important}
+  .stock-ledger-page .stock-ledger-table td:nth-child(3)::before{content:"الحركة"!important}
+  .stock-ledger-page .stock-ledger-table td:nth-child(4)::before{content:"الكمية"!important}
+  .stock-ledger-page .stock-ledger-table td:nth-child(5)::before{content:"القيمة"!important}
+  .stock-ledger-page .stock-ledger-table td:nth-child(6)::before{content:"الرصيد"!important}
+  .stock-ledger-page .stock-ledger-table td:nth-child(7)::before{content:"الطرف"!important}
+  .stock-ledger-page .stock-ledger-table td:nth-child(8)::before{content:"البيان"!important}
+  .stock-ledger-page .stock-ledger-table td:nth-child(7),
+  .stock-ledger-page .stock-ledger-table td:nth-child(8){
+    grid-column:1/-1!important;border-top:1px dashed #e6ece9!important;margin-top:2px!important;padding-top:8px!important;
+  }
+  .stock-ledger-page .stock-ledger-table td:nth-child(4),
+  .stock-ledger-page .stock-ledger-table td:nth-child(6){font-weight:950!important}
+  .stock-ledger-page .stock-ledger-table td>*{min-width:0!important;max-width:100%!important}
+  .stock-ledger-page .stock-ledger-type{display:inline-flex!important;max-width:100%!important;padding:4px 6px!important;font-size:.65rem!important;white-space:nowrap!important}
+  .stock-ledger-page .stock-ledger-actions{display:grid!important;grid-template-columns:1fr!important;gap:8px!important}
+  .stock-ledger-page .stock-ledger-actions .btn{width:100%!important;min-width:0!important}
+}
+</style>
+
 </head>
 <body>
 <div id="loading-screen">
@@ -2354,7 +2401,7 @@ html,body{width:100%;max-width:100%;overflow-x:hidden}
 </div>
 <script>
 // ==================== معلومات الإصدار ====================
-const APP_VERSION='v1.7.6';
+const APP_VERSION='v1.7.7';
 const APP_NAME = "متجري";
 const APP_BUILD_DATE = "1 سبتمبر 2026 — سجل حركة الأصناف والتحسينات";
 
@@ -8001,7 +8048,7 @@ if ('serviceWorker' in navigator) {
 @media(max-width:700px){.stock-ledger-filters{grid-template-columns:1fr 1fr}.stock-ledger-filters input{grid-column:1/-1}.stock-ledger-hero-top{align-items:flex-start}.stock-ledger-product{align-items:flex-start}.stock-ledger-balance{min-width:82px}}
 
 /* =========================================================
-   v1.7.6 — تحسين سجل حركة الصنف للموبايل
+   v1.7.7 — تحسين سجل حركة الصنف للموبايل
    يمنع تداخل الرقم مع الوحدة ويحوّل الحركات إلى بطاقات واضحة.
 ========================================================= */
 @media(max-width:700px){
