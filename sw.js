@@ -1,4 +1,4 @@
-const CACHE_NAME = 'matgary-v1.7.9-20260901';
+const CACHE_NAME = 'matgary-v1.8.0-20260901';
 const APP_SHELL = ['./','./index.html','./manifest.json','./icon-192.png','./icon-512.png'];
 
 self.addEventListener('install', event => {
