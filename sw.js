@@ -1,4 +1,5 @@
-const CACHE_NAME = 'matgary-v1.7.7-20260901-1';
+const CACHE_NAME = 'matgary-update-safe-v1.7.7';
+
 const APP_SHELL = [
   './',
   './index.html',
@@ -10,65 +11,55 @@ const APP_SHELL = [
 self.addEventListener('install', event => {
   event.waitUntil(
     caches.open(CACHE_NAME)
-      .then(cache => cache.addAll(APP_SHELL).catch(() => {}))
-      .then(() => self.skipWaiting())
+      .then(cache => cache.addAll(APP_SHELL).catch(()=>{}))
+      .then(()=>self.skipWaiting())
   );
 });
 
 self.addEventListener('activate', event => {
   event.waitUntil(
-    caches.keys()
-      .then(keys => Promise.all(keys.filter(k => k !== CACHE_NAME).map(k => caches.delete(k))))
-      .then(() => self.clients.claim())
+    caches.keys().then(keys =>
+      Promise.all(keys.filter(k=>k!==CACHE_NAME).map(k=>caches.delete(k)))
+    ).then(()=>self.clients.claim())
   );
 });
 
-self.addEventListener('message', event => {
-  if (event.data && event.data.type === 'SKIP_WAITING') self.skipWaiting();
-});
-
-function isExternalService(url) {
-  return url.hostname.includes('firebase') ||
-         url.hostname.includes('googleapis.com') ||
-         url.hostname.includes('identitytoolkit') ||
-         url.hostname.includes('gstatic.com');
-}
-
 self.addEventListener('fetch', event => {
-  const request = event.request;
-  if (request.method !== 'GET') return;
-  const url = new URL(request.url);
-  if (isExternalService(url)) return;
+  const req=event.request;
+  if(req.method!=='GET') return;
+  const url=new URL(req.url);
 
-  // صفحات التنقل: الشبكة أولاً دائماً، حتى لا نعيد HTML قديم.
-  if (request.mode === 'navigate' || url.pathname.endsWith('/index.html') || url.pathname === '/') {
+  // Never cache the update manifest.
+  if(url.pathname.endsWith('/version.json')){
+    event.respondWith(fetch(req,{cache:'no-store'}));
+    return;
+  }
+
+  // Always ask the network first for the application HTML.
+  if(req.mode==='navigate' || url.pathname.endsWith('/index.html') || url.pathname.endsWith('/')){
     event.respondWith(
-      fetch(request, {cache:'no-store'})
-        .then(response => {
-          if (response && response.ok) {
-            const copy = response.clone();
-            caches.open(CACHE_NAME).then(c => c.put('./index.html', copy)).catch(()=>{});
+      fetch(req,{cache:'no-store'})
+        .then(res=>{
+          if(res && res.ok){
+            const copy=res.clone();
+            caches.open(CACHE_NAME).then(c=>c.put('./index.html',copy)).catch(()=>{});
           }
-          return response;
+          return res;
         })
-        .catch(() => caches.match('./index.html').then(c => c || caches.match('./')))
+        .catch(()=>caches.match('./index.html'))
     );
     return;
   }
 
-  // باقي الملفات: كاش أولاً، ثم الشبكة.
-  if (url.origin === self.location.origin) {
+  if(url.origin===self.location.origin){
     event.respondWith(
-      caches.match(request).then(cached => {
-        if (cached) return cached;
-        return fetch(request).then(response => {
-          if (response && response.ok) {
-            const copy = response.clone();
-            caches.open(CACHE_NAME).then(c => c.put(request, copy)).catch(()=>{});
-          }
-          return response;
-        });
-      })
+      caches.match(req).then(cached=>cached||fetch(req).then(res=>{
+        if(res && res.ok){
+          const copy=res.clone();
+          caches.open(CACHE_NAME).then(c=>c.put(req,copy)).catch(()=>{});
+        }
+        return res;
+      }))
     );
   }
 });
