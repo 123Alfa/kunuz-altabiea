@@ -8296,55 +8296,90 @@ async function matgaryFetchVersion(){
 async function matgaryInstallUpdate(remote,card){
   if(matgaryUpdateBusy)return;
   matgaryUpdateBusy=true;
+
   const btn=document.getElementById('matgaryUpdateNow');
-  if(btn){btn.disabled=true;btn.textContent='جاري تثبيت التحديث...';}
+  if(btn){
+    btn.disabled=true;
+    btn.textContent='جاري تجهيز التحديث...';
+  }
 
   try{
-    // Fetch the ACTUAL new HTML. Reloading the current URL is not enough.
+    /*
+      مهم:
+      لا نستخدم Blob URL هنا. في PWA على Android هذا قد يفشل لأن الصفحة
+      الجديدة تصبح blob: وتفقد مسارات GitHub Pages النسبية.
+      بدل ذلك نحذف كاش التطبيق ثم ننتقل لنفس رابط GitHub Pages مع query جديد.
+    */
+
+    // 1) تحقق من أن النسخة الجديدة المنشورة موجودة فعلًا.
     const pageUrl=new URL('index.html',location.href);
-    pageUrl.searchParams.set('_matgary_update',Date.now());
+    pageUrl.searchParams.set('_matgary_update',String(Date.now()));
 
     const r=await fetch(pageUrl.toString(),{
+      method:'GET',
       cache:'no-store',
-      headers:{'Cache-Control':'no-cache, no-store, must-revalidate','Pragma':'no-cache'}
+      headers:{
+        'Cache-Control':'no-cache, no-store, must-revalidate',
+        'Pragma':'no-cache'
+      }
     });
+
     if(!r.ok) throw new Error('index.html HTTP '+r.status);
 
     const newHtml=await r.text();
     const versionRegex=/APP_VERSION\s*=\s*['"]([^'"]+)['"]/;
     const found=newHtml.match(versionRegex);
 
-    // Require the downloaded HTML itself to report the requested version.
     if(!found || matgaryCompare(found[1],remote.version)!==0){
       throw new Error('النسخة المنشورة من index.html لا تطابق version.json');
     }
 
-    // Keep user data. We do not clear localStorage/IndexedDB.
-    sessionStorage.setItem('matgary_last_update',remote.version);
+    // 2) نحفظ علامة نجاح مؤقتة فقط للتشخيص؛ لا نلمس بيانات البرنامج.
+    try{
+      sessionStorage.setItem('matgary_pending_update',remote.version);
+    }catch(_){}
 
-    // Remove old SW registrations so the new document cannot be intercepted by
-    // the old worker during this installation.
+    // 3) اطلب من Service Worker تحديث نفسه ثم ألغِ القديم.
     if('serviceWorker' in navigator){
-      const regs=await navigator.serviceWorker.getRegistrations();
-      await Promise.all(regs.map(function(reg){
-        return reg.unregister().catch(function(){});
-      }));
+      try{
+        const regs=await navigator.serviceWorker.getRegistrations();
+        await Promise.all(regs.map(async function(reg){
+          try{ await reg.update(); }catch(_){}
+          try{ await reg.unregister(); }catch(_){}
+        }));
+      }catch(_){}
     }
 
-    // Delete Cache Storage only; app data remains intact.
+    // 4) احذف Cache Storage فقط. localStorage / IndexedDB لا يتم لمسها.
     if(window.caches){
-      const keys=await caches.keys();
-      await Promise.all(keys.map(function(k){return caches.delete(k).catch(function(){});}));
+      try{
+        const keys=await caches.keys();
+        await Promise.all(keys.map(function(k){
+          return caches.delete(k).catch(function(){});
+        }));
+      }catch(_){}
     }
 
-    // Replace this document with the downloaded, validated new program.
-    const blob=new Blob([newHtml],{type:'text/html;charset=utf-8'});
-    const blobUrl=URL.createObjectURL(blob);
-    location.replace(blobUrl);
+    /*
+      5) انتقل لنفس صفحة GitHub Pages مع cache-buster.
+      بما أن الـSW والكاش تم تنظيفهما، سيأتي index.html الجديد من الشبكة.
+      لا نستخدم reload(true) ولا blob URL.
+    */
+    const finalUrl=new URL(location.href);
+    finalUrl.searchParams.set('_matgary_fresh',String(Date.now()));
+    finalUrl.searchParams.set('_matgary_version',remote.version);
+
+    location.replace(finalUrl.toString());
+
   }catch(e){
     console.error('Matgary update failed:',e);
     matgaryUpdateBusy=false;
-    if(btn){btn.disabled=false;btn.textContent='إعادة المحاولة';}
+
+    if(btn){
+      btn.disabled=false;
+      btn.textContent='إعادة المحاولة';
+    }
+
     alert('تعذر تثبيت التحديث. لم يتم حذف بيانات البرنامج.');
   }
 }
