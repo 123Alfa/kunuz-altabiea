@@ -1,19 +1,74 @@
-const CACHE_NAME = 'matgary-shell-v1.7.4';
-const OFFLINE_URL = './index.html';
-const APP_SHELL = ['./', './index.html', './manifest.json', './version.json'];
+const CACHE_NAME = 'matgary-v1.7.6-20260901-1';
+const APP_SHELL = [
+  './',
+  './index.html',
+  './manifest.json',
+  './icon-192.png',
+  './icon-512.png'
+];
+
 self.addEventListener('install', event => {
-  event.waitUntil(caches.open(CACHE_NAME).then(cache => cache.addAll(APP_SHELL).catch(()=>{})).then(() => self.skipWaiting()));
+  event.waitUntil(
+    caches.open(CACHE_NAME)
+      .then(cache => cache.addAll(APP_SHELL).catch(() => {}))
+      .then(() => self.skipWaiting())
+  );
 });
+
 self.addEventListener('activate', event => {
-  event.waitUntil(caches.keys().then(keys => Promise.all(keys.filter(k => k.startsWith('matgary-shell-') && k !== CACHE_NAME).map(k => caches.delete(k)))).then(() => self.clients.claim()));
+  event.waitUntil(
+    caches.keys()
+      .then(keys => Promise.all(keys.filter(k => k !== CACHE_NAME).map(k => caches.delete(k))))
+      .then(() => self.clients.claim())
+  );
 });
-self.addEventListener('message', event => { if(event.data && event.data.type === 'SKIP_WAITING') self.skipWaiting(); });
+
+self.addEventListener('message', event => {
+  if (event.data && event.data.type === 'SKIP_WAITING') self.skipWaiting();
+});
+
+function isExternalService(url) {
+  return url.hostname.includes('firebase') ||
+         url.hostname.includes('googleapis.com') ||
+         url.hostname.includes('identitytoolkit') ||
+         url.hostname.includes('gstatic.com');
+}
+
 self.addEventListener('fetch', event => {
-  const req = event.request; const url = new URL(req.url);
-  if(url.origin !== location.origin) return;
-  if(req.mode === 'navigate' || req.destination === 'document'){
-    event.respondWith((async()=>{ try{ const fresh=await fetch(req,{cache:'no-store'}); const cache=await caches.open(CACHE_NAME); cache.put(req,fresh.clone()).catch(()=>{}); return fresh; } catch(e){ return (await caches.match(req)) || (await caches.match(OFFLINE_URL)); } })()); return;
+  const request = event.request;
+  if (request.method !== 'GET') return;
+  const url = new URL(request.url);
+  if (isExternalService(url)) return;
+
+  // صفحات التنقل: الشبكة أولاً دائماً، حتى لا نعيد HTML قديم.
+  if (request.mode === 'navigate' || url.pathname.endsWith('/index.html') || url.pathname === '/') {
+    event.respondWith(
+      fetch(request, {cache:'no-store'})
+        .then(response => {
+          if (response && response.ok) {
+            const copy = response.clone();
+            caches.open(CACHE_NAME).then(c => c.put('./index.html', copy)).catch(()=>{});
+          }
+          return response;
+        })
+        .catch(() => caches.match('./index.html').then(c => c || caches.match('./')))
+    );
+    return;
   }
-  if(url.pathname.endsWith('/version.json')){ event.respondWith(fetch(req,{cache:'no-store',headers:{'Cache-Control':'no-cache','Pragma':'no-cache'}})); return; }
-  event.respondWith((async()=>{ const cached=await caches.match(req); const network=fetch(req).then(res=>{ if(res.ok) caches.open(CACHE_NAME).then(c=>c.put(req,res.clone())).catch(()=>{}); return res; }).catch(()=>null); return cached || await network || new Response('',{status:504}); })());
+
+  // باقي الملفات: كاش أولاً، ثم الشبكة.
+  if (url.origin === self.location.origin) {
+    event.respondWith(
+      caches.match(request).then(cached => {
+        if (cached) return cached;
+        return fetch(request).then(response => {
+          if (response && response.ok) {
+            const copy = response.clone();
+            caches.open(CACHE_NAME).then(c => c.put(request, copy)).catch(()=>{});
+          }
+          return response;
+        });
+      })
+    );
+  }
 });

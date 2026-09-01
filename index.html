@@ -2354,7 +2354,7 @@ html,body{width:100%;max-width:100%;overflow-x:hidden}
 </div>
 <script>
 // ==================== معلومات الإصدار ====================
-const APP_VERSION='v1.7.5';
+const APP_VERSION='v1.7.6';
 const APP_NAME = "متجري";
 const APP_BUILD_DATE = "1 سبتمبر 2026 — سجل حركة الأصناف والتحسينات";
 
@@ -7568,15 +7568,15 @@ async function replaceCloudDataWithLocal() {
 </script>
 <script>
 /* =========================================================
-   🔄 مدير تحديثات متجري — آمن + تلقائي + مناسب لـ GitHub Pages
-   - يفحص version.json فقط، ولا يلمس بيانات المستخدم.
-   - ينفذ نسخة احتياطية قبل التحديث إذا كانت الدالة متاحة.
-   - يدعم تأجيل التحديث.
-   - بعد تحديث Service Worker يعيد تحميل النسخة الجديدة.
+   🔄 مدير تحديثات متجري — إصدار ثابت
+   - يفحص version.json بدون كاش.
+   - عند الضغط على تحديث: يلغي Service Worker القديم، يمسح كاشه,
+     ثم يفتح index.html مباشرة من الشبكة مع Cache-Busting.
+   - لا يلمس بيانات المستخدم أو localStorage الخاص بالبرنامج.
 ========================================================= */
 (function(){
   const UPDATE_CONFIG={
-    manifestUrl:'version.json?v='+Date.now(),
+    manifestUrl:'version.json',
     checkEveryMs:30*60*1000,
     skipKey:'bm_update_skip_version',
     lastCheckKey:'bm_update_last_check'
@@ -7586,8 +7586,7 @@ async function replaceCloudDataWithLocal() {
   function currentVersion(){return typeof APP_VERSION!=='undefined'?APP_VERSION:'v0.0.0';}
   function showUpdateCard(remote){
     if(document.getElementById('matgaryUpdateCard'))return;
-    const card=document.createElement('div');card.id='matgaryUpdateCard';
-    card.dir='rtl';
+    const card=document.createElement('div');card.id='matgaryUpdateCard';card.dir='rtl';
     card.innerHTML=`<div class="matgary-update-backdrop"></div><div class="matgary-update-box">
       <div class="matgary-update-icon">↻</div>
       <h3>تحديث جديد لمتجري</h3>
@@ -7601,41 +7600,53 @@ async function replaceCloudDataWithLocal() {
     document.getElementById('matgaryUpdateNow').onclick=()=>performUpdate(remote,card);
   }
   async function performUpdate(remote,card){
-    const btn=document.getElementById('matgaryUpdateNow');if(btn){btn.disabled=true;btn.textContent='جاري تجهيز التحديث...';}
+    const btn=document.getElementById('matgaryUpdateNow');
+    if(btn){btn.disabled=true;btn.textContent='جاري تثبيت التحديث...';}
     try{
-      // نسخة احتياطية قبل أي تغيير في الكاش/النسخة المعروضة.
+      // النسخة الاحتياطية اختيارية فقط إذا كانت خدمات Google متصلة بالفعل.
       if(typeof buildBackupPayload==='function' && typeof backupToGoogle==='function' && typeof driveAccessTokenValid==='function' && driveAccessTokenValid()){
         await backupToGoogle({silent:true});
       }
-      localStorage.removeItem(UPDATE_CONFIG.skipKey);
+      // علّم النسخة التي طلب المستخدم تثبيتها، حتى لا تعود النافذة أثناء إعادة التحميل.
+      localStorage.setItem('bm_update_pending_version',String(remote.version));
+      localStorage.setItem(UPDATE_CONFIG.lastCheckKey,String(Date.now()));
+
+      // إلغاء أي Service Worker قديم هو أهم خطوة لمنع إعادة تقديم index.html القديم.
       if('serviceWorker' in navigator){
-        const reg=await navigator.serviceWorker.getRegistration();
-        if(reg){
-          await reg.update();
-          if(reg.waiting){reg.waiting.postMessage({type:'SKIP_WAITING'});}
-          else if(reg.installing){
-            await new Promise(resolve=>{reg.installing.addEventListener('statechange',function(){if(this.state==='installed')resolve();});});
-            if(reg.waiting)reg.waiting.postMessage({type:'SKIP_WAITING'});
-          }
-        }
+        const regs=await navigator.serviceWorker.getRegistrations();
+        await Promise.all(regs.map(async reg=>{
+          try{ await reg.unregister(); }catch(e){}
+        }));
       }
-      // كسر كاش HTML على GitHub Pages.
-      window.location.replace(window.location.pathname+'?updated='+encodeURIComponent(remote.version)+'&t='+Date.now());
+      // امسح فقط Cache Storage الخاص بالـ Service Worker، ولا نمسح localStorage/بيانات البرنامج.
+      if(window.caches){
+        const keys=await caches.keys();
+        await Promise.all(keys.map(k=>caches.delete(k)));
+      }
+
+      // افتح النسخة المنشورة مباشرة مع معامل جديد لكسر أي كاش من GitHub Pages/المتصفح.
+      const u=new URL(window.location.href);
+      u.search='';
+      u.hash='';
+      u.searchParams.set('updated',String(remote.version).replace(/^v/i,''));
+      u.searchParams.set('t',String(Date.now()));
+      window.location.replace(u.toString());
     }catch(e){
       console.error('Update failed',e);
+      localStorage.removeItem('bm_update_pending_version');
       if(btn){btn.disabled=false;btn.textContent='إعادة المحاولة';}
       if(typeof showToast==='function')showToast('تعذر إكمال التحديث. بياناتك لم يتم حذفها.','error');
     }
   }
   async function checkForUpdate(force){
     try{
+      const pending=localStorage.getItem('bm_update_pending_version');
+      if(pending && compareVersions(currentVersion(),pending)>=0){localStorage.removeItem('bm_update_pending_version');}
       const last=Number(localStorage.getItem(UPDATE_CONFIG.lastCheckKey)||0);
-      // افحص عند كل تشغيل للتأكد من ظهور التحديثات الجديدة فورًا.
-      // حدّ التكرار يطبق فقط على الفحص الدوري، وليس أول فحص بعد فتح البرنامج.
       if(!force && window.__matgaryInitialUpdateCheckDone && Date.now()-last<UPDATE_CONFIG.checkEveryMs)return;
       window.__matgaryInitialUpdateCheckDone=true;
       localStorage.setItem(UPDATE_CONFIG.lastCheckKey,String(Date.now()));
-      const r=await fetch(UPDATE_CONFIG.manifestUrl+'&_='+Date.now(),{cache:'no-store',headers:{'Cache-Control':'no-cache','Pragma':'no-cache'}});
+      const r=await fetch(UPDATE_CONFIG.manifestUrl+'?t='+Date.now(),{cache:'no-store',headers:{'Cache-Control':'no-cache','Pragma':'no-cache'}});
       if(!r.ok)return;
       const remote=await r.json();
       if(!remote || !remote.version || compareVersions(remote.version,currentVersion())<=0)return;
@@ -7658,17 +7669,18 @@ async function replaceCloudDataWithLocal() {
   document.addEventListener('DOMContentLoaded',()=>{injectStyle();setTimeout(()=>checkForUpdate(false),800);setInterval(()=>checkForUpdate(false),UPDATE_CONFIG.checkEveryMs);});
 })();
 
+/* Service Worker: يسجل فقط بعد تحميل الصفحة، وباسم متغير لكسر النسخ القديمة. */
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', function() {
-    navigator.serviceWorker.register('sw.js?v=1.7.6', {updateViaCache:'none'})
+    navigator.serviceWorker.register('sw.js?v=1.7.6.1', {updateViaCache:'none'})
       .then(function(registration) {
         registration.update().catch(function(){});
-        console.log('SW registered: ', registration.scope);
+        console.log('SW registered:', registration.scope);
       })
-      .catch(function(error) { console.log('SW registration failed: ', error); });
+      .catch(function(error) { console.log('SW registration failed:', error); });
   });
 }
-</script>
+
 <style id="sales-purchases-final-fixes">
 .sale-ref-service-row{display:grid!important;grid-template-columns:minmax(0,1fr) 150px!important;gap:8px!important;align-items:center!important;margin:10px 0!important}
 .sale-ref-service-row .sale-ref-service{width:100%!important}
