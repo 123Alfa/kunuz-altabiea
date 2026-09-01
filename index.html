@@ -2351,7 +2351,7 @@ html,body{width:100%;max-width:100%;overflow-x:hidden}
 </div>
 <script>
 // ==================== معلومات الإصدار ====================
-const APP_VERSION='v1.7.8';
+const APP_VERSION='v1.7.9';
 const APP_NAME = "متجري";
 const APP_BUILD_DATE = "1 سبتمبر 2026 — تحسين نظام التحديث الذكي";
 
@@ -7427,7 +7427,7 @@ async function replaceCloudDataWithLocal() {
 <script>
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', function() {
-    navigator.serviceWorker.register('sw.js?v=1.7.8')
+    navigator.serviceWorker.register('sw.js?v=1.7.9')
       .then(function(registration) {
         registration.update().catch(function(){});
         console.log('SW registered: ', registration.scope);
@@ -8133,203 +8133,160 @@ window.addEventListener('online',()=>{try{if(typeof markCloudSyncPending==='func
      - يمنع حلقة التحديث إذا لم تتغير النسخة فعليًا.
      ========================================================= -->
 <style id="matgary-update-style">
-  #matgaryUpdateCard{position:fixed;inset:0;z-index:100000;display:flex;align-items:center;justify-content:center;padding:20px;direction:rtl}
-  .matgary-update-backdrop{position:absolute;inset:0;background:rgba(15,23,42,.48);backdrop-filter:blur(6px)}
-  .matgary-update-box{position:relative;width:min(100%,430px);background:#fff;border-radius:28px;padding:28px 22px 22px;text-align:center;box-shadow:0 25px 70px rgba(0,0,0,.25);font-family:'Tajawal','Segoe UI',sans-serif}
-  .matgary-update-icon{width:78px;height:78px;margin:0 auto 16px;border-radius:22px;display:flex;align-items:center;justify-content:center;font-size:38px;color:#0f766e;background:#edf8f5}
-  .matgary-update-box h3{margin:0 0 10px;font-size:1.35rem;font-weight:900;color:#243238}
-  .matgary-update-box p{margin:7px 0;color:#64748b;font-size:.95rem}
-  .matgary-update-notes{margin:16px 0;padding:13px 12px;border-radius:15px;background:#f5f8f7;color:#475569;font-size:.86rem;line-height:1.8}
-  .matgary-update-actions{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:20px}
-  .matgary-update-actions button{min-height:52px;border-radius:15px;border:0;font:inherit;font-weight:900;font-size:.95rem;cursor:pointer}
-  .matgary-update-now{background:linear-gradient(135deg,#075e54,#6d28d9,#c99a22);color:#fff;box-shadow:0 8px 24px rgba(109,40,217,.22)}
-  .matgary-update-later{border:1px solid #d8e4df!important;background:#fff;color:#7c3aed}
-  .matgary-update-status{margin-top:12px;color:#64748b;font-size:.78rem;min-height:20px}
-  @media(max-width:430px){.matgary-update-box{padding:24px 16px 18px}.matgary-update-actions{gap:8px}}
+  #matgaryUpdateModal{position:fixed;inset:0;z-index:2147483647;display:flex;align-items:center;justify-content:center;padding:18px;direction:rtl;box-sizing:border-box}
+  .matgary-update-backdrop{position:absolute;inset:0;background:rgba(15,23,42,.52);backdrop-filter:blur(7px)}
+  .matgary-update-card{position:relative;width:min(100%,520px);background:#fff;border-radius:30px;padding:30px 22px 22px;text-align:center;box-shadow:0 25px 80px rgba(0,0,0,.28);font-family:'Tajawal','Segoe UI',sans-serif}
+  .matgary-update-icon{width:82px;height:82px;margin:0 auto 16px;border-radius:24px;display:flex;align-items:center;justify-content:center;font-size:46px;color:#147d75;background:#edf8f5}
+  .matgary-update-card h2{margin:0 0 18px;font-size:1.55rem;font-weight:900;color:#243238}
+  .matgary-update-version{display:flex;justify-content:center;gap:10px;margin:8px 0;color:#64748b;font-size:1rem}
+  .matgary-update-version b{color:#26343a}
+  .matgary-update-version.new b{color:#6d28d9}
+  .matgary-update-notes{margin:18px 0;padding:14px;border-radius:17px;background:#f4f8f8;color:#475569;font-size:.92rem;line-height:1.8}
+  .matgary-update-actions{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:18px}
+  .matgary-update-actions button{min-height:54px;border-radius:16px;border:1px solid #d8e4df;background:#fff;color:#6d28d9;font:inherit;font-weight:900;font-size:1rem;cursor:pointer}
+  .matgary-update-now{border:0!important;background:linear-gradient(135deg,#075e54,#6d28d9,#c99a22)!important;color:#fff!important;box-shadow:0 8px 24px rgba(109,40,217,.22)}
+  .matgary-update-actions button:disabled{opacity:.6;cursor:wait}
+  .matgary-update-status{margin-top:12px;color:#64748b;font-size:.82rem;line-height:1.6;min-height:20px}
+  @media(max-width:430px){.matgary-update-card{padding:25px 16px 18px}.matgary-update-actions{gap:8px}.matgary-update-actions button{min-height:52px}}
 </style>
-
 <script>
 (function(){
   'use strict';
 
+  /* متجري — نظام تحديث جذري وآمن.
+     يعتمد على version.json لاكتشاف النسخة، ثم ينزّل index.html الفعلي من GitHub Raw.
+     لا يحذف localStorage أو IndexedDB أو بيانات البرنامج. */
   const MATGARY_UPDATE={
-    manifest:'version.json',
+    versionUrl:'https://123Alfa.github.io/matgary-mobile/version.json',
+    appUrl:'https://raw.githubusercontent.com/123Alfa/matgary-mobile/main/index.html',
     current:(typeof APP_VERSION!=='undefined'?APP_VERSION:'v0.0.0'),
-    targetKey:'matgary_update_target',
+    installedKey:'matgary_update_installed_version',
+    dismissedKey:'matgary_update_dismissed_version',
     busyKey:'matgary_update_busy'
   };
 
   function normalizeVersion(v){
-    return String(v||'').trim().replace(/^v/i,'').split('.').map(function(x){return parseInt(x,10)||0;});
+    const m=String(v||'').trim().replace(/^v/i,'').match(/^(\d+)(?:\.(\d+))?(?:\.(\d+))?/);
+    return m?[Number(m[1]),Number(m[2]||0),Number(m[3]||0)]:[0,0,0];
   }
   function compareVersions(a,b){
     const A=normalizeVersion(a),B=normalizeVersion(b);
-    for(let i=0;i<3;i++){
-      const x=A[i]||0,y=B[i]||0;
-      if(x>y)return 1;
-      if(x<y)return -1;
-    }
+    for(let i=0;i<3;i++){if(A[i]>B[i])return 1;if(A[i]<B[i])return -1;}
     return 0;
   }
-  function escapeUpdateText(v){
-    return String(v??'').replace(/[&<>"']/g,function(ch){
-      return ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'})[ch];
-    });
-  }
-  function removeUpdateCard(){
-    document.getElementById('matgaryUpdateCard')?.remove();
-  }
+  function esc(v){return String(v??'').replace(/[&<>"']/g,function(c){return({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'})[c];});}
+  function removeModal(){document.getElementById('matgaryUpdateModal')?.remove();}
 
   function showUpdate(remote){
-    if(document.getElementById('matgaryUpdateCard'))return;
-    const card=document.createElement('div');
-    card.id='matgaryUpdateCard';
-    card.innerHTML=
+    if(document.getElementById('matgaryUpdateModal'))return;
+    const overlay=document.createElement('div');
+    overlay.id='matgaryUpdateModal';
+    overlay.innerHTML=
       '<div class="matgary-update-backdrop"></div>'+
-      '<div class="matgary-update-box">'+
+      '<div class="matgary-update-card" role="dialog" aria-modal="true">'+
         '<div class="matgary-update-icon">↻</div>'+
-        '<h3>تحديث جديد لمتجري</h3>'+
-        '<p>الإصدار الحالي <b>'+escapeUpdateText(MATGARY_UPDATE.current)+'</b></p>'+
-        '<p>الإصدار الجديد <b>'+escapeUpdateText(remote.version)+'</b></p>'+
-        (remote.notes?'<div class="matgary-update-notes">'+escapeUpdateText(remote.notes)+'</div>':'')+
-        '<div class="matgary-update-status" id="matgaryUpdateStatus"></div>'+
+        '<h2>تحديث جديد لمتجري</h2>'+
+        '<div class="matgary-update-version"><span>الإصدار الحالي</span><b>'+esc(MATGARY_UPDATE.current)+'</b></div>'+
+        '<div class="matgary-update-version new"><span>الإصدار الجديد</span><b>'+esc(remote.version)+'</b></div>'+
+        '<div class="matgary-update-notes">'+esc(remote.notes||'إصلاحات وتحسينات للبرنامج')+'</div>'+ 
+        '<div class="matgary-update-status" id="matgaryUpdateStatus"></div>'+ 
         '<div class="matgary-update-actions">'+
-          '<button class="matgary-update-later" id="matgaryUpdateLater">لاحقًا</button>'+
-          '<button class="matgary-update-now" id="matgaryUpdateNow">تحديث الآن</button>'+
+          '<button type="button" id="matgaryUpdateLater">لاحقًا</button>'+ 
+          '<button type="button" class="matgary-update-now" id="matgaryUpdateNow">تحديث الآن</button>'+ 
         '</div>'+ 
       '</div>';
-    document.body.appendChild(card);
-
-    document.getElementById('matgaryUpdateLater').onclick=function(){removeUpdateCard();};
-    document.getElementById('matgaryUpdateNow').onclick=function(){performUpdate(remote,this);};
+    document.body.appendChild(overlay);
+    overlay.querySelector('#matgaryUpdateLater').onclick=function(){
+      try{localStorage.setItem(MATGARY_UPDATE.dismissedKey,String(remote.version));}catch(_){}
+      removeModal();
+    };
+    overlay.querySelector('#matgaryUpdateNow').onclick=function(){installUpdate(remote,this);};
   }
 
-  function waitForControllerChange(timeoutMs){
-    return new Promise(function(resolve){
-      if(!('serviceWorker' in navigator)){resolve(false);return;}
-      let done=false;
-      const timer=setTimeout(function(){finish(false);},timeoutMs||6000);
-      function finish(value){
-        if(done)return;
-        done=true;
-        clearTimeout(timer);
-        navigator.serviceWorker.removeEventListener('controllerchange',onChange);
-        resolve(value);
-      }
-      function onChange(){finish(true);}
-      navigator.serviceWorker.addEventListener('controllerchange',onChange);
-    });
+  async function clearCachesOnly(){
+    if(!('caches' in window))return;
+    try{const names=await caches.keys();await Promise.all(names.map(n=>caches.delete(n)));}catch(_){}
   }
 
-  async function activateLatestServiceWorker(){
-    if(!('serviceWorker' in navigator))return false;
-    try{
-      const reg=await navigator.serviceWorker.getRegistration();
-      if(!reg)return false;
-
-      if(reg.waiting){
-        reg.waiting.postMessage({type:'SKIP_WAITING'});
-        await waitForControllerChange(6000);
-        return true;
-      }
-
-      const installingBefore=reg.installing;
-      if(installingBefore){
-        installingBefore.postMessage?.({type:'SKIP_WAITING'});
-        await new Promise(function(resolve){
-          const started=Date.now();
-          const timer=setInterval(function(){
-            if(!reg.installing || Date.now()-started>6000){clearInterval(timer);resolve();}
-          },100);
-        });
-      }
-
-      await reg.update();
-      if(reg.waiting){
-        reg.waiting.postMessage({type:'SKIP_WAITING'});
-        await waitForControllerChange(6000);
-        return true;
-      }
-      return false;
-    }catch(e){
-      console.warn('Matgary service worker update skipped:',e);
-      return false;
-    }
+  async function unregisterOldServiceWorkers(){
+    if(!('serviceWorker' in navigator))return;
+    try{const regs=await navigator.serviceWorker.getRegistrations();await Promise.all(regs.map(r=>r.unregister()));}catch(_){}
   }
 
-  async function performUpdate(remote,btn){
-    if(localStorage.getItem(MATGARY_UPDATE.busyKey)==='1')return;
-    localStorage.setItem(MATGARY_UPDATE.busyKey,'1');
-    btn.disabled=true;
+  async function installUpdate(remote,button){
+    if(sessionStorage.getItem(MATGARY_UPDATE.busyKey)==='1')return;
+    sessionStorage.setItem(MATGARY_UPDATE.busyKey,'1');
     const later=document.getElementById('matgaryUpdateLater');
-    if(later)later.disabled=true;
     const status=document.getElementById('matgaryUpdateStatus');
-    const setStatus=function(t){if(status)status.textContent=t;};
-    btn.textContent='جاري التحديث...';
-
+    const setStatus=t=>{if(status)status.textContent=t;};
+    button.disabled=true;if(later)later.disabled=true;
+    button.textContent='جاري التحديث…';
     try{
-      // مهم: لا نحذف أي بيانات أعمال أو localStorage.
-      localStorage.setItem(MATGARY_UPDATE.targetKey,String(remote.version));
-      setStatus('جاري تجهيز النسخة الجديدة...');
+      setStatus('جاري تنزيل النسخة الجديدة…');
+      const response=await fetch(MATGARY_UPDATE.appUrl+'?update='+Date.now(),{
+        cache:'no-store',headers:{'Cache-Control':'no-cache, no-store, must-revalidate','Pragma':'no-cache'}
+      });
+      if(!response.ok)throw new Error('HTTP '+response.status);
+      const html=await response.text();
 
-      // حدّث الـ Service Worker الحالي إن وجد.
-      await activateLatestServiceWorker();
-
-      // امسح Cache Storage فقط؛ لا نلمس localStorage أو IndexedDB.
-      if(window.caches){
-        const keys=await caches.keys();
-        await Promise.all(keys.map(function(k){return caches.delete(k).catch(function(){});}));
+      // لا نسمح بتثبيت ملف لا يحمل نفس رقم النسخة المطلوبة.
+      const wanted=normalizeVersion(remote.version).join('.');
+      const found=html.match(/APP_VERSION\s*=\s*['"]v?(\d+(?:\.\d+){0,2})['"]/i);
+      if(!found || normalizeVersion(found[1]).join('.')!==wanted){
+        throw new Error('Downloaded index.html does not match requested version');
       }
 
-      setStatus('جاري فتح النسخة الجديدة...');
-      const u=new URL('./index.html',window.location.href);
-      u.searchParams.set('matgary_update',String(remote.version).replace(/^v/i,''));
-      u.searchParams.set('t',String(Date.now()));
-      window.location.replace(u.href);
-    }catch(err){
-      console.error('Matgary update failed:',err);
-      localStorage.removeItem(MATGARY_UPDATE.busyKey);
-      btn.disabled=false;
-      if(later)later.disabled=false;
-      btn.textContent='إعادة المحاولة';
-      setStatus('لم يكتمل التحديث. بيانات البرنامج لم تُحذف.');
+      // سجّل نجاح التحديث قبل تبديل الصفحة، لمنع أي حلقة تحديث.
+      try{
+        localStorage.setItem(MATGARY_UPDATE.installedKey,String(remote.version));
+        localStorage.removeItem(MATGARY_UPDATE.dismissedKey);
+      }catch(_){}
+
+      setStatus('جاري تنظيف كاش النسخة القديمة…');
+      await unregisterOldServiceWorkers();
+      await clearCachesOnly();
+
+      setStatus('تم تجهيز النسخة الجديدة، جاري فتحها…');
+      sessionStorage.removeItem(MATGARY_UPDATE.busyKey);
+      // document.write يحافظ على عنوان GitHub Pages الحالي، وبالتالي تظل الموارد النسبية صحيحة.
+      document.open();
+      document.write(html);
+      document.close();
+    }catch(error){
+      console.error('Matgary update failed:',error);
+      sessionStorage.removeItem(MATGARY_UPDATE.busyKey);
+      button.disabled=false;if(later)later.disabled=false;
+      button.textContent='تحديث الآن';
+      setStatus('تعذر تثبيت التحديث. لم يتم حذف بيانات البرنامج.');
     }
   }
 
-  async function checkForUpdate(){
+  async function checkMatgaryUpdate(){
     try{
-      const response=await fetch(MATGARY_UPDATE.manifest+'?t='+Date.now(),{
-        method:'GET',cache:'no-store',
-        headers:{'Cache-Control':'no-cache, no-store, must-revalidate','Pragma':'no-cache'}
+      const response=await fetch(MATGARY_UPDATE.versionUrl+'?t='+Date.now(),{
+        cache:'no-store',headers:{'Cache-Control':'no-cache, no-store, must-revalidate','Pragma':'no-cache'}
       });
-      if(!response.ok)return;
+      if(!response.ok)throw new Error('HTTP '+response.status);
       const remote=await response.json();
       if(!remote||!remote.version)return;
 
-      // لو كنا راجعين من عملية تحديث، نتأكد أن النسخة الجديدة وصلت فعلًا.
-      const target=localStorage.getItem(MATGARY_UPDATE.targetKey);
-      if(target && compareVersions(MATGARY_UPDATE.current,target)>=0){
-        localStorage.removeItem(MATGARY_UPDATE.targetKey);
-        localStorage.removeItem(MATGARY_UPDATE.busyKey);
+      if(compareVersions(remote.version,MATGARY_UPDATE.current)<=0){
+        try{localStorage.setItem(MATGARY_UPDATE.installedKey,MATGARY_UPDATE.current);}catch(_){}
+        return;
       }
 
-      // لا تعرض رسالة إلا عندما يكون السيرفر أحدث فعلًا.
-      if(compareVersions(remote.version,MATGARY_UPDATE.current)>0){
-        showUpdate(remote);
-      }
-    }catch(err){
-      console.warn('Matgary update check skipped:',err);
-    }finally{
-      localStorage.removeItem(MATGARY_UPDATE.busyKey);
+      // لا نخفي التحديث الجديد إلا إذا اختار المستخدم «لاحقًا» لنفس الرقم.
+      let dismissed='';try{dismissed=localStorage.getItem(MATGARY_UPDATE.dismissedKey)||'';}catch(_){}
+      if(dismissed===String(remote.version))return;
+      showUpdate(remote);
+    }catch(error){
+      console.warn('تعذر فحص تحديث متجري:',error);
     }
   }
 
-  window.matgaryCheckForUpdate=checkForUpdate;
-  document.addEventListener('DOMContentLoaded',function(){
-    setTimeout(checkForUpdate,800);
-  });
+  window.checkMatgaryUpdate=checkMatgaryUpdate;
+  window.addEventListener('load',function(){setTimeout(checkMatgaryUpdate,1200);},{once:true});
 })();
 </script>
-
 </body>
   </html>
