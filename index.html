@@ -2282,6 +2282,11 @@ html,body{width:100%;max-width:100%;overflow-x:hidden}
 .pos-invoice-date input{border:0;background:#fff;border-radius:10px;padding:8px 10px;font-weight:800;color:#263238;font-family:inherit;min-width:135px;outline:none}
 @media(max-width:700px){.pos-invoice-date{width:100%;justify-content:space-between;margin-top:8px}.pos-invoice-date input{flex:1;max-width:180px}.pos-advanced-toolbar{flex-wrap:wrap}}
 </style>
+<style id="stock-movement-adjust-delete">
+#contentArea .stock-movement-page .sm-adjust-delete{margin-top:10px;width:100%;min-height:40px;border:1px solid #efb5b9;border-radius:12px;background:#fff5f5;color:#c53b45;font:inherit;font-weight:900;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:7px}
+#contentArea .stock-movement-page .sm-adjust-delete:active{transform:scale(.99)}
+#contentArea .stock-movement-page .sm-movement-card.adjust .sm-movement-meta{grid-template-columns:1fr}
+</style>
 <style id="stock-movement-final-mobile">
 /* ===== Stock Movement FINAL mobile layout override v1.8.0 ===== */
 #contentArea .stock-movement-page{width:100%!important;max-width:980px!important;margin:0 auto!important;padding:12px 10px 110px!important;direction:rtl!important;overflow:visible!important}
@@ -5406,7 +5411,7 @@ function getStockMovements(){
     const qty=stockMovementNum(s.qty);if(qty>0&&s.productId)movements.push({date:s.date||today(),time:s.time||'',productId:s.productId,productName:s.productName||'صنف',kind:'out',label:'بيع',delta:-qty,detail:s.customerName||'عميل عادي',ref:s.invoiceNo||''});
     const returned=stockMovementNum(s.returnedQty);if(returned>0&&s.productId)movements.push({date:s.returnedAt||s.date||today(),time:s.returnedAt||'',productId:s.productId,productName:s.productName||'صنف',kind:'return',label:'مرتجع',delta:returned,detail:'مرتجع من فاتورة '+(s.invoiceNo||'غير محددة'),ref:s.invoiceNo||''});
   });
-  (Store.get('stockMovements')||[]).forEach(m=>{const delta=stockMovementNum(m.delta);if(m.productId&&delta)movements.push({date:m.date||today(),time:m.time||'',productId:m.productId,productName:m.productName||'صنف',kind:'adjust',label:m.label||'تسوية جرد',delta,detail:m.reason||'تسوية يدوية',ref:m.id||''});});
+  (Store.get('stockMovements')||[]).forEach(m=>{const delta=stockMovementNum(m.delta);if(m.productId&&delta)movements.push({id:m.id||'',date:m.date||today(),time:m.time||'',productId:m.productId,productName:m.productName||'صنف',kind:'adjust',label:m.label||'تسوية جرد',delta,detail:m.reason||'تسوية يدوية',ref:m.id||''});});
   return movements.sort((a,b)=>String(b.date).localeCompare(String(a.date))||String(b.time).localeCompare(String(a.time)));
 }
 function renderStockMovementData(){
@@ -5467,6 +5472,7 @@ function renderStockMovementData(){
         <div class="sm-balance"><span>الرصيد بعد الحركة</span><strong>${bal.after.toFixed(2)} <em>${stockMovementEsc(unit)}</em></strong></div>
       </div>
       <div class="sm-movement-meta"><div><span>الطرف / السبب</span><strong>${stockMovementEsc(detail)}</strong></div>${ref?`<div><span>المرجع</span><strong>${stockMovementEsc(ref)}</strong></div>`:''}</div>
+      ${m.kind==='adjust'&&m.id?`<button class="sm-adjust-delete" type="button" onclick="deleteStockAdjustment('${stockMovementEsc(String(m.id))}')"><i class="fas fa-trash-can"></i> حذف تسوية الجرد</button>`:''}
     </article>`;
   }).join('');
   const count=document.getElementById('stockMovementCount');if(count)count.textContent=`${filtered.length} حركة`;
@@ -5492,6 +5498,28 @@ function saveStockAdjustment(){
   Store.update('products',p.id,{qty:Math.max(0,stockMovementNum(p.qty)+delta)});
   Store.add('stockMovements',{date:now.slice(0,10),time:now.slice(11,19),productId:p.id,productName:p.name,delta,label:'تسوية جرد',reason,user:currentUser?.name||'مستخدم'});
   closeModal();window.stockMovementProduct=String(p.id);renderStockMovementPage(document.getElementById('contentArea'));showToast('✅ تم اعتماد التسوية وتحديث الرصيد','success');
+}
+
+function deleteStockAdjustment(id){
+  const sid=String(id||'').trim();
+  if(!sid)return showToast('تعذر تحديد حركة الجرد','error');
+  const rows=Store.get('stockMovements')||[];
+  const movement=rows.find(m=>String(m.id||'')===sid);
+  if(!movement)return showToast('حركة الجرد غير موجودة أو تم حذفها بالفعل','warning');
+  const delta=stockMovementNum(movement.delta);
+  const product=(Store.get('products')||[]).find(p=>String(p.id)===String(movement.productId));
+  if(!product)return showToast('الصنف المرتبط بالجرد غير موجود','error');
+  const kind=delta>=0?'زيادة':'نقص';
+  const qty=Math.abs(delta).toFixed(3);
+  const msg=`سيتم حذف تسوية الجرد فقط\n\nالصنف: ${movement.productName||product.name||'صنف'}\nالتسوية: ${kind} ${qty} ${product.unit||'كجم'}\n\nسيتم عكس أثر التسوية على الرصيد الحالي، ولن يتم حذف أي بيع أو شراء.\n\nهل تريد المتابعة؟`;
+  if(!confirm(msg))return;
+  const currentQty=stockMovementNum(product.qty);
+  const restoredQty=Math.max(0,currentQty-delta);
+  Store.update('products',product.id,{qty:restoredQty});
+  Store.delete('stockMovements',movement.id);
+  window.stockMovementProduct=String(product.id);
+  renderStockMovementPage(document.getElementById('contentArea'));
+  showToast('🗑️ تم حذف تسوية الجرد وعكس أثرها على الرصيد','success');
 }
 
 // ==================== المشتريات (مُحسّن) ====================
