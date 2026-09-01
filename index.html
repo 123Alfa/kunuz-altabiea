@@ -556,7 +556,7 @@ tr:hover td{background:rgba(15,118,110,.045)}
 @media(max-width:800px){.dash-kpis,.products-kpis{grid-template-columns:repeat(2,1fr)}.dash-grid-2{grid-template-columns:1fr}.products-filters{grid-template-columns:1fr}.products-filter-buttons{order:2}.products-filters select{order:3}.sales-today-strip{grid-template-columns:repeat(2,1fr)}}
 @media(max-width:480px){.dash-welcome,.products-hero{align-items:flex-start;flex-direction:column}.dash-date{align-self:stretch;text-align:center}.dash-kpi strong{font-size:1.05rem}.products-kpis>div{padding:10px}.products-kpis>div{display:grid;grid-template-columns:32px 1fr}.products-kpis i{width:32px;height:32px;grid-row:1/3}.products-list-view .product-item{display:grid;grid-template-columns:64px 1fr}.products-list-view .product-item .p-image{width:64px;height:64px}.products-list-view .product-item .p-actions{grid-column:2;grid-row:auto}.products-list-view .product-item .p-actions .btn:first-child{display:inline-flex}.sales-today-strip>div{padding:8px}.sales-today-strip strong{font-size:.72rem}}
 
-/* ==================== متجري v1.5.12 - تحسين لوحة التحكم ==================== */
+/* ==================== كنوز الطبيعة v1.5.12 - تحسين لوحة التحكم ==================== */
 .dashboard-v2{padding-bottom:8px}
 .dashboard-v2 .dash-welcome{position:relative;overflow:hidden;min-height:142px;padding:22px 20px;background:linear-gradient(135deg,#0b655e 0%,#0f766e 48%,#1d857a 72%,#c99a22 155%);box-shadow:0 14px 34px rgba(15,118,110,.20)}
 .dashboard-v2 .dash-welcome::before{content:'';position:absolute;width:220px;height:220px;border-radius:50%;left:-90px;top:-125px;background:rgba(255,255,255,.07);pointer-events:none}
@@ -2282,56 +2282,6 @@ html,body{width:100%;max-width:100%;overflow-x:hidden}
 .pos-invoice-date input{border:0;background:#fff;border-radius:10px;padding:8px 10px;font-weight:800;color:#263238;font-family:inherit;min-width:135px;outline:none}
 @media(max-width:700px){.pos-invoice-date{width:100%;justify-content:space-between;margin-top:8px}.pos-invoice-date input{flex:1;max-width:180px}.pos-advanced-toolbar{flex-wrap:wrap}}
 </style>
-<style id="inventory-count-v173">
-.inventory-count-note{display:flex;gap:9px;align-items:flex-start;background:#f7faf9;border:1px solid var(--border);border-radius:13px;padding:11px 12px;margin-bottom:14px;color:var(--text-muted);font-size:.68rem;line-height:1.7}.inventory-count-note i{color:var(--primary);margin-top:2px}.inventory-adjustment-row{display:flex;justify-content:space-between;gap:12px;align-items:center;padding:12px 0;border-bottom:1px solid var(--border)}.inventory-adjustment-row:last-child{border-bottom:0}.inventory-adjustment-row strong,.inventory-adjustment-row small{display:block}.inventory-adjustment-row strong{font-size:.78rem}.inventory-adjustment-row small{font-size:.6rem;color:var(--text-muted);margin-top:3px}.inventory-adjustment-values{display:flex;align-items:center;gap:8px;flex-wrap:wrap;justify-content:flex-end;font-size:.58rem;color:var(--text-muted)}.inventory-adjustment-values b{font-size:.72rem;padding:5px 8px;border-radius:999px}.inventory-adjustment-values b.up{background:#ecfdf5;color:#087443}.inventory-adjustment-values b.down{background:#fff1f2;color:#b42318}@media(max-width:600px){.inventory-adjustment-row{align-items:flex-start;flex-direction:column}.inventory-adjustment-values{justify-content:flex-start}.inventory-count-page .products-hero{gap:10px}}
-</style>
-
-<style id="matgary-stock-ledger-mobile-final">
-@media (max-width: 760px) {
-  .stock-ledger-page,.stock-ledger-page .stock-ledger-table-wrap,
-  .stock-ledger-page .stock-ledger-table,.stock-ledger-page .stock-ledger-table tbody {
-    width:100%!important;max-width:100%!important;min-width:0!important;box-sizing:border-box!important;
-  }
-  .stock-ledger-page .stock-ledger-table-wrap{overflow:visible!important;border:0!important}
-  .stock-ledger-page .stock-ledger-table{display:block!important;table-layout:fixed!important;border-collapse:separate!important}
-  .stock-ledger-page .stock-ledger-table thead{display:none!important}
-  .stock-ledger-page .stock-ledger-table tbody{display:block!important}
-  .stock-ledger-page .stock-ledger-table tr{
-    display:grid!important;grid-template-columns:1fr 1fr!important;gap:0 10px!important;
-    width:100%!important;margin:0 0 10px!important;padding:10px!important;box-sizing:border-box!important;
-    background:#fff!important;border:1px solid var(--border)!important;border-radius:14px!important;
-    box-shadow:0 3px 12px rgba(31,55,48,.05)!important;
-  }
-  .stock-ledger-page .stock-ledger-table td{
-    display:flex!important;align-items:center!important;justify-content:space-between!important;gap:8px!important;
-    width:auto!important;min-width:0!important;max-width:100%!important;padding:7px 2px!important;margin:0!important;
-    border:0!important;white-space:normal!important;overflow:hidden!important;text-align:right!important;
-    font-size:.72rem!important;line-height:1.45!important;box-sizing:border-box!important;
-  }
-  .stock-ledger-page .stock-ledger-table td::before{
-    flex:0 0 auto!important;color:var(--text-muted)!important;font-size:.62rem!important;font-weight:800!important;
-  }
-  .stock-ledger-page .stock-ledger-table td:nth-child(1){display:none!important}
-  .stock-ledger-page .stock-ledger-table td:nth-child(2)::before{content:"التاريخ"!important}
-  .stock-ledger-page .stock-ledger-table td:nth-child(3)::before{content:"الحركة"!important}
-  .stock-ledger-page .stock-ledger-table td:nth-child(4)::before{content:"الكمية"!important}
-  .stock-ledger-page .stock-ledger-table td:nth-child(5)::before{content:"القيمة"!important}
-  .stock-ledger-page .stock-ledger-table td:nth-child(6)::before{content:"الرصيد"!important}
-  .stock-ledger-page .stock-ledger-table td:nth-child(7)::before{content:"الطرف"!important}
-  .stock-ledger-page .stock-ledger-table td:nth-child(8)::before{content:"البيان"!important}
-  .stock-ledger-page .stock-ledger-table td:nth-child(7),
-  .stock-ledger-page .stock-ledger-table td:nth-child(8){
-    grid-column:1/-1!important;border-top:1px dashed #e6ece9!important;margin-top:2px!important;padding-top:8px!important;
-  }
-  .stock-ledger-page .stock-ledger-table td:nth-child(4),
-  .stock-ledger-page .stock-ledger-table td:nth-child(6){font-weight:950!important}
-  .stock-ledger-page .stock-ledger-table td>*{min-width:0!important;max-width:100%!important}
-  .stock-ledger-page .stock-ledger-type{display:inline-flex!important;max-width:100%!important;padding:4px 6px!important;font-size:.65rem!important;white-space:nowrap!important}
-  .stock-ledger-page .stock-ledger-actions{display:grid!important;grid-template-columns:1fr!important;gap:8px!important}
-  .stock-ledger-page .stock-ledger-actions .btn{width:100%!important;min-width:0!important}
-}
-</style>
-
 </head>
 <body>
 <div id="loading-screen">
@@ -2401,9 +2351,9 @@ html,body{width:100%;max-width:100%;overflow-x:hidden}
 </div>
 <script>
 // ==================== معلومات الإصدار ====================
-const APP_VERSION='v1.7.7';
+const APP_VERSION='v1.7.2';
 const APP_NAME = "متجري";
-const APP_BUILD_DATE = "1 سبتمبر 2026 — سجل حركة الأصناف والتحسينات";
+const APP_BUILD_DATE = "30 أغسطس 2026 — إصلاح المرتجعات والخزنة وحذف الفاتورة";
 
 // =====================================================
 // ☁️ Google Drive — مزامنة تلقائية + نسخة محلية
@@ -2620,8 +2570,7 @@ function buildBackupPayload(){
     customers:Store.get('customers'),
     suppliers:Store.get('suppliers'),
     offers:Store.get('offers'),
-    auditLog:Store.get('auditLog'),
-    stockAdjustments:Store.get('stockAdjustments')
+    auditLog:Store.get('auditLog')
   };
 }
 
@@ -2896,7 +2845,7 @@ window.addEventListener('visibilitychange',()=>{
   }
 });
 
-function getBackupCollections(){return ['products','sales','purchases','expenses','withdrawals','debts','customers','suppliers','offers','auditLog','returns','stockAdjustments'];}
+function getBackupCollections(){return ['products','sales','purchases','expenses','withdrawals','debts','customers','suppliers','offers','auditLog','returns'];}
 
 // =====================================================
 // 📦 نظام التخزين المتقدم (محلي + سحابة)
@@ -3379,7 +3328,6 @@ function navigateTo(tab){
       case 'suppliers':renderSuppliersPage(content);break;
       case 'audit':renderAuditPage(content);break;
       case 'offers':renderOffersPage(content);break;
-      case 'inventoryCount':renderInventoryCountPage(content);break;
     }
   }catch(error){
     console.error('خطأ أثناء عرض الصفحة:', tab, error);
@@ -3480,7 +3428,7 @@ function renderProductsPage(container){
   const out=products.filter(p=>Number(p.qty||0)<=0);
   const value=products.reduce((sum,p)=>sum+Number(p.qty||0)*Number(p.purchase||0),0);
   container.innerHTML=`<div class="fade-in products-v2">
-    <div class="products-hero"><div><span>إدارة المخزون</span><h2>الأصناف والمنتجات 📦</h2><p>تحكم في الأسعار والكميات والصور وحالة المخزون من مكان واحد.</p></div><div style="display:flex;gap:7px;flex-wrap:wrap;justify-content:flex-end"><button class="btn btn-outline" onclick="navigateTo('inventoryCount')"><i class="fas fa-clipboard-check"></i> جرد وتسوية</button><button class="btn btn-primary" onclick="document.getElementById('pName')?.focus()"><i class="fas fa-plus"></i> إضافة صنف</button></div></div>
+    <div class="products-hero"><div><span>إدارة المخزون</span><h2>الأصناف والمنتجات 📦</h2><p>تحكم في الأسعار والكميات والصور وحالة المخزون من مكان واحد.</p></div><button class="btn btn-primary" onclick="document.getElementById('pName')?.focus()"><i class="fas fa-plus"></i> إضافة صنف</button></div>
     <div class="products-kpis"><div><i class="fas fa-boxes-stacked"></i><b>${products.length}</b><span>إجمالي الأصناف</span></div><div class="warning"><i class="fas fa-triangle-exclamation"></i><b>${low.length}</b><span>مخزون منخفض</span></div><div class="danger"><i class="fas fa-circle-xmark"></i><b>${out.length}</b><span>نافد</span></div><div class="success"><i class="fas fa-sack-dollar"></i><b>${fmt(value)}</b><span>قيمة المخزون</span></div></div>
     <div class="card products-add-card"><div class="card-title"><i class="fas fa-circle-plus"></i> إضافة صنف جديد</div>
       <div class="form-grid">
@@ -4380,7 +4328,7 @@ function sharePOSOnWhatsApp(){
 function invoiceTextPro(inv,sales){
   const date=formatInvoiceDate(inv.date||'');
   const typeLabel=inv.type==='wholesale'?'جملة':'قطاعي';
-  let t=`🧾 *متجري — فاتورة بيع*
+  let t=`🧾 *كنوز الطبيعة — فاتورة بيع*
 `;
   t+=`━━━━━━━━━━━━━━
 `;
@@ -4466,7 +4414,7 @@ function openPOSReceiptPreview(invoice){
   const payLabel=({cash:'نقدي',credit:'آجل',transfer:'تحويل',card:'بطاقة'})[inv.method]||inv.method||'نقدي';
   openModal(`<div class="modal-header"><h2><i class="fas fa-file-invoice" style="color:var(--primary);margin-left:8px"></i> فاتورة بيع رقم ${inv.invoiceSeq||inv.invoiceNo}</h2><button class="modal-close" onclick="closeModal()">&times;</button></div>
     <div class="pos-receipt-preview receipt-pro-new">
-      <div class="receipt-brand">متجري</div>
+      <div class="receipt-brand">كنوز الطبيعة</div>
       <div class="receipt-title">فاتورة بيع</div>
       <div class="receipt-info-grid">
         <div><small>رقم الفاتورة</small><strong>${inv.invoiceSeq||inv.invoiceNo}</strong></div>
@@ -4496,7 +4444,7 @@ function printPOSReceipt(){
   const w=window.open('','_blank','width=760,height=900'); if(!w)return showToast('المتصفح منع نافذة الطباعة','warning');
   const doc=`<!doctype html><html lang="ar" dir="rtl"><head><meta charset="utf-8"><title>${inv.invoiceNo}</title><style>
   @page{size:A4;margin:14mm}body{font-family:Arial,sans-serif;color:#222;margin:0;background:#fff}.page{max-width:760px;margin:0 auto;padding:18px}.brand{text-align:center;font-size:24px;font-weight:900;margin-bottom:4px}.sub{text-align:center;color:#666;font-size:12px;line-height:1.8}.line{border-top:1px dashed #888;margin:14px 0}table{width:100%;border-collapse:collapse;font-size:13px}th,td{padding:9px 5px;border-bottom:1px solid #ddd;text-align:right}.r{display:flex;justify-content:space-between;padding:8px 0}.grand{font-size:19px;font-weight:900;border-top:2px solid #222;margin-top:8px;padding-top:12px}.thanks{text-align:center;margin-top:20px;font-size:12px;color:#666}@media print{.page{padding:0}}
-  </style></head><body><div class="page"><div class="brand">متجري</div><div class="sub">فاتورة بيع رقم ${inv.invoiceSeq||inv.invoiceNo}<br>${formatInvoiceDate(inv.date)}${inv.time?' • '+inv.time:''}<br>العميل: ${inv.customerName}<br>نوع البيع: ${inv.type==='wholesale'?'جملة':'قطاعي'}</div><div class="line"></div><table><thead><tr><th>الصنف</th><th>الكمية</th><th>الإجمالي</th></tr></thead><tbody>${rows}</tbody></table><div class="line"></div><div class="r"><span>الإجمالي قبل الخصم</span><b>${fmt(inv.subtotal)}</b></div><div class="r"><span>الخصم</span><b>${fmt(inv.discount)}</b></div><div class="r"><span>الضريبة</span><b>${fmt(inv.tax)}</b></div><div class="r grand"><span>الإجمالي النهائي</span><b>${fmt(inv.total)}</b></div><div class="r"><span>المدفوع</span><b>${fmt(inv.paid)}</b></div><div class="r"><span>${inv.method==='cash'?'الباقي':'المتبقي'}</span><b>${fmt(inv.method==='cash'?inv.change:inv.remaining)}</b></div><div class="r"><span>السداد</span><b>${({cash:'نقدي',credit:'آجل',transfer:'تحويل',card:'بطاقة'})[inv.method]||inv.method||'نقدي'}</b></div><div class="thanks">شكرًا لتعاملكم معنا ❤️</div></div>
+  </style></head><body><div class="page"><div class="brand">كنوز الطبيعة</div><div class="sub">فاتورة بيع رقم ${inv.invoiceSeq||inv.invoiceNo}<br>${formatInvoiceDate(inv.date)}${inv.time?' • '+inv.time:''}<br>العميل: ${inv.customerName}<br>نوع البيع: ${inv.type==='wholesale'?'جملة':'قطاعي'}</div><div class="line"></div><table><thead><tr><th>الصنف</th><th>الكمية</th><th>الإجمالي</th></tr></thead><tbody>${rows}</tbody></table><div class="line"></div><div class="r"><span>الإجمالي قبل الخصم</span><b>${fmt(inv.subtotal)}</b></div><div class="r"><span>الخصم</span><b>${fmt(inv.discount)}</b></div><div class="r"><span>الضريبة</span><b>${fmt(inv.tax)}</b></div><div class="r grand"><span>الإجمالي النهائي</span><b>${fmt(inv.total)}</b></div><div class="r"><span>المدفوع</span><b>${fmt(inv.paid)}</b></div><div class="r"><span>${inv.method==='cash'?'الباقي':'المتبقي'}</span><b>${fmt(inv.method==='cash'?inv.change:inv.remaining)}</b></div><div class="r"><span>السداد</span><b>${({cash:'نقدي',credit:'آجل',transfer:'تحويل',card:'بطاقة'})[inv.method]||inv.method||'نقدي'}</b></div><div class="thanks">شكرًا لتعاملكم معنا ❤️</div></div>
 
 </body></html>`;
   w.document.open(); w.document.write(doc); w.document.close(); w.focus(); setTimeout(()=>w.print(),300);
@@ -6036,7 +5984,7 @@ function debtShareMessage(name,remaining,type){
   const relation=type==='علينا'?'المبلغ المستحق لكم':'المبلغ المتبقي عليك';
   return `السلام عليكم ${name}،
 
-ده ملخص حسابك لدى متجري:
+ده ملخص حسابك لدى كنوز الطبيعة:
 ${relation}: ${fmt(remaining)}
 
 لو محتاج تفاصيل الحساب أنا تحت أمرك.`;
@@ -6652,71 +6600,6 @@ function saveSupplierEdit(id){
 
 function deleteSupplier(id){if(!confirm('حذف المورد؟'))return;Store.delete('suppliers',id);showToast('🗑️ تم الحذف');renderSuppliersPage(document.getElementById('contentArea'));}
 
-// ==================== الجرد وتسويات المخزون (v1.7.3) ====================
-function getStockAdjustments(){ return Store.get('stockAdjustments')||[]; }
-function inventoryCountValue(qty,cost){ return money(Number(qty||0)*Number(cost||0)); }
-function renderInventoryCountPage(container){
-  const products=Store.get('products')||[];
-  const adjustments=getStockAdjustments().slice().sort((a,b)=>String(b.dateTime||'').localeCompare(String(a.dateTime||'')));
-  const totalValue=products.reduce((n,p)=>n+inventoryCountValue(p.qty,p.purchase),0);
-  const diffs=adjustments.reduce((n,a)=>n+Number(a.difference||0),0);
-  container.innerHTML=`<div class="fade-in inventory-count-page">
-    <div class="products-hero"><div><span>مراقبة المخزون</span><h2>الجرد وتسويات المخزون 📋</h2><p>قارن الكمية الفعلية بالكمية المسجلة وسجل فرق الجرد بسبب واضح.</p></div><button class="btn btn-primary" onclick="navigateTo('products')"><i class="fas fa-arrow-right"></i> رجوع للأصناف</button></div>
-    <div class="products-kpis"><div><i class="fas fa-boxes-stacked"></i><b>${products.length}</b><span>الأصناف</span></div><div class="warning"><i class="fas fa-clipboard-list"></i><b>${adjustments.length}</b><span>حركات التسوية</span></div><div class="success"><i class="fas fa-sack-dollar"></i><b>${fmt(totalValue)}</b><span>قيمة المخزون</span></div><div class="${diffs===0?'success':'danger'}"><i class="fas fa-scale-balanced"></i><b>${fmt(diffs)}</b><span>صافي فروق الكمية</span></div></div>
-    <div class="card"><div class="card-title"><i class="fas fa-clipboard-check"></i> بدء جرد صنف</div>
-      <div class="inventory-count-note"><i class="fas fa-circle-info"></i><span>الكمية الدفترية هي الكمية المسجلة حاليًا. أدخل الكمية التي وجدتها فعليًا، وسيحسب البرنامج الفرق ويحدّث المخزون بعد التأكيد.</span></div>
-      <div class="form-grid">
-        <div class="form-group" style="grid-column:1/-1"><label>الصنف</label><select id="icProduct" onchange="updateInventoryCountPreview()"><option value="">اختر الصنف</option>${products.map(p=>`<option value="${p.id}">${escapeHtml(p.name)} — ${formatProductQty(p,Number(p.qty||0))} ${p.unit||'كجم'}</option>`).join('')}</select></div>
-        <div class="form-group"><label>الكمية الدفترية</label><input id="icBookQty" type="number" readonly placeholder="-" step="0.001"></div>
-        <div class="form-group"><label>الكمية الفعلية</label><input id="icActualQty" type="number" min="0" step="0.001" inputmode="decimal" placeholder="أدخل الكمية الفعلية" oninput="updateInventoryCountPreview()"></div>
-        <div class="form-group"><label>الفرق</label><input id="icDifference" type="text" readonly placeholder="-" ></div>
-        <div class="form-group"><label>قيمة الفرق بالتكلفة</label><input id="icDifferenceValue" type="text" readonly placeholder="-" ></div>
-        <div class="form-group" style="grid-column:1/-1"><label>سبب التسوية</label><input id="icReason" type="text" maxlength="200" placeholder="مثال: فرق جرد / تلف / فاقد / خطأ إدخال"></div>
-      </div>
-      <button class="btn btn-primary btn-block" onclick="applyInventoryCount()"><i class="fas fa-check-double"></i> اعتماد الجرد وتحديث المخزون</button>
-    </div>
-    <div class="card"><div class="card-title"><i class="fas fa-history"></i> آخر تسويات الجرد</div><div id="inventoryAdjustmentsList"></div></div>
-  </div>`;
-  renderInventoryAdjustmentsList();
-}
-function updateInventoryCountPreview(){
-  const id=document.getElementById('icProduct')?.value||'';
-  const p=(Store.get('products')||[]).find(x=>String(x.id)===String(id));
-  const book=Number(p?.qty||0);
-  const actualEl=document.getElementById('icActualQty');
-  const actual=actualEl&&actualEl.value!==''?Number(actualEl.value):null;
-  const diff=actual===null?null:money(actual-book);
-  const value=diff===null?null:inventoryCountValue(diff,p?.purchase||0);
-  const set=(id,val)=>{const el=document.getElementById(id);if(el)el.value=val===null?'-':String(val);};
-  set('icBookQty',p?formatProductQty(p,book):'-');
-  set('icDifference',diff===null?null:(diff>0?`+${formatProductQty(p,diff)}`:formatProductQty(p,diff)));
-  set('icDifferenceValue',value===null?null:(value>0?`+${fmt(value)}`:fmt(value)));
-}
-function applyInventoryCount(){
-  const id=document.getElementById('icProduct')?.value||'';
-  const actualRaw=document.getElementById('icActualQty')?.value;
-  const reason=(document.getElementById('icReason')?.value||'').trim();
-  const p=(Store.get('products')||[]).find(x=>String(x.id)===String(id));
-  if(!p)return showToast('اختر الصنف أولًا','warning');
-  if(actualRaw===''||!Number.isFinite(Number(actualRaw))||Number(actualRaw)<0)return showToast('أدخل الكمية الفعلية بشكل صحيح','warning');
-  if(!reason)return showToast('اكتب سبب التسوية','warning');
-  const book=Number(p.qty||0), actual=Number(actualRaw), difference=money(actual-book);
-  if(Math.abs(difference)<0.000001)return showToast('لا يوجد فرق بين الجرد الفعلي والدفتر','info');
-  const cost=Number(p.purchase||0), value=inventoryCountValue(difference,cost), now=cairoDateTimeISO();
-  if(!confirm(`تأكيد تسوية ${p.name}؟\nالدفتر: ${formatProductQty(p,book)} ${p.unit||'كجم'}\nالفعلي: ${formatProductQty(p,actual)} ${p.unit||'كجم'}\nالفرق: ${difference>0?'+':''}${formatProductQty(p,difference)}\nالسبب: ${reason}`))return;
-  const current=(Store.get('products')||[]).find(x=>String(x.id)===String(id));
-  if(!current)return showToast('تعذر العثور على الصنف','error');
-  Store.update('products',id,{qty:actual});
-  Store.add('stockAdjustments',{productId:p.id,productName:p.name,date:now,dateTime:now,bookQty:book,actualQty:actual,difference,costPerUnit:cost,value,unit:p.unit||'كجم',reason,user:currentUser?.name||'مستخدم'});
-  showToast(`✅ تم اعتماد الجرد — ${difference>0?'زيادة':'عجز'} ${formatProductQty(p,Math.abs(difference))} ${p.unit||'كجم'}`,'success');
-  document.getElementById('icActualQty').value=''; document.getElementById('icReason').value=''; updateInventoryCountPreview(); renderInventoryAdjustmentsList();
-}
-function renderInventoryAdjustmentsList(){
-  const box=document.getElementById('inventoryAdjustmentsList'); if(!box)return;
-  const rows=getStockAdjustments().slice().sort((a,b)=>String(b.dateTime||'').localeCompare(String(a.dateTime||''))).slice(0,50);
-  box.innerHTML=rows.map(a=>{const up=Number(a.difference||0)>0;return `<div class="inventory-adjustment-row"><div><strong>${escapeHtml(a.productName||'-')}</strong><small>${formatInvoiceDate(a.date||a.dateTime||'')} • ${escapeHtml(a.reason||'-')} • ${escapeHtml(a.user||'مستخدم')}</small></div><div class="inventory-adjustment-values"><span>دفتر ${fmt(a.bookQty)}</span><span>فعلي ${fmt(a.actualQty)}</span><b class="${up?'up':'down'}">${up?'+':''}${fmt(a.difference)} ${a.unit||''}</b></div></div>`}).join('')||'<div class="empty-state"><i class="fas fa-clipboard-check"></i><p>لا توجد تسويات جرد حتى الآن</p></div>';
-}
-
 // ==================== العروض والخصومات (ميزة جديدة) ====================
 function renderOffersPage(container){
   const offers=Store.get('offers')||[];
@@ -7003,7 +6886,7 @@ function renderMorePage(container){
     </div>
     <div class="more-section-title"><span><i class="fas fa-chart-pie"></i> التقارير والمتابعة</span><small>تحليل الأداء</small></div>
     <div class="menu-grid menu-grid-v3 compact">
-      <div class="menu-item-v3" onclick="navigateTo('offers')"><div class="menu-icon"><i class="fas fa-tags"></i></div><div><b>العروض</b><small>العروض والخصومات</small></div><i class="fas fa-chevron-left arrow"></i></div><div class="menu-item-v3" onclick="navigateTo('inventoryCount')"><div class="menu-icon"><i class="fas fa-clipboard-check"></i></div><div><b>الجرد والتسويات</b><small>مطابقة المخزون الفعلي بالدفتر</small></div><i class="fas fa-chevron-left arrow"></i></div>
+      <div class="menu-item-v3" onclick="navigateTo('offers')"><div class="menu-icon"><i class="fas fa-tags"></i></div><div><b>العروض</b><small>العروض والخصومات</small></div><i class="fas fa-chevron-left arrow"></i></div>
       <div class="menu-item-v3" onclick="navigateTo('summary')"><div class="menu-icon"><i class="fas fa-chart-column"></i></div><div><b>ملخص الشهر</b><small>الأرقام والنتائج</small></div><i class="fas fa-chevron-left arrow"></i></div>
       <div class="menu-item-v3" onclick="navigateTo('reports')"><div class="menu-icon"><i class="fas fa-chart-line"></i></div><div><b>التقارير</b><small>تقارير تفصيلية</small></div><i class="fas fa-chevron-left arrow"></i></div>
       <div class="menu-item-v3" onclick="navigateTo('audit')"><div class="menu-icon"><i class="fas fa-clock-rotate-left"></i></div><div><b>سجل التعديلات</b><small>آخر التغييرات</small></div><i class="fas fa-chevron-left arrow"></i></div>
@@ -7224,7 +7107,7 @@ function renderSettingsPage(container){
             <div class="backup-head-icon"><i class="fas fa-shield-halved"></i></div>
             <div style="min-width:0">
               <h3>مركز النسخ الاحتياطي</h3>
-              <p>احفظ بيانات متجري على جهازك أو Google Drive مع التحقق من سلامة النسخة.</p>
+              <p>احفظ بيانات كنوز الطبيعة على جهازك أو Google Drive مع التحقق من سلامة النسخة.</p>
             </div>
           </div>
           <div class="backup-head-status" id="backupOverallStatus"><i class="fas fa-circle"></i> جاهز</div>
@@ -7514,83 +7397,11 @@ async function applyBundledOriginalDataOnce(){
   }catch(e){ console.error('تعذر تطبيق البيانات الأصلية المدمجة:',e); return false; }
 }
 
-/* v1.7.2 — تصحيح حالة تحصيلات أحمد عطا وإسلام الوحدة الصحية
-   الهدف: إعادة الفواتير لحالة آجل حقيقية عندما لا توجد حركة تحصيل فعلية في الخزنة.
-   يعمل فقط عند اكتشاف الحالة القديمة المحددة، لذلك لا يعيد تصفير أي تحصيل جديد لاحقًا. */
-function restorePendingDebtStateV172(){
-  try{
-    // تنفيذ التصحيح مرة واحدة فقط. بعد نجاحه لا يُعاد تعديل أي فاتورة مستقبلًا.
-    const MIGRATION_FLAG='bm_debt_state_reset_v172';
-    if(localStorage.getItem(MIGRATION_FLAG)==='1') return false;
-    const sales=Store.get('sales')||[];
-    const debts=Store.get('debts')||[];
-    const targets=[
-      {person:'أحمد عطا', seq:'57', invoiceNo:'INV-20260821-947970', total:500, paid:100, remaining:400},
-      {person:'اسلام الوحدة الصحية', seq:'17', invoiceNo:'', total:500, paid:500, remaining:0}
-    ];
-    let changed=false;
-    targets.forEach(target=>{
-      const matches=sales.filter(s=>{
-        const person=String(s.customerName||'').trim();
-        const seq=String(s.invoiceSeq||'');
-        const no=String(s.invoiceNo||'');
-        return person===target.person &&
-          ((target.invoiceNo && no===target.invoiceNo) || seq===target.seq);
-      });
-      if(!matches.length)return;
-      const batchIds=[...new Set(matches.map(s=>String(s.saleBatchId||s.invoiceNo||s.id||'')))].filter(Boolean);
-      batchIds.forEach(batchId=>{
-        const batch=sales.filter(s=>String(s.saleBatchId||s.invoiceNo||s.id||'')===batchId);
-        const total=Math.max(...batch.map(s=>Number(s.total||0)),0);
-        const paid=Math.max(...batch.map(s=>Number(s.paid||0)),0);
-        const remaining=Math.max(...batch.map(s=>Number(s.remaining||0)),0);
-        const isExpectedState=Math.abs(total-target.total)<0.01 &&
-          Math.abs(paid-target.paid)<0.01 && Math.abs(remaining-target.remaining)<0.01;
-        if(!isExpectedState)return;
-        batch.forEach(s=>{
-          Store.update('sales',s.id,{
-            paid:0,
-            remaining:Math.max(0,Number(s.total||0)),
-            initialPaid:0,
-            collectionHistory:[]
-          });
-        });
-        debts.filter(d=>{
-          return d && d.source==='sale' && d.type==='لنا' &&
-            String(d.saleBatchId||d.invoiceNo||'')===batchId;
-        }).forEach(d=>{
-          Store.update('debts',d.id,{
-            amount:total,
-            paidAmount:0,
-            paymentHistory:[],
-            paid:false,
-            debtVersion:2,
-            source:'sale',
-            type:'لنا',
-            person:target.person,
-            saleTotal:total
-          });
-        });
-        changed=true;
-      });
-    });
-    if(changed){
-      try{localStorage.setItem(MIGRATION_FLAG,'1');}catch(e){}
-      console.log('v1.7.2 debt-state correction applied');
-    }
-    return changed;
-  }catch(e){
-    console.error('تعذر تصحيح حالة ديون أحمد وإسلام:',e);
-    return false;
-  }
-}
-
 window.addEventListener('DOMContentLoaded', async () => {
   applyAppTheme();
   applyAppIdentity();
   try { await initIndexedDBStore(); } catch (e) { console.warn('IndexedDB init:', e); }
   await applyBundledOriginalDataOnce();
-  restorePendingDebtStateV172();
   const user = Store.getUser();
   if (user && !isLockEnabled()) {
     currentUser = user;
@@ -7614,120 +7425,17 @@ async function replaceCloudDataWithLocal() {
 
 </script>
 <script>
-/* =========================================================
-   🔄 مدير تحديثات متجري — إصدار ثابت
-   - يفحص version.json بدون كاش.
-   - عند الضغط على تحديث: يلغي Service Worker القديم، يمسح كاشه,
-     ثم يفتح index.html مباشرة من الشبكة مع Cache-Busting.
-   - لا يلمس بيانات المستخدم أو localStorage الخاص بالبرنامج.
-========================================================= */
-(function(){
-  const UPDATE_CONFIG={
-    manifestUrl:'version.json',
-    checkEveryMs:30*60*1000,
-    skipKey:'bm_update_skip_version',
-    lastCheckKey:'bm_update_last_check'
-  };
-  function normalizeVersion(v){return String(v||'').trim().replace(/^v/i,'').split('.').map(x=>parseInt(x,10)||0);}
-  function compareVersions(a,b){const A=normalizeVersion(a),B=normalizeVersion(b);for(let i=0;i<3;i++){if((A[i]||0)!==(B[i]||0))return (A[i]||0)>(B[i]||0)?1:-1;}return 0;}
-  function currentVersion(){return typeof APP_VERSION!=='undefined'?APP_VERSION:'v0.0.0';}
-  function showUpdateCard(remote){
-    if(document.getElementById('matgaryUpdateCard'))return;
-    const card=document.createElement('div');card.id='matgaryUpdateCard';card.dir='rtl';
-    card.innerHTML=`<div class="matgary-update-backdrop"></div><div class="matgary-update-box">
-      <div class="matgary-update-icon">↻</div>
-      <h3>تحديث جديد لمتجري</h3>
-      <p>الإصدار الحالي <b>${currentVersion()}</b></p>
-      <p>الإصدار الجديد <b>${remote.version}</b></p>
-      ${remote.notes?`<div class="matgary-update-notes">${escapeHtml(String(remote.notes))}</div>`:''}
-      <div class="matgary-update-actions"><button id="matgaryUpdateNow" class="btn btn-primary">تحديث الآن</button><button id="matgaryUpdateLater" class="btn btn-outline">لاحقًا</button></div>
-    </div>`;
-    document.body.appendChild(card);
-    document.getElementById('matgaryUpdateLater').onclick=()=>{localStorage.setItem(UPDATE_CONFIG.skipKey,String(remote.version));card.remove();};
-    document.getElementById('matgaryUpdateNow').onclick=()=>performUpdate(remote,card);
-  }
-  async function performUpdate(remote,card){
-    const btn=document.getElementById('matgaryUpdateNow');
-    if(btn){btn.disabled=true;btn.textContent='جاري تثبيت التحديث...';}
-    try{
-      // النسخة الاحتياطية اختيارية فقط إذا كانت خدمات Google متصلة بالفعل.
-      if(typeof buildBackupPayload==='function' && typeof backupToGoogle==='function' && typeof driveAccessTokenValid==='function' && driveAccessTokenValid()){
-        await backupToGoogle({silent:true});
-      }
-      // علّم النسخة التي طلب المستخدم تثبيتها، حتى لا تعود النافذة أثناء إعادة التحميل.
-      localStorage.setItem('bm_update_pending_version',String(remote.version));
-      localStorage.setItem(UPDATE_CONFIG.lastCheckKey,String(Date.now()));
-
-      // إلغاء أي Service Worker قديم هو أهم خطوة لمنع إعادة تقديم index.html القديم.
-      if('serviceWorker' in navigator){
-        const regs=await navigator.serviceWorker.getRegistrations();
-        await Promise.all(regs.map(async reg=>{
-          try{ await reg.unregister(); }catch(e){}
-        }));
-      }
-      // امسح فقط Cache Storage الخاص بالـ Service Worker، ولا نمسح localStorage/بيانات البرنامج.
-      if(window.caches){
-        const keys=await caches.keys();
-        await Promise.all(keys.map(k=>caches.delete(k)));
-      }
-
-      // افتح النسخة المنشورة مباشرة مع معامل جديد لكسر أي كاش من GitHub Pages/المتصفح.
-      const u=new URL(window.location.href);
-      u.search='';
-      u.hash='';
-      u.searchParams.set('updated',String(remote.version).replace(/^v/i,''));
-      u.searchParams.set('t',String(Date.now()));
-      window.location.replace(u.toString());
-    }catch(e){
-      console.error('Update failed',e);
-      localStorage.removeItem('bm_update_pending_version');
-      if(btn){btn.disabled=false;btn.textContent='إعادة المحاولة';}
-      if(typeof showToast==='function')showToast('تعذر إكمال التحديث. بياناتك لم يتم حذفها.','error');
-    }
-  }
-  async function checkForUpdate(force){
-    try{
-      const pending=localStorage.getItem('bm_update_pending_version');
-      if(pending && compareVersions(currentVersion(),pending)>=0){localStorage.removeItem('bm_update_pending_version');}
-      const last=Number(localStorage.getItem(UPDATE_CONFIG.lastCheckKey)||0);
-      if(!force && window.__matgaryInitialUpdateCheckDone && Date.now()-last<UPDATE_CONFIG.checkEveryMs)return;
-      window.__matgaryInitialUpdateCheckDone=true;
-      localStorage.setItem(UPDATE_CONFIG.lastCheckKey,String(Date.now()));
-      const r=await fetch(UPDATE_CONFIG.manifestUrl+'?t='+Date.now(),{cache:'no-store',headers:{'Cache-Control':'no-cache','Pragma':'no-cache'}});
-      if(!r.ok)return;
-      const remote=await r.json();
-      if(!remote || !remote.version || compareVersions(remote.version,currentVersion())<=0)return;
-      if(localStorage.getItem(UPDATE_CONFIG.skipKey)===String(remote.version))return;
-      showUpdateCard(remote);
-    }catch(e){console.warn('Update check skipped:',e);}
-  }
-  function injectStyle(){
-    if(document.getElementById('matgary-update-style'))return;
-    const st=document.createElement('style');st.id='matgary-update-style';st.textContent=`
-      #matgaryUpdateCard{position:fixed;inset:0;z-index:999999;font-family:inherit}
-      .matgary-update-backdrop{position:absolute;inset:0;background:rgba(15,23,42,.48);backdrop-filter:blur(4px)}
-      .matgary-update-box{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:min(92vw,420px);background:#fff;border-radius:24px;padding:26px;text-align:center;box-shadow:0 24px 80px rgba(0,0,0,.25)}
-      .matgary-update-icon{width:58px;height:58px;margin:0 auto 12px;border-radius:18px;display:grid;place-items:center;background:rgba(15,118,110,.10);font-size:32px;color:#0f766e;font-weight:900}
-      .matgary-update-box h3{margin:0 0 10px;font-size:1.15rem}.matgary-update-box p{margin:6px 0;color:#64748b;font-size:.9rem}.matgary-update-notes{margin:14px 0;padding:10px;border-radius:12px;background:#f8fafc;color:#475569;font-size:.8rem}
-      .matgary-update-actions{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-top:18px}.matgary-update-actions button{min-height:46px;border-radius:13px;border:0;font:inherit;font-weight:800;cursor:pointer}.matgary-update-actions .btn-outline{border:1px solid #d8e4df;background:#fff}
-    `;document.head.appendChild(st);
-  }
-  window.matgaryCheckForUpdate=()=>checkForUpdate(true);
-  document.addEventListener('DOMContentLoaded',()=>{injectStyle();setTimeout(()=>checkForUpdate(false),800);setInterval(()=>checkForUpdate(false),UPDATE_CONFIG.checkEveryMs);});
-})();
-
-/* Service Worker: يسجل فقط بعد تحميل الصفحة، وباسم متغير لكسر النسخ القديمة. */
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', function() {
-    navigator.serviceWorker.register('sw.js?v=1.7.6.1', {updateViaCache:'none'})
+    navigator.serviceWorker.register('sw.js?v=1.7.2')
       .then(function(registration) {
         registration.update().catch(function(){});
-        console.log('SW registered:', registration.scope);
+        console.log('SW registered: ', registration.scope);
       })
-      .catch(function(error) { console.log('SW registration failed:', error); });
+      .catch(function(error) { console.log('SW registration failed: ', error); });
   });
 }
-
+</script>
 <style id="sales-purchases-final-fixes">
 .sale-ref-service-row{display:grid!important;grid-template-columns:minmax(0,1fr) 150px!important;gap:8px!important;align-items:center!important;margin:10px 0!important}
 .sale-ref-service-row .sale-ref-service{width:100%!important}
@@ -7873,7 +7581,7 @@ if ('serviceWorker' in navigator) {
   function esc(v){return String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
   function invoiceTotalText(inv){return fmt(inv.total);}
   function invoiceText(inv){
-    let t=`🧾 *متجري — فاتورة بيع*\n`;
+    let t=`🧾 *كنوز الطبيعة — فاتورة بيع*\n`;
     t+=`━━━━━━━━━━━━━━\n`;
     t+=`🔢 رقم الفاتورة: *${inv.invoiceSeq||inv.invoiceNo}*\n`;
     t+=`📅 التاريخ: *${formatInvoiceDate(inv.date)}${inv.time?' — '+inv.time:''}*\n`;
@@ -8013,85 +7721,7 @@ if ('serviceWorker' in navigator) {
     const inv=findInvoice(key);if(!inv)return;
     const rows=inv.lines.map(s=>{const q=money(s.packages||s.qty||1),w=money(s.weight||1);const p=productForSaleLine(s);const qty=isKgProduct(p)||s.isWeightSale?saleQuantityLabel(p,q,w):`${q} ${isFixedPackProduct(p)?'علبة':(s.sellUnit||p?.unit||'علبة')}`;return `<tr><td>${esc(s.productName||'صنف')}</td><td>${esc(qty)}</td><td>${fmt(s.price||0)}</td><td>${fmt(s.total)}</td></tr>`}).join('');
     const w=window.open('','_blank','width=900,height=800');if(!w){showToast('اسمح بفتح نافذة الطباعة','warning');return;}
-    const html='<!doctype html><html lang="ar" dir="rtl"><head><meta charset="UTF-8"><title>'+esc(inv.invoiceNo)+'</title><style>@page{size:A4;margin:12mm}body{margin:0;font-family:Arial,Tahoma,sans-serif;color:#173b32;background:#fff}.page{width:100%;max-width:190mm;margin:auto;padding:6mm;box-sizing:border-box}.brand{text-align:center;font-size:28px;font-weight:900;color:#0f766e;margin-bottom:4px}.sub{text-align:center;color:#66756f;font-size:12px;line-height:1.8}.line{border-top:1px solid #dce8e3;margin:14px 0}table{width:100%;border-collapse:collapse;margin:10px 0;font-size:12px}th{background:#eef7f3;color:#0f766e}th,td{padding:9px 7px;border-bottom:1px solid #e6eeeb;text-align:right}.r{display:flex;justify-content:space-between;padding:6px 0;font-size:13px}.grand{font-size:19px;font-weight:900;border-top:2px solid #0f766e;margin-top:8px;padding-top:10px}.thanks{text-align:center;margin-top:25px;color:#71827b;font-size:12px}.meta{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px}.meta div{border:1px solid #dfeae5;border-radius:10px;padding:8px}.meta small{display:block;color:#778780;font-size:10px}.meta b{display:block;margin-top:3px;font-size:12px}@media print{button{display:none}}</style>
-<style id="matgary-stock-ledger-style">
-/* v1.7.5 — سجل حركة الأصناف */
-.stock-ledger-hero{background:linear-gradient(135deg,#0f766e 0%,#176f68 58%,#c99a22 145%);color:#fff;border-radius:20px;padding:20px;margin-bottom:16px;box-shadow:0 12px 30px rgba(15,118,110,.18)}
-.stock-ledger-hero-top{display:flex;align-items:center;justify-content:space-between;gap:12px}
-.stock-ledger-hero h2{margin:3px 0 0;font-size:1.2rem;font-weight:950}
-.stock-ledger-hero p{margin:6px 0 0;color:rgba(255,255,255,.82);font-size:.76rem}
-.stock-ledger-back{border:1px solid rgba(255,255,255,.35);background:rgba(255,255,255,.12);color:#fff;border-radius:11px;padding:9px 12px;font-family:inherit;font-weight:900;cursor:pointer}
-.stock-ledger-kpis{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-bottom:16px}
-.stock-ledger-kpi{background:#fff;border:1px solid var(--border);border-radius:15px;padding:13px;text-align:center;box-shadow:var(--shadow)}
-.stock-ledger-kpi i{display:block;font-size:1.15rem;color:var(--primary);margin-bottom:5px}
-.stock-ledger-kpi b{display:block;font-size:1.05rem;font-weight:950;color:var(--text)}
-.stock-ledger-kpi span{display:block;color:var(--text-muted);font-size:.67rem;margin-top:3px;font-weight:800}
-.stock-ledger-filters{display:grid;grid-template-columns:1.5fr 1fr 1fr;gap:9px;margin-bottom:12px}
-.stock-ledger-filters input,.stock-ledger-filters select{width:100%;padding:11px 12px;border:1.5px solid var(--border);border-radius:11px;background:#fbfdfc;font:inherit;font-size:.75rem;font-weight:800;color:var(--text)}
-.stock-ledger-product{display:flex;align-items:center;gap:10px;background:#f7faf9;border:1px solid #e2ebe7;border-radius:13px;padding:10px;margin-bottom:12px}
-.stock-ledger-product .icon{width:44px;height:44px;border-radius:12px;display:grid;place-items:center;background:#fff;border:1px solid var(--border);font-size:1.35rem}
-.stock-ledger-product .info{flex:1;min-width:0}.stock-ledger-product strong{display:block;font-size:.9rem;font-weight:950}.stock-ledger-product small{display:block;color:var(--text-muted);font-size:.67rem;margin-top:2px}
-.stock-ledger-balance{text-align:center;background:#fff;border:1px solid #dce9e4;border-radius:12px;padding:8px 10px;min-width:92px}
-.stock-ledger-balance small{display:block;color:var(--text-muted);font-size:.6rem}.stock-ledger-balance b{display:block;color:var(--primary);font-size:.95rem}
-.stock-ledger-table-wrap{overflow:auto;border:1px solid var(--border);border-radius:14px;-webkit-overflow-scrolling:touch}
-.stock-ledger-table{width:100%;min-width:690px;border-collapse:collapse}
-.stock-ledger-table th,.stock-ledger-table td{padding:9px 7px;border-bottom:1px solid var(--border);font-size:.7rem;text-align:right;white-space:nowrap}
-.stock-ledger-table th{background:#eef4f1;color:var(--primary);font-weight:950}
-.stock-ledger-table tr:last-child td{border-bottom:0}
-.stock-ledger-in{color:#08796d;font-weight:950}.stock-ledger-out{color:#c63f3f;font-weight:950}.stock-ledger-neutral{color:#7b5d13;font-weight:950}
-.stock-ledger-type{display:inline-flex;align-items:center;gap:4px;padding:4px 7px;border-radius:8px;background:#f4f8f6;font-weight:900}
-.stock-ledger-running{font-weight:950;color:var(--text)}
-.stock-ledger-empty{text-align:center;padding:38px 15px;color:var(--text-muted)}
-.stock-ledger-note{font-size:.68rem;color:var(--text-muted);line-height:1.7;margin-top:10px;padding:10px;border-radius:11px;background:#fffaf0;border:1px solid #f1e5c5}
-.stock-ledger-actions{display:flex;gap:7px;flex-wrap:wrap;margin-top:10px}.stock-ledger-actions .btn{flex:1;min-width:130px}
-.product-ledger-btn{width:100%;margin-top:8px!important}
-@media(max-width:700px){.stock-ledger-filters{grid-template-columns:1fr 1fr}.stock-ledger-filters input{grid-column:1/-1}.stock-ledger-hero-top{align-items:flex-start}.stock-ledger-product{align-items:flex-start}.stock-ledger-balance{min-width:82px}}
-
-/* =========================================================
-   v1.7.7 — تحسين سجل حركة الصنف للموبايل
-   يمنع تداخل الرقم مع الوحدة ويحوّل الحركات إلى بطاقات واضحة.
-========================================================= */
-@media(max-width:700px){
-  .stock-ledger-page{min-width:0;overflow:hidden}
-  .stock-ledger-hero{padding:16px 14px;border-radius:17px}
-  .stock-ledger-hero-top{gap:9px}
-  .stock-ledger-hero h2{font-size:1.02rem}
-  .stock-ledger-hero p{font-size:.69rem;line-height:1.65}
-  .stock-ledger-back{padding:8px 9px;font-size:.68rem;white-space:nowrap}
-  .stock-ledger-kpis{gap:8px}
-  .stock-ledger-kpi{padding:11px 7px;min-width:0}
-  .stock-ledger-kpi b{font-size:.92rem;white-space:normal;line-height:1.45;overflow-wrap:anywhere}
-  .stock-ledger-product{gap:8px;padding:9px}
-  .stock-ledger-product .info{min-width:0}
-  .stock-ledger-product strong{font-size:.82rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-  .stock-ledger-balance{min-width:76px!important;padding:7px 6px}
-  .stock-ledger-balance b{font-size:.82rem;white-space:normal;line-height:1.35}
-  .stock-ledger-table-wrap{overflow:visible;border:0;border-radius:0}
-  .stock-ledger-table{display:block;width:100%;min-width:0}
-  .stock-ledger-table thead{display:none}
-  .stock-ledger-table tbody{display:block;width:100%}
-  .stock-ledger-table tr{display:grid;grid-template-columns:1fr 1fr;gap:0 9px;background:#fff;border:1px solid var(--border);border-radius:14px;margin:0 0 9px;padding:9px;box-shadow:0 3px 12px rgba(31,55,48,.05)}
-  .stock-ledger-table td{display:flex;align-items:center;justify-content:space-between;gap:8px;width:100%;min-width:0!important;padding:7px 2px;border:0;font-size:.72rem;white-space:normal;text-align:right;overflow:hidden}
-  .stock-ledger-table td::before{content:'';color:var(--text-muted);font-size:.62rem;font-weight:800;flex:0 0 auto}
-  .stock-ledger-table td:nth-child(1){display:none}
-  .stock-ledger-table td:nth-child(2)::before{content:'التاريخ'}
-  .stock-ledger-table td:nth-child(3)::before{content:'الحركة'}
-  .stock-ledger-table td:nth-child(4)::before{content:'الكمية'}
-  .stock-ledger-table td:nth-child(5)::before{content:'القيمة'}
-  .stock-ledger-table td:nth-child(6)::before{content:'الرصيد'}
-  .stock-ledger-table td:nth-child(7)::before{content:'الطرف'}
-  .stock-ledger-table td:nth-child(8)::before{content:'البيان'}
-  .stock-ledger-table td:nth-child(2),.stock-ledger-table td:nth-child(3),.stock-ledger-table td:nth-child(4),.stock-ledger-table td:nth-child(5),.stock-ledger-table td:nth-child(6){grid-column:span 1}
-  .stock-ledger-table td:nth-child(7),.stock-ledger-table td:nth-child(8){grid-column:1/-1}
-  .stock-ledger-table td:nth-child(4),.stock-ledger-table td:nth-child(6){font-weight:950}
-  .stock-ledger-table td:nth-child(4)>*,.stock-ledger-table td:nth-child(6)>*{min-width:0}
-  .stock-ledger-table td:nth-child(7),.stock-ledger-table td:nth-child(8){border-top:1px dashed #e6ece9;margin-top:2px;padding-top:8px}
-  .stock-ledger-type{font-size:.65rem;padding:4px 6px;white-space:nowrap}
-  .stock-ledger-actions{display:grid;grid-template-columns:1fr;gap:8px}
-  .stock-ledger-actions .btn{width:100%;min-width:0}
-}
-</style>
-</head><body><div class="page"><div class="brand">متجري</div><div class="sub">فاتورة بيع — '+esc(inv.invoiceNo)+'<br>'+esc(inv.date)+' '+esc(inv.time)+'</div><div class="line"></div><div class="meta"><div><small>العميل</small><b>'+esc(inv.customerName)+'</b></div><div><small>نوع البيع</small><b>'+(inv.type==='wholesale'?'جملة':'قطاعي')+'</b></div><div><small>السداد</small><b>'+paymentLabel(inv.paymentMethod)+'</b></div></div><div class="line"></div><table><thead><tr><th>الصنف</th><th>الكمية</th><th>السعر</th><th>الإجمالي</th></tr></thead><tbody>'+rows+'</tbody></table><div class="line"></div><div class="r"><span>الإجمالي</span><b>'+fmt(inv.total)+'</b></div><div class="r"><span>المدفوع</span><b>'+fmt(inv.paid)+'</b></div><div class="r grand"><span>المتبقي</span><b>'+fmt(inv.remaining)+'</b></div>'+(inv.note?'<div class="line"></div><div class="r"><span>ملاحظات</span><b>'+esc(inv.note)+'</b></div>':'')+'<div class="thanks">شكرًا لتعاملكم معنا ❤️</div></div></body></html>';
+    const html='<!doctype html><html lang="ar" dir="rtl"><head><meta charset="UTF-8"><title>'+esc(inv.invoiceNo)+'</title><style>@page{size:A4;margin:12mm}body{margin:0;font-family:Arial,Tahoma,sans-serif;color:#173b32;background:#fff}.page{width:100%;max-width:190mm;margin:auto;padding:6mm;box-sizing:border-box}.brand{text-align:center;font-size:28px;font-weight:900;color:#0f766e;margin-bottom:4px}.sub{text-align:center;color:#66756f;font-size:12px;line-height:1.8}.line{border-top:1px solid #dce8e3;margin:14px 0}table{width:100%;border-collapse:collapse;margin:10px 0;font-size:12px}th{background:#eef7f3;color:#0f766e}th,td{padding:9px 7px;border-bottom:1px solid #e6eeeb;text-align:right}.r{display:flex;justify-content:space-between;padding:6px 0;font-size:13px}.grand{font-size:19px;font-weight:900;border-top:2px solid #0f766e;margin-top:8px;padding-top:10px}.thanks{text-align:center;margin-top:25px;color:#71827b;font-size:12px}.meta{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px}.meta div{border:1px solid #dfeae5;border-radius:10px;padding:8px}.meta small{display:block;color:#778780;font-size:10px}.meta b{display:block;margin-top:3px;font-size:12px}@media print{button{display:none}}</style></head><body><div class="page"><div class="brand">كنوز الطبيعة</div><div class="sub">فاتورة بيع — '+esc(inv.invoiceNo)+'<br>'+esc(inv.date)+' '+esc(inv.time)+'</div><div class="line"></div><div class="meta"><div><small>العميل</small><b>'+esc(inv.customerName)+'</b></div><div><small>نوع البيع</small><b>'+(inv.type==='wholesale'?'جملة':'قطاعي')+'</b></div><div><small>السداد</small><b>'+paymentLabel(inv.paymentMethod)+'</b></div></div><div class="line"></div><table><thead><tr><th>الصنف</th><th>الكمية</th><th>السعر</th><th>الإجمالي</th></tr></thead><tbody>'+rows+'</tbody></table><div class="line"></div><div class="r"><span>الإجمالي</span><b>'+fmt(inv.total)+'</b></div><div class="r"><span>المدفوع</span><b>'+fmt(inv.paid)+'</b></div><div class="r grand"><span>المتبقي</span><b>'+fmt(inv.remaining)+'</b></div>'+(inv.note?'<div class="line"></div><div class="r"><span>ملاحظات</span><b>'+esc(inv.note)+'</b></div>':'')+'<div class="thanks">شكرًا لتعاملكم معنا ❤️</div></div></body></html>';
     w.document.open();w.document.write(html);w.document.close();w.focus();setTimeout(()=>w.print(),350);
   };
 
@@ -8494,200 +8124,149 @@ window.addEventListener('online',()=>{try{if(typeof markCloudSyncPending==='func
 })();
 </script>
 
-<script id="matgary-stock-ledger-v175">
-/* =========================================================
-   متجري v1.7.5 — سجل حركة الأصناف
-   يعتمد على السجلات الحالية: المشتريات، المبيعات، المرتجعات
-   وتسويات الجرد، ولا يغيّر أرصدة المخزون بمجرد فتح الشاشة.
-   ========================================================= */
+<!-- =========================================================
+     متجري — نظام التحديث الذكي
+     مبني على النسخة النظيفة v1.7.2 فقط.
+     لا يعدّل بيانات المستخدم ولا شاشات المبيعات/الأصناف.
+     ========================================================= -->
+<style id="matgary-update-style">
+  #matgaryUpdateCard{position:fixed;inset:0;z-index:100000;display:flex;align-items:center;justify-content:center;padding:20px;direction:rtl}
+  .matgary-update-backdrop{position:absolute;inset:0;background:rgba(15,23,42,.48);backdrop-filter:blur(6px)}
+  .matgary-update-box{position:relative;width:min(100%,430px);background:#fff;border-radius:28px;padding:28px 22px 22px;text-align:center;box-shadow:0 25px 70px rgba(0,0,0,.25);font-family:'Tajawal','Segoe UI',sans-serif}
+  .matgary-update-icon{width:78px;height:78px;margin:0 auto 16px;border-radius:22px;display:flex;align-items:center;justify-content:center;font-size:38px;color:#0f766e;background:#edf8f5}
+  .matgary-update-box h3{margin:0 0 10px;font-size:1.35rem;font-weight:900;color:#243238}
+  .matgary-update-box p{margin:7px 0;color:#64748b;font-size:.95rem}
+  .matgary-update-notes{margin:16px 0;padding:13px 12px;border-radius:15px;background:#f5f8f7;color:#475569;font-size:.86rem;line-height:1.8}
+  .matgary-update-actions{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:20px}
+  .matgary-update-actions button{min-height:52px;border-radius:15px;border:0;font:inherit;font-weight:900;font-size:.95rem;cursor:pointer}
+  .matgary-update-now{background:linear-gradient(135deg,#075e54,#6d28d9,#c99a22);color:#fff;box-shadow:0 8px 24px rgba(109,40,217,.22)}
+  .matgary-update-later{border:1px solid #d8e4df!important;background:#fff;color:#7c3aed}
+  @media(max-width:430px){.matgary-update-box{padding:24px 16px 18px}.matgary-update-actions{gap:8px}}
+</style>
+
+<script>
 (function(){
-  const esc=v=>String(v??'').replace(/[&<>'"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c]));
-  const num=v=>{const n=Number(v);return Number.isFinite(n)?n:0;};
-  const moneySafe=v=>typeof money==='function'?money(v):Math.round((num(v)+Number.EPSILON)*100)/100;
-  const dateText=v=>{
-    const s=String(v||'');
-    if(!s)return '-';
-    try{return new Date(s.includes('T')?s:s+'T00:00:00').toLocaleString('ar-EG',{dateStyle:'short',timeStyle:s.includes('T')?'short':undefined,timeZone:'Africa/Cairo'});}
-    catch(e){return s.slice(0,16).replace('T',' ');}
-  };
-  const qtyText=(p,q)=>typeof formatProductQty==='function'?formatProductQty(p,q):String(moneySafe(q));
-  const typeInfo=t=>{
-    if(t==='purchase')return ['📥','شراء','in'];
-    if(t==='sale')return ['🛒','بيع','out'];
-    if(t==='return')return ['↩️','مرتجع','in'];
-    if(t==='adjustment')return ['⚖️','تسوية جرد','neutral'];
-    if(t==='initial')return ['📦','رصيد مسجل','neutral'];
-    return ['•','حركة','neutral'];
+  'use strict';
+
+  const MATGARY_UPDATE = {
+    manifest: 'version.json',
+    current: 'v1.7.2'
   };
 
-  function buildMovements(productId){
-    const pid=String(productId);
-    const products=Store.get('products')||[];
-    const p=products.find(x=>String(x.id)===pid);
-    if(!p)return [];
-    const rows=[];
-
-    (Store.get('purchases')||[]).forEach(x=>{
-      if(String(x.productId)!==pid)return;
-      const q=num(x.qty);
-      if(q<=0)return;
-      rows.push({date:x.date||x.createdAt||'',time:x.createdAt||x.updatedAt||'',type:'purchase',qty:q,value:moneySafe(x.total??q*num(x.price)),ref:x.purchaseBatchId||x.id||'',party:x.supplierName||'مورد',note:x.note||''});
-    });
-
-    (Store.get('sales')||[]).forEach(x=>{
-      if(String(x.productId)!==pid)return;
-      const q=num(x.qty);
-      if(q<=0)return;
-      rows.push({date:x.date||x.createdAt||'',time:x.createdAt||x.updatedAt||'',type:'sale',qty:-q,value:moneySafe(x.total),ref:x.invoiceSeq||x.invoiceNo||x.saleBatchId||x.id||'',party:x.customerName||'عميل عادي',note:x.note||''});
-      /* إذا كان هناك مرتجع محفوظ داخل سطر البيع، نظهره كحركة موجبة.
-         تاريخ المرتجع يُستنتج من updatedAt الذي يحدّثه Store.update. */
-      const returned=num(x.returnedQty);
-      if(returned>0){
-        rows.push({date:x.updatedAt||x.date||'',time:x.updatedAt||'',type:'return',qty:returned,value:moneySafe(x.returnedAmount||0),ref:x.invoiceSeq||x.invoiceNo||x.saleBatchId||x.id||'',party:x.customerName||'عميل عادي',note:'مرتجع مسجل على الفاتورة'});
-      }
-    });
-
-    (Store.get('stockAdjustments')||[]).forEach(x=>{
-      if(String(x.productId)!==pid)return;
-      const q=num(x.difference);
-      if(Math.abs(q)<0.0000001)return;
-      rows.push({date:x.date||x.dateTime||'',time:x.dateTime||x.date||'',type:'adjustment',qty:q,value:moneySafe(x.value),ref:x.id||'جرد',party:x.user||'مستخدم',note:x.reason||'تسوية جرد'});
-    });
-
-    rows.sort((a,b)=>String(a.date||'').localeCompare(String(b.date||''))||String(a.time||'').localeCompare(String(b.time||'')));
-    return rows;
-  }
-
-  function productOptions(selected){
-    return (Store.get('products')||[]).slice().sort((a,b)=>String(a.name).localeCompare(String(b.name),'ar'))
-      .map(p=>`<option value="${esc(p.id)}" ${String(p.id)===String(selected||'')?'selected':''}>${esc(p.name)} — ${qtyText(p,num(p.qty))} ${esc(p.unit||'كجم')}</option>`).join('');
-  }
-
-  function renderStockLedgerPage(container, selectedId){
-    const products=Store.get('products')||[];
-    if(!products.length){
-      container.innerHTML='<div class="card stock-ledger-empty">لا توجد أصناف لعرض حركة المخزون.</div>';
-      return;
+  function compareVersions(a,b){
+    const pa=String(a||'').replace(/^v/i,'').split('.').map(Number);
+    const pb=String(b||'').replace(/^v/i,'').split('.').map(Number);
+    for(let i=0;i<Math.max(pa.length,pb.length);i++){
+      const x=Number.isFinite(pa[i])?pa[i]:0;
+      const y=Number.isFinite(pb[i])?pb[i]:0;
+      if(x>y)return 1;
+      if(x<y)return -1;
     }
-    const selected=selectedId||window.stockLedgerSelectedId||products[0].id;
-    window.stockLedgerSelectedId=selected;
-    const p=products.find(x=>String(x.id)===String(selected))||products[0];
-    window.stockLedgerSelectedId=p.id;
-    const rows=buildMovements(p.id);
-    const incoming=rows.filter(x=>x.qty>0).reduce((n,x)=>n+x.qty,0);
-    const outgoing=rows.filter(x=>x.qty<0).reduce((n,x)=>n+Math.abs(x.qty),0);
-    const adjustments=rows.filter(x=>x.type==='adjustment').length;
-    const current=num(p.qty);
-
-    container.innerHTML=`<div class="fade-in stock-ledger-page">
-      <div class="stock-ledger-hero">
-        <div class="stock-ledger-hero-top">
-          <div><span>مراقبة المخزون بالتفصيل</span><h2>📦 سجل حركة الصنف</h2><p>تتبّع كل دخول وخروج وتسوية للصنف المختار من السجلات الموجودة بالفعل.</p></div>
-          <button class="stock-ledger-back" onclick="navigateTo('products')"><i class="fas fa-arrow-right"></i> الأصناف</button>
-        </div>
-      </div>
-      <div class="stock-ledger-kpis">
-        <div class="stock-ledger-kpi"><i class="fas fa-box"></i><b>${qtyText(p,current)} ${esc(p.unit||'كجم')}</b><span>الرصيد الحالي</span></div>
-        <div class="stock-ledger-kpi"><i class="fas fa-arrow-down"></i><b>${qtyText(p,incoming)} ${esc(p.unit||'كجم')}</b><span>إجمالي الداخل</span></div>
-        <div class="stock-ledger-kpi"><i class="fas fa-arrow-up"></i><b>${qtyText(p,outgoing)} ${esc(p.unit||'كجم')}</b><span>إجمالي الخارج</span></div>
-        <div class="stock-ledger-kpi"><i class="fas fa-scale-balanced"></i><b>${adjustments}</b><span>تسويات الجرد</span></div>
-      </div>
-      <div class="card">
-        <div class="card-title"><i class="fas fa-filter"></i> اختيار الصنف والفترة</div>
-        <div class="stock-ledger-filters">
-          <select id="stockLedgerProduct" onchange="window.stockLedgerSelectedId=this.value;renderStockLedgerPage(document.getElementById('contentArea'),this.value)">
-            ${productOptions(p.id)}
-          </select>
-          <input type="date" id="stockLedgerFrom" onchange="filterStockLedger()" aria-label="من تاريخ">
-          <input type="date" id="stockLedgerTo" onchange="filterStockLedger()" aria-label="إلى تاريخ">
-        </div>
-        <div class="stock-ledger-product">
-          <div class="icon">${p.type==='cheese'?'🧀':'❄️'}</div>
-          <div class="info"><strong>${esc(p.name)}</strong><small>سعر التكلفة: ${fmt(num(p.purchase))} ج.م • حد التنبيه: ${fmt(num(p.minStock||0))} ${esc(p.unit||'كجم')}</small></div>
-          <div class="stock-ledger-balance"><small>الرصيد الآن</small><b>${qtyText(p,current)} ${esc(p.unit||'كجم')}</b></div>
-        </div>
-        <div id="stockLedgerTableBox"></div>
-        <div class="stock-ledger-note"><i class="fas fa-circle-info"></i> الحركات هنا تُقرأ من سجل المبيعات والمشتريات والمرتجعات وتسويات الجرد الحالية. البرنامج لا يغيّر المخزون من شاشة السجل.</div>
-      </div>
-    </div>`;
-    filterStockLedger();
+    return 0;
   }
 
-  function filterStockLedger(){
-    const p=(Store.get('products')||[]).find(x=>String(x.id)===String(window.stockLedgerSelectedId));
-    const box=document.getElementById('stockLedgerTableBox');
-    if(!p||!box)return;
-    const from=document.getElementById('stockLedgerFrom')?.value||'';
-    const to=document.getElementById('stockLedgerTo')?.value||'';
-    let rows=buildMovements(p.id).filter(x=>{
-      const d=String(x.date||'').slice(0,10);
-      return (!from||d>=from)&&(!to||d<=to);
+  function escapeUpdateText(v){
+    return String(v??'').replace(/[&<>"']/g,function(ch){
+      return ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'})[ch];
     });
-    // استنتاج رصيد ما قبل أول حركة من الرصيد الحالي وصافي الحركات المسجلة،
-    // حتى يكون الرصيد التراكمي مفيدًا بدل أن يبدأ من صفر.
-    const netMovements=rows.reduce((n,x)=>n+num(x.qty),0);
-    let running=moneySafe(num(p.qty)-netMovements);
-    const display=rows.map((x,i)=>{
-      running=moneySafe(running+x.qty);
-      const [icon,label,cls]=typeInfo(x.type);
-      const qty=x.qty>0?`+${qtyText(p,x.qty)}`:qtyText(p,x.qty);
-      return `<tr>
-        <td>${i+1}</td><td>${icon} ${esc(dateText(x.date||x.time))}</td>
-        <td><span class="stock-ledger-type">${label}</span></td>
-        <td class="${cls==='in'?'stock-ledger-in':cls==='out'?'stock-ledger-out':'stock-ledger-neutral'}">${qty} ${esc(p.unit||'كجم')}</td>
-        <td>${fmt(x.value||0)} ج.م</td><td class="stock-ledger-running">${qtyText(p,running)} ${esc(p.unit||'كجم')}</td>
-        <td>${esc(x.party||'-')}</td><td>${esc(x.note||x.ref||'-')}</td>
-      </tr>`;
-    }).join('');
-    box.innerHTML=rows.length?`<div class="stock-ledger-table-wrap"><table class="stock-ledger-table"><thead><tr><th>#</th><th>التاريخ</th><th>الحركة</th><th>الكمية</th><th>القيمة</th><th>الرصيد بعد الحركة</th><th>الطرف</th><th>البيان</th></tr></thead><tbody>${display}</tbody></table></div>
-      <div class="stock-ledger-actions"><button class="btn btn-outline" onclick="window.print()"><i class="fas fa-print"></i> طباعة السجل</button><button class="btn btn-primary" onclick="navigateTo('inventoryCount')"><i class="fas fa-clipboard-check"></i> جرد وتسوية الصنف</button></div>`
-      :'<div class="stock-ledger-empty"><i class="fas fa-box-open" style="font-size:2.3rem;display:block;margin-bottom:8px"></i>لا توجد حركات مطابقة للفترة المحددة.</div>';
   }
 
-  window.openStockLedger=function(productId){
-    window.stockLedgerSelectedId=productId||window.stockLedgerSelectedId||(Store.get('products')||[])[0]?.id;
-    const content=document.getElementById('contentArea');
-    if(content)renderStockLedgerPage(content,window.stockLedgerSelectedId);
-  };
-  window.renderStockLedgerPage=renderStockLedgerPage;
-  window.filterStockLedger=filterStockLedger;
+  function showUpdate(remote){
+    if(document.getElementById('matgaryUpdateCard')) return;
 
-  // إضافة زر سجل الحركة إلى صفحة الأصناف بدون استبدال تصميم الصفحة الحالي.
-  const originalProducts=window.renderProductsPage;
-  if(typeof originalProducts==='function'){
-    window.renderProductsPage=function(container){
-      originalProducts(container);
-      const hero=container?.querySelector('.products-hero > div:last-child');
-      if(hero && !hero.querySelector('[data-stock-ledger]')){
-        const b=document.createElement('button');
-        b.className='btn btn-outline';
-        b.setAttribute('data-stock-ledger','1');
-        b.innerHTML='<i class="fas fa-clock-rotate-left"></i> سجل حركة الأصناف';
-        b.onclick=()=>openStockLedger();
-        hero.insertBefore(b,hero.firstChild);
+    const card=document.createElement('div');
+    card.id='matgaryUpdateCard';
+    card.innerHTML=
+      '<div class="matgary-update-backdrop"></div>'+
+      '<div class="matgary-update-box">'+
+        '<div class="matgary-update-icon">↻</div>'+
+        '<h3>تحديث جديد لمتجري</h3>'+
+        '<p>الإصدار الحالي <b>'+escapeUpdateText(MATGARY_UPDATE.current)+'</b></p>'+
+        '<p>الإصدار الجديد <b>'+escapeUpdateText(remote.version)+'</b></p>'+
+        (remote.notes?'<div class="matgary-update-notes">'+escapeUpdateText(remote.notes)+'</div>':'')+
+        '<div class="matgary-update-actions">'+
+          '<button class="matgary-update-now" id="matgaryUpdateNow">تحديث الآن</button>'+
+          '<button class="matgary-update-later" id="matgaryUpdateLater">لاحقًا</button>'+
+        '</div>'+
+      '</div>';
+
+    document.body.appendChild(card);
+
+    document.getElementById('matgaryUpdateLater').onclick=function(){
+      card.remove();
+    };
+
+    document.getElementById('matgaryUpdateNow').onclick=async function(){
+      const btn=this;
+      btn.disabled=true;
+      btn.textContent='جاري تثبيت التحديث...';
+
+      try{
+        // لا نحذف localStorage أو بيانات البرنامج.
+        localStorage.setItem('matgary_update_target',String(remote.version));
+
+        // إلغاء Service Worker القديم ومسح Cache Storage فقط.
+        if('serviceWorker' in navigator){
+          const regs=await navigator.serviceWorker.getRegistrations();
+          await Promise.all(regs.map(function(reg){
+            return reg.unregister().catch(function(){});
+          }));
+        }
+
+        if(window.caches){
+          const keys=await caches.keys();
+          await Promise.all(keys.map(function(k){
+            return caches.delete(k).catch(function(){});
+          }));
+        }
+
+        // إعادة فتح نفس الصفحة من الشبكة بمعامل جديد لمنع الكاش.
+        const u=new URL(window.location.href);
+        u.search='';
+        u.hash='';
+        u.searchParams.set('update',String(remote.version).replace(/^v/i,''));
+        u.searchParams.set('t',String(Date.now()));
+        window.location.replace(u.toString());
+      }catch(err){
+        console.error('Matgary update failed:',err);
+        btn.disabled=false;
+        btn.textContent='إعادة المحاولة';
+        alert('تعذر إكمال التحديث. بيانات البرنامج لم تُحذف.');
       }
     };
   }
 
-  // زر "حركة" صغير داخل كل بطاقة صنف.
-  const originalFilter=window.filterProducts;
-  if(typeof originalFilter==='function'){
-    window.filterProducts=function(){
-      originalFilter();
-      document.querySelectorAll('#productsGrid .product-item').forEach(card=>{
-        const edit=card.querySelector('[onclick*="editProduct"]');
-        if(!edit || card.querySelector('.product-ledger-btn'))return;
-        const m=String(edit.getAttribute('onclick')||'').match(/editProduct\('([^']+)'\)/);
-        if(!m)return;
-        const btn=document.createElement('button');
-        btn.className='btn btn-sm btn-outline product-ledger-btn';
-        btn.innerHTML='<i class="fas fa-clock-rotate-left"></i> حركة الصنف';
-        btn.onclick=e=>{e.stopPropagation();openStockLedger(m[1]);};
-        card.querySelector('.p-actions')?.appendChild(btn);
+  async function checkForUpdate(){
+    try{
+      // لا نعتمد على localStorage لمعرفة الإصدار الحالي.
+      // version.json يُطلب دائمًا من الشبكة قدر الإمكان.
+      const response=await fetch(MATGARY_UPDATE.manifest+'?t='+Date.now(),{
+        method:'GET',
+        cache:'no-store',
+        headers:{'Cache-Control':'no-cache, no-store, must-revalidate','Pragma':'no-cache'}
       });
-    };
+
+      if(!response.ok) return;
+
+      const remote=await response.json();
+      if(!remote || !remote.version) return;
+
+      if(compareVersions(remote.version,MATGARY_UPDATE.current)>0){
+        showUpdate(remote);
+      }
+    }catch(err){
+      console.warn('Matgary update check skipped:',err);
+    }
   }
+
+  // فحص مرة واحدة عند فتح البرنامج بعد ظهور الصفحة.
+  document.addEventListener('DOMContentLoaded',function(){
+    setTimeout(checkForUpdate,500);
+  });
+
+  window.matgaryCheckForUpdate=checkForUpdate;
 })();
 </script>
+
 </body>
   </html>
