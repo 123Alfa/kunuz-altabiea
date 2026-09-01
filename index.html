@@ -2354,9 +2354,9 @@ html,body{width:100%;max-width:100%;overflow-x:hidden}
 </div>
 <script>
 // ==================== معلومات الإصدار ====================
-const APP_VERSION='v1.7.3';
+const APP_VERSION='v1.7.4';
 const APP_NAME = "متجري";
-const APP_BUILD_DATE = "1 سبتمبر 2026 — إضافة نظام الجرد وتسويات المخزون";
+const APP_BUILD_DATE = "1 سبتمبر 2026 — اختبار نظام التحديث الذكي";
 
 // =====================================================
 // ☁️ Google Drive — مزامنة تلقائية + نسخة محلية
@@ -7630,9 +7630,12 @@ async function replaceCloudDataWithLocal() {
   async function checkForUpdate(force){
     try{
       const last=Number(localStorage.getItem(UPDATE_CONFIG.lastCheckKey)||0);
-      if(!force && Date.now()-last<UPDATE_CONFIG.checkEveryMs)return;
+      // افحص عند كل تشغيل للتأكد من ظهور التحديثات الجديدة فورًا.
+      // حدّ التكرار يطبق فقط على الفحص الدوري، وليس أول فحص بعد فتح البرنامج.
+      if(!force && window.__matgaryInitialUpdateCheckDone && Date.now()-last<UPDATE_CONFIG.checkEveryMs)return;
+      window.__matgaryInitialUpdateCheckDone=true;
       localStorage.setItem(UPDATE_CONFIG.lastCheckKey,String(Date.now()));
-      const r=await fetch(UPDATE_CONFIG.manifestUrl,{cache:'no-store',headers:{'Cache-Control':'no-cache'}});
+      const r=await fetch(UPDATE_CONFIG.manifestUrl+'&_='+Date.now(),{cache:'no-store',headers:{'Cache-Control':'no-cache','Pragma':'no-cache'}});
       if(!r.ok)return;
       const remote=await r.json();
       if(!remote || !remote.version || compareVersions(remote.version,currentVersion())<=0)return;
@@ -7657,7 +7660,7 @@ async function replaceCloudDataWithLocal() {
 
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', function() {
-    navigator.serviceWorker.register('sw.js?v=1.7.3')
+    navigator.serviceWorker.register('sw.js?v=1.7.3', {updateViaCache:'none'})
       .then(function(registration) {
         registration.update().catch(function(){});
         console.log('SW registered: ', registration.scope);
