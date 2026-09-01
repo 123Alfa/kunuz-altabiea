@@ -2282,156 +2282,7 @@ html,body{width:100%;max-width:100%;overflow-x:hidden}
 .pos-invoice-date input{border:0;background:#fff;border-radius:10px;padding:8px 10px;font-weight:800;color:#263238;font-family:inherit;min-width:135px;outline:none}
 @media(max-width:700px){.pos-invoice-date{width:100%;justify-content:space-between;margin-top:8px}.pos-invoice-date input{flex:1;max-width:180px}.pos-advanced-toolbar{flex-wrap:wrap}}
 </style>
-<style id="stock-movement-final-mobile">
-/* ===== Stock Movement FINAL mobile layout override v1.8.0 ===== */
-#contentArea .stock-movement-page{width:100%!important;max-width:980px!important;margin:0 auto!important;padding:12px 10px 110px!important;direction:rtl!important;overflow:visible!important}
-#contentArea .stock-movement-page .sm-hero{display:grid!important;grid-template-columns:52px minmax(0,1fr)!important;gap:12px!important;align-items:center!important;padding:16px!important;margin:0 0 12px!important;border-radius:20px!important}
-#contentArea .stock-movement-page .sm-hero-copy{min-width:0!important;text-align:right!important}
-#contentArea .stock-movement-page .sm-hero-copy h2{margin:2px 0 5px!important;font-size:clamp(1.2rem,5vw,1.55rem)!important;line-height:1.35!important;white-space:normal!important}
-#contentArea .stock-movement-page .sm-hero-copy p{font-size:.78rem!important;line-height:1.8!important;margin:0!important;white-space:normal!important;overflow-wrap:anywhere!important}
-#contentArea .stock-movement-page .sm-back{grid-column:1/-1!important;width:100%!important;min-height:46px!important;margin-top:2px!important;justify-content:center!important}
-#contentArea .stock-movement-page .sm-summary{display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:9px!important;margin:0 0 12px!important}
-#contentArea .stock-movement-page .sm-stat{display:grid!important;grid-template-columns:38px minmax(0,1fr)!important;align-items:center!important;gap:9px!important;min-width:0!important;padding:11px!important;border-radius:16px!important;overflow:hidden!important}
-#contentArea .stock-movement-page .sm-stat>div:last-child{min-width:0!important}
-#contentArea .stock-movement-page .sm-stat span,#contentArea .stock-movement-page .sm-stat small{display:block!important;white-space:normal!important;overflow-wrap:anywhere!important;line-height:1.45!important}
-#contentArea .stock-movement-page .sm-stat strong{display:block!important;white-space:nowrap!important;font-size:.92rem!important;line-height:1.35!important}
-#contentArea .stock-movement-page .sm-filter-card,#contentArea .stock-movement-page .sm-list-card{width:100%!important;margin:0 0 12px!important;padding:14px!important;border-radius:20px!important;overflow:visible!important}
-#contentArea .stock-movement-page .sm-section-title{display:flex!important;flex-direction:column!important;align-items:stretch!important;gap:4px!important;margin:0 0 12px!important}
-#contentArea .stock-movement-page .sm-section-title>div{display:flex!important;align-items:center!important;gap:8px!important;min-width:0!important}
-#contentArea .stock-movement-page .sm-section-title strong{font-size:.95rem!important;line-height:1.5!important}
-#contentArea .stock-movement-page .sm-section-title small{display:block!important;font-size:.68rem!important;line-height:1.5!important}
-#contentArea .stock-movement-page .sm-filters{display:flex!important;flex-direction:column!important;gap:10px!important;width:100%!important}
-#contentArea .stock-movement-page .sm-field{display:flex!important;flex-direction:column!important;align-items:stretch!important;gap:5px!important;width:100%!important;min-width:0!important;margin:0!important}
-#contentArea .stock-movement-page .sm-field>span{display:block!important;width:100%!important;margin:0!important;font-size:.72rem!important;font-weight:800!important;line-height:1.5!important}
-#contentArea .stock-movement-page .sm-field select,#contentArea .stock-movement-page .sm-field input{display:block!important;width:100%!important;max-width:100%!important;height:46px!important;min-height:46px!important;margin:0!important;padding:0 12px!important;border-radius:13px!important;box-sizing:border-box!important;font-size:.78rem!important;line-height:46px!important}
-#contentArea .stock-movement-page .sm-actions{display:flex!important;flex-direction:column!important;gap:9px!important;width:100%!important;margin-top:12px!important}
-#contentArea .stock-movement-page .sm-actions .btn{width:100%!important;min-height:46px!important;margin:0!important;justify-content:center!important}
-#contentArea .stock-movement-page .sm-list-head{display:flex!important;flex-direction:column!important;align-items:stretch!important;gap:6px!important;margin-bottom:10px!important}
-#contentArea .stock-movement-page .sm-list-head>div{width:100%!important;display:flex!important;align-items:center!important;justify-content:space-between!important}
-#contentArea .stock-movement-page #stockMovementCount{display:block!important;text-align:right!important;font-size:.7rem!important;color:var(--text-muted)!important}
-#contentArea .stock-movement-page .sm-movement-card{width:100%!important;margin:0 0 10px!important;padding:12px!important;border-radius:17px!important;box-sizing:border-box!important;overflow:hidden!important}
-#contentArea .stock-movement-page .sm-movement-top{display:grid!important;grid-template-columns:minmax(0,1fr) auto!important;gap:10px!important;align-items:center!important}
-#contentArea .stock-movement-page .sm-movement-type{min-width:0!important;display:flex!important;align-items:center!important;gap:8px!important}
-#contentArea .stock-movement-page .sm-movement-type>div{min-width:0!important}
-#contentArea .stock-movement-page .sm-movement-type strong{font-size:.8rem!important;line-height:1.45!important;white-space:normal!important}
-#contentArea .stock-movement-page .sm-movement-type small{font-size:.65rem!important;line-height:1.4!important;white-space:normal!important;overflow-wrap:anywhere!important}
-#contentArea .stock-movement-page .sm-movement-date{min-width:68px!important;text-align:left!important}
-#contentArea .stock-movement-page .sm-movement-date b{font-size:.64rem!important;white-space:nowrap!important}
-#contentArea .stock-movement-page .sm-movement-body{display:grid!important;grid-template-columns:1fr 1fr!important;gap:7px!important;padding:10px 0!important}
-#contentArea .stock-movement-page .sm-movement-body>div{min-width:0!important;padding:9px!important;border-radius:11px!important}
-#contentArea .stock-movement-page .sm-product{grid-column:1/-1!important}
-#contentArea .stock-movement-page .sm-movement-body span,#contentArea .stock-movement-page .sm-movement-meta span{font-size:.62rem!important;line-height:1.45!important}
-#contentArea .stock-movement-page .sm-product strong,#contentArea .stock-movement-page .sm-qty strong,#contentArea .stock-movement-page .sm-balance strong{font-size:.76rem!important;line-height:1.55!important;white-space:normal!important;overflow-wrap:anywhere!important}
-#contentArea .stock-movement-page .sm-qty strong,#contentArea .stock-movement-page .sm-balance strong{white-space:nowrap!important}
-#contentArea .stock-movement-page .sm-movement-meta{display:flex!important;flex-direction:column!important;gap:8px!important;padding-top:9px!important}
-#contentArea .stock-movement-page .sm-movement-meta>div{width:100%!important;min-width:0!important;padding:8px 9px!important;border-radius:10px!important;background:rgba(148,163,184,.045)!important}
-#contentArea .stock-movement-page .sm-movement-meta strong{font-size:.68rem!important;line-height:1.6!important;white-space:normal!important;overflow-wrap:anywhere!important}
-@media(max-width:600px){
-  #contentArea .stock-movement-page{padding-left:8px!important;padding-right:8px!important}
-  #contentArea .stock-movement-page .sm-summary{grid-template-columns:1fr!important}
-  #contentArea .stock-movement-page .sm-stat{grid-template-columns:36px minmax(0,1fr)!important}
-  #contentArea .stock-movement-page .sm-hero{grid-template-columns:46px minmax(0,1fr)!important;padding:14px!important}
-  #contentArea .stock-movement-page .sm-hero-icon{width:46px!important;height:46px!important}
-}
-</style>
 
-<style id="stock-movement-polish-v180">
-/* ===== سجل حركة الصنف — Polish pass v1.8.0 ===== */
-#contentArea .stock-movement-page{max-width:980px!important;padding:12px 10px 110px!important}
-#contentArea .stock-movement-page .sm-hero{background:linear-gradient(135deg,#0f766e 0%,#0b665f 72%,#0a5b55 100%)!important;color:#fff!important;border:0!important;box-shadow:0 12px 30px rgba(15,118,110,.20)!important}
-#contentArea .stock-movement-page .sm-hero-copy span,#contentArea .stock-movement-page .sm-hero-copy p{color:rgba(255,255,255,.82)!important}
-#contentArea .stock-movement-page .sm-hero-copy h2{color:#fff!important;font-weight:900!important}
-#contentArea .stock-movement-page .sm-hero-icon{background:rgba(255,255,255,.13)!important;color:#fff!important}
-#contentArea .stock-movement-page .sm-back{background:#fff!important;color:#0f766e!important;border:0!important;font-weight:900!important;box-shadow:0 6px 18px rgba(0,0,0,.08)!important}
-#contentArea .stock-movement-page .sm-summary{grid-template-columns:repeat(4,minmax(0,1fr))!important;gap:10px!important}
-#contentArea .stock-movement-page .sm-stat{position:relative!important;min-height:78px!important;padding:12px 11px!important;border-radius:16px!important;background:#fff!important;box-shadow:0 5px 18px rgba(31,55,48,.07)!important}
-#contentArea .stock-movement-page .sm-stat:before{content:'';position:absolute;inset:0 0 0 auto;width:4px;border-radius:0 16px 16px 0;background:#94a3b8}
-#contentArea .stock-movement-page .sm-stat.current:before{background:#0f766e}
-#contentArea .stock-movement-page .sm-stat.in:before{background:#16a34a}
-#contentArea .stock-movement-page .sm-stat.out:before{background:#dc2626}
-#contentArea .stock-movement-page .sm-stat.net:before{background:#2563eb}
-#contentArea .stock-movement-page .sm-stat.current .sm-stat-icon{background:#e7f6f1!important;color:#0f766e!important}
-#contentArea .stock-movement-page .sm-stat.in .sm-stat-icon{background:#eaf8ef!important;color:#159a72!important}
-#contentArea .stock-movement-page .sm-stat.out .sm-stat-icon{background:#fff0f0!important;color:#dc2626!important}
-#contentArea .stock-movement-page .sm-stat.net .sm-stat-icon{background:#edf3ff!important;color:#2563eb!important}
-#contentArea .stock-movement-page .sm-stat.current strong{color:#0f766e!important}
-#contentArea .stock-movement-page .sm-stat.in strong{color:#159a72!important}
-#contentArea .stock-movement-page .sm-stat.out strong{color:#dc2626!important}
-#contentArea .stock-movement-page .sm-stat.net strong{color:#2563eb!important}
-#contentArea .stock-movement-page .sm-filter-card,#contentArea .stock-movement-page .sm-list-card{border-radius:20px!important;box-shadow:0 6px 20px rgba(31,55,48,.06)!important}
-#contentArea .stock-movement-page .sm-filters{gap:10px!important}
-#contentArea .stock-movement-page .sm-field select,#contentArea .stock-movement-page .sm-field input{background:#fbfdfc!important;border-color:#dbe6e1!important}
-#contentArea .stock-movement-page .sm-actions{display:grid!important;grid-template-columns:1fr 1fr!important}
-#contentArea .stock-movement-page .sm-actions .btn{width:100%!important}
-#contentArea .stock-movement-page .sm-list-head{margin-bottom:12px!important}
-#contentArea .stock-movement-page #stockMovementCount{font-weight:800!important;color:#64748b!important}
-#contentArea .stock-movement-page .sm-movement-card{position:relative!important;border:1px solid #e2e8e5!important;border-radius:18px!important;background:#fff!important;padding:13px!important;margin-bottom:11px!important;box-shadow:0 5px 18px rgba(31,55,48,.055)!important;overflow:hidden!important}
-#contentArea .stock-movement-page .sm-movement-card:before{content:'';position:absolute;top:0;bottom:0;right:0;width:4px;background:#94a3b8}
-#contentArea .stock-movement-page .sm-movement-card.in:before{background:#16a34a}
-#contentArea .stock-movement-page .sm-movement-card.out:before{background:#dc2626}
-#contentArea .stock-movement-page .sm-movement-card.adjust:before{background:#2563eb}
-#contentArea .stock-movement-page .sm-movement-top{padding-bottom:10px!important;border-bottom:1px solid #edf1ef!important}
-#contentArea .stock-movement-page .sm-movement-icon{width:42px!important;height:42px!important;border-radius:13px!important;font-size:.95rem!important}
-#contentArea .stock-movement-page .sm-movement-card.in .sm-movement-icon{background:#eaf8ef!important;color:#159a72!important}
-#contentArea .stock-movement-page .sm-movement-card.out .sm-movement-icon{background:#fff0f0!important;color:#dc2626!important}
-#contentArea .stock-movement-page .sm-movement-card.adjust .sm-movement-icon{background:#edf3ff!important;color:#2563eb!important}
-#contentArea .stock-movement-page .sm-movement-type strong{font-size:.84rem!important;font-weight:900!important}
-#contentArea .stock-movement-page .sm-movement-type small{font-size:.64rem!important;color:#94a3b8!important}
-#contentArea .stock-movement-page .sm-movement-date{text-align:left!important}
-#contentArea .stock-movement-page .sm-movement-date b{font-size:.68rem!important;color:#334155!important}
-#contentArea .stock-movement-page .sm-movement-date span{font-size:.62rem!important;color:#94a3b8!important}
-#contentArea .stock-movement-page .sm-movement-product{display:flex!important;align-items:baseline!important;gap:7px!important;padding:10px 0 8px!important;min-width:0!important}
-#contentArea .stock-movement-page .sm-movement-product span{font-size:.62rem!important;color:#94a3b8!important;white-space:nowrap!important}
-#contentArea .stock-movement-page .sm-movement-product strong{font-size:.86rem!important;font-weight:900!important;line-height:1.55!important;overflow-wrap:anywhere!important}
-#contentArea .stock-movement-page .sm-movement-product em{font-style:normal!important;font-size:.60rem!important;color:#94a3b8!important;white-space:nowrap!important}
-#contentArea .stock-movement-page .sm-movement-numbers{display:grid!important;grid-template-columns:1fr 1.08fr 1fr!important;gap:7px!important;padding:0 0 10px!important}
-#contentArea .stock-movement-page .sm-movement-numbers>div{background:#f8faf9!important;border:1px solid #edf2ef!important;border-radius:12px!important;padding:9px 7px!important;text-align:center!important;min-width:0!important}
-#contentArea .stock-movement-page .sm-movement-numbers span{display:block!important;font-size:.60rem!important;color:#94a3b8!important;margin-bottom:4px!important}
-#contentArea .stock-movement-page .sm-movement-numbers strong{display:block!important;font-size:.76rem!important;color:#334155!important;white-space:nowrap!important}
-#contentArea .stock-movement-page .sm-movement-numbers em{font-style:normal!important;font-size:.56rem!important;color:#94a3b8!important}
-#contentArea .stock-movement-page .sm-movement-numbers .movement-quantity{background:#eef8f3!important;border-color:#d7eee4!important}
-#contentArea .stock-movement-page .sm-movement-numbers .movement-quantity.negative{background:#fff1f1!important;border-color:#ffd8d8!important}
-#contentArea .stock-movement-page .movement-quantity.positive strong{color:#159a72!important}
-#contentArea .stock-movement-page .movement-quantity.negative strong{color:#dc2626!important}
-#contentArea .stock-movement-page .sm-movement-meta{display:grid!important;grid-template-columns:minmax(0,1fr) auto!important;gap:7px!important;padding-top:9px!important;border-top:1px dashed #dfe7e3!important}
-#contentArea .stock-movement-page .sm-movement-meta>div{background:#fafcfb!important;border-radius:10px!important;padding:7px 9px!important;min-width:0!important}
-#contentArea .stock-movement-page .sm-movement-meta span{font-size:.58rem!important;color:#94a3b8!important;margin-bottom:2px!important}
-#contentArea .stock-movement-page .sm-movement-meta strong{font-size:.64rem!important;color:#475569!important;line-height:1.55!important;overflow-wrap:anywhere!important}
-@media(max-width:800px){
-  #contentArea .stock-movement-page .sm-summary{grid-template-columns:repeat(2,minmax(0,1fr))!important}
-  #contentArea .stock-movement-page .sm-filters{grid-template-columns:1fr 1fr!important}
-  #contentArea .stock-movement-page .sm-product-field{grid-column:1/-1!important}
-}
-@media(max-width:600px){
-  #contentArea .stock-movement-page{padding:8px 8px 105px!important}
-  #contentArea .stock-movement-page .sm-summary{grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:8px!important}
-  #contentArea .stock-movement-page .sm-stat{min-height:76px!important;padding:10px 8px!important;grid-template-columns:32px minmax(0,1fr)!important;gap:7px!important}
-  #contentArea .stock-movement-page .sm-stat strong{font-size:.88rem!important}
-  #contentArea .stock-movement-page .sm-stat span{font-size:.60rem!important}
-  #contentArea .stock-movement-page .sm-stat small{font-size:.55rem!important}
-  #contentArea .stock-movement-page .sm-stat-icon{width:32px!important;height:32px!important;border-radius:10px!important;font-size:.78rem!important}
-  #contentArea .stock-movement-page .sm-filters{grid-template-columns:1fr!important}
-  #contentArea .stock-movement-page .sm-product-field{grid-column:auto!important}
-  #contentArea .stock-movement-page .sm-actions{grid-template-columns:1fr 1fr!important;gap:7px!important}
-  #contentArea .stock-movement-page .sm-actions .btn{min-height:45px!important;padding:10px 7px!important;font-size:.78rem!important}
-  #contentArea .stock-movement-page .sm-movement-card{padding:11px!important;border-radius:16px!important}
-  #contentArea .stock-movement-page .sm-movement-top{gap:7px!important}
-  #contentArea .stock-movement-page .sm-movement-icon{width:38px!important;height:38px!important;border-radius:11px!important}
-  #contentArea .stock-movement-page .sm-movement-type strong{font-size:.75rem!important}
-  #contentArea .stock-movement-page .sm-movement-product strong{font-size:.78rem!important}
-  #contentArea .stock-movement-page .sm-movement-numbers{grid-template-columns:1fr 1.08fr 1fr!important;gap:5px!important}
-  #contentArea .stock-movement-page .sm-movement-numbers>div{padding:8px 4px!important}
-  #contentArea .stock-movement-page .sm-movement-numbers strong{font-size:.67rem!important}
-  #contentArea .stock-movement-page .sm-movement-meta{grid-template-columns:1fr!important}
-  #contentArea .stock-movement-page .sm-movement-meta>div{padding:7px 8px!important}
-}
-@media(max-width:360px){
-  #contentArea .stock-movement-page .sm-summary{gap:6px!important}
-  #contentArea .stock-movement-page .sm-stat{padding:9px 6px!important}
-  #contentArea .stock-movement-page .sm-stat strong{font-size:.80rem!important}
-  #contentArea .stock-movement-page .sm-movement-numbers strong{font-size:.62rem!important}
-}
-</style>
 </head>
 <body>
 <div id="loading-screen">
@@ -2503,7 +2354,7 @@ html,body{width:100%;max-width:100%;overflow-x:hidden}
 // ==================== معلومات الإصدار ====================
 const APP_VERSION='v1.8.0';
 const APP_NAME = "متجري";
-const APP_BUILD_DATE = "1 سبتمبر 2026 — تحسين سجل حركة الصنف";
+const APP_BUILD_DATE = "1 سبتمبر 2026 — تحسين نظام التحديث الذكي";
 
 // =====================================================
 // ☁️ Google Drive — مزامنة تلقائية + نسخة محلية
@@ -4599,19 +4450,196 @@ function printPOSReceipt(){
 
 
 <style id="stock-movement-style">
-/* سجل حركة الصنف — تصميم موبايل مرتب */
-.stock-movement-page{direction:rtl;max-width:1100px;margin:0 auto;padding-bottom:24px;color:var(--text)}
-.sm-hero{display:grid;grid-template-columns:auto 1fr auto;align-items:center;gap:14px;background:linear-gradient(135deg,var(--bg-card),rgba(15,118,110,.06));border:1px solid var(--border);border-radius:22px;padding:18px;margin-bottom:14px;box-shadow:var(--shadow)}
-.sm-hero-icon{width:54px;height:54px;border-radius:16px;display:grid;place-items:center;background:rgba(15,118,110,.10);color:var(--primary);font-size:1.35rem}
-.sm-hero-copy span{font-size:.72rem;color:var(--text-muted);font-weight:700}.sm-hero-copy h2{margin:3px 0 4px;font-size:1.35rem;line-height:1.35}.sm-hero-copy p{margin:0;color:var(--text-light);font-size:.78rem;line-height:1.7}.sm-back{white-space:nowrap}
-.sm-summary{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:14px}.sm-stat{display:flex;align-items:center;gap:10px;background:var(--bg-card);border:1px solid var(--border);border-radius:17px;padding:12px;box-shadow:var(--shadow);min-width:0}.sm-stat-icon{width:38px;height:38px;flex:0 0 38px;border-radius:12px;display:grid;place-items:center;background:rgba(100,116,139,.10);color:var(--text-light)}.sm-stat.in .sm-stat-icon{background:rgba(16,185,129,.10);color:var(--success)}.sm-stat.out .sm-stat-icon{background:rgba(239,68,68,.10);color:var(--danger)}.sm-stat.adjust .sm-stat-icon{background:rgba(212,167,44,.12);color:var(--accent)}.sm-stat span,.sm-stat small{display:block;color:var(--text-muted);font-size:.67rem;line-height:1.4}.sm-stat strong{display:block;font-size:1.02rem;margin:2px 0;line-height:1.2;white-space:nowrap}.sm-stat.in strong{color:var(--success)}.sm-stat.out strong{color:var(--danger)}.sm-stat.adjust strong{color:var(--accent)}
-.sm-filter-card,.sm-list-card{padding:16px!important}.sm-section-title{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:13px}.sm-section-title>div{display:flex;align-items:center;gap:8px}.sm-section-title i{color:var(--primary)}.sm-section-title strong{font-size:.94rem}.sm-section-title small{color:var(--text-muted);font-size:.66rem}.sm-section-title.compact{margin:0}.sm-filters{display:grid;grid-template-columns:2fr 1fr 1fr 1fr;gap:10px}.sm-field{display:block;min-width:0}.sm-field>span{display:block;font-size:.68rem;color:var(--text-light);font-weight:800;margin-bottom:5px}.sm-field select,.sm-field input{width:100%;height:43px;border:1px solid var(--border);border-radius:12px;background:var(--bg-card);color:var(--text);padding:0 11px;font:inherit;font-size:.75rem;box-sizing:border-box}.sm-actions{display:flex;gap:8px;margin-top:12px}.sm-actions .btn{min-height:40px}
-.sm-list-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}.sm-list-head>div{display:flex;align-items:end;justify-content:space-between;width:100%}.sm-list-head small{color:var(--text-muted);font-size:.66rem}
-.sm-movement-card{border:1px solid var(--border);border-radius:17px;background:var(--bg-card);padding:14px;margin-bottom:10px;box-shadow:0 5px 16px rgba(20,70,55,.04);overflow:hidden}.sm-movement-card:last-child{margin-bottom:0}.sm-movement-top{display:flex;justify-content:space-between;align-items:center;gap:10px;padding-bottom:10px;border-bottom:1px solid rgba(148,163,184,.16)}.sm-movement-type{display:flex;align-items:center;gap:9px;min-width:0}.sm-movement-icon{width:38px;height:38px;flex:0 0 38px;border-radius:12px;display:grid;place-items:center;background:rgba(100,116,139,.10);color:var(--text-light)}.sm-movement-card.in .sm-movement-icon,.sm-movement-card.return .sm-movement-icon{background:rgba(16,185,129,.10);color:var(--success)}.sm-movement-card.out .sm-movement-icon{background:rgba(239,68,68,.10);color:var(--danger)}.sm-movement-card.adjust .sm-movement-icon{background:rgba(212,167,44,.12);color:var(--accent)}.sm-movement-type strong,.sm-movement-type small{display:block}.sm-movement-type strong{font-size:.78rem;line-height:1.4}.sm-movement-type small{font-size:.63rem;color:var(--text-muted);margin-top:2px}.sm-movement-date{text-align:left;flex:0 0 auto}.sm-movement-date b{display:block;font-size:.68rem;white-space:nowrap}.sm-movement-date span{display:block;color:var(--text-muted);font-size:.61rem;margin-top:3px}
-.sm-movement-body{display:grid;grid-template-columns:minmax(0,1.6fr) minmax(90px,1fr) minmax(110px,1fr);gap:8px;padding:11px 0}.sm-movement-body>div{min-width:0;background:rgba(148,163,184,.055);border-radius:11px;padding:9px}.sm-movement-body span,.sm-movement-meta span{display:block;color:var(--text-muted);font-size:.61rem;margin-bottom:4px}.sm-product strong,.sm-qty strong,.sm-balance strong{display:block;font-size:.76rem;line-height:1.5;overflow-wrap:anywhere}.sm-qty{text-align:center}.sm-balance{text-align:center}.sm-qty .positive{color:var(--success)}.sm-qty .negative{color:var(--danger)}.sm-movement-body em{font-style:normal;font-size:.59rem;font-weight:700;color:var(--text-muted)}
-.sm-movement-meta{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:8px;padding-top:9px;border-top:1px dashed var(--border)}.sm-movement-meta>div{min-width:0}.sm-movement-meta strong{display:block;font-size:.66rem;line-height:1.5;overflow-wrap:anywhere}.sm-empty{text-align:center;padding:35px 15px;color:var(--text-muted)}.sm-empty i{font-size:2.5rem;display:block;margin-bottom:10px;opacity:.5}.sm-empty strong{display:block;font-size:.85rem;color:var(--text-light)}.sm-empty p{margin:5px 0 0;font-size:.68rem}
-@media(max-width:800px){.sm-summary{grid-template-columns:repeat(2,1fr)}.sm-filters{grid-template-columns:1fr 1fr}.sm-product-field{grid-column:1/-1}}
-@media(max-width:520px){.stock-movement-page{padding:0 2px 18px}.sm-hero{grid-template-columns:auto 1fr;gap:10px;padding:14px;border-radius:18px}.sm-hero-icon{width:46px;height:46px}.sm-hero-copy h2{font-size:1.08rem}.sm-hero-copy p{font-size:.68rem}.sm-back{grid-column:1/-1;width:100%;justify-content:center}.sm-summary{gap:7px}.sm-stat{padding:10px 8px;gap:7px}.sm-stat-icon{width:32px;height:32px;flex-basis:32px;border-radius:10px;font-size:.78rem}.sm-stat span,.sm-stat small{font-size:.58rem}.sm-stat strong{font-size:.9rem}.sm-filter-card,.sm-list-card{padding:12px!important}.sm-section-title strong{font-size:.8rem}.sm-filters{grid-template-columns:1fr}.sm-product-field{grid-column:auto}.sm-actions{flex-direction:column}.sm-actions .btn{width:100%}.sm-movement-card{padding:11px;border-radius:15px}.sm-movement-top{align-items:flex-start}.sm-movement-body{grid-template-columns:1fr 1fr;gap:7px}.sm-product{grid-column:1/-1}.sm-qty,.sm-balance{text-align:right}.sm-movement-meta{grid-template-columns:1fr}.sm-movement-date b{font-size:.61rem}.sm-movement-type strong{font-size:.72rem}.sm-movement-body>div{padding:8px}.sm-product strong,.sm-qty strong,.sm-balance strong{font-size:.7rem}}
+/* ===== سجل حركة الصنف — تصميم احترافي v1.8.0 ===== */
+.stock-movement-page{
+  direction:rtl;max-width:980px;margin:0 auto;padding:0 0 110px;color:var(--text);
+}
+.stock-movement-page .sm-hero{
+  display:grid;grid-template-columns:54px minmax(0,1fr);gap:14px;align-items:center;
+  background:linear-gradient(135deg,#0f766e 0%,#0b665e 68%,#0f766e 100%);
+  color:#fff;border:0;border-radius:22px;padding:20px;margin-bottom:12px;
+  box-shadow:0 12px 28px rgba(15,118,110,.20);overflow:hidden;position:relative;
+}
+.stock-movement-page .sm-hero:before{
+  content:"";position:absolute;width:190px;height:190px;left:-80px;bottom:-110px;
+  border-radius:50%;background:rgba(255,255,255,.07);pointer-events:none;
+}
+.sm-hero-icon{
+  width:54px;height:54px;border-radius:16px;display:grid;place-items:center;
+  background:rgba(255,255,255,.14);color:#fff;font-size:1.35rem;position:relative;z-index:1;
+}
+.sm-hero-copy{min-width:0;position:relative;z-index:1}
+.sm-hero-copy span{display:block;font-size:.72rem;color:rgba(255,255,255,.75);font-weight:700}
+.sm-hero-copy h2{margin:2px 0 4px;font-size:1.42rem;line-height:1.3;font-weight:900;color:#fff}
+.sm-hero-copy p{margin:0;color:rgba(255,255,255,.84);font-size:.76rem;line-height:1.7}
+.sm-back{
+  grid-column:1/-1;width:100%;min-height:48px!important;margin-top:2px;
+  justify-content:center!important;background:#fff!important;border:0!important;color:#0f766e!important;
+  box-shadow:0 5px 14px rgba(0,0,0,.08);
+}
+.sm-back:hover{background:#fff!important;color:#0b5f58!important}
+
+.sm-summary{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin-bottom:12px}
+.sm-stat{
+  display:grid;grid-template-columns:40px minmax(0,1fr);align-items:center;gap:10px;
+  min-width:0;background:#fff;border:1px solid var(--border);border-radius:16px;padding:12px;
+  box-shadow:0 5px 16px rgba(31,55,48,.06);overflow:hidden;position:relative;
+}
+.sm-stat:after{content:"";position:absolute;right:0;top:0;bottom:0;width:3px;background:#cbd5e1}
+.sm-stat-icon{
+  width:40px;height:40px;border-radius:12px;display:grid;place-items:center;
+  background:#f1f5f4;color:#64748b;font-size:.95rem;
+}
+.sm-stat>div:last-child{min-width:0}
+.sm-stat span,.sm-stat small{display:block;line-height:1.45}
+.sm-stat span{font-size:.68rem;color:#5f6d72;font-weight:800}
+.sm-stat small{font-size:.61rem;color:#94a3b8;margin-top:2px}
+.sm-stat strong{display:block;font-size:1.02rem;line-height:1.25;margin:2px 0;white-space:nowrap}
+.sm-stat.current:after{background:#0f766e}.sm-stat.current .sm-stat-icon{background:#e7f5f1;color:#0f766e}.sm-stat.current strong{color:#0f766e}
+.sm-stat.in:after{background:#159a72}.sm-stat.in .sm-stat-icon{background:#e8f7f0;color:#159a72}.sm-stat.in strong{color:#159a72}
+.sm-stat.out:after{background:#dc4b4b}.sm-stat.out .sm-stat-icon{background:#fff0f0;color:#dc4b4b}.sm-stat.out strong{color:#dc4b4b}
+.sm-stat.net:after{background:#2563eb}.sm-stat.net .sm-stat-icon{background:#edf3ff;color:#2563eb}.sm-stat.net strong{color:#2563eb}
+
+.sm-filter-card,.sm-list-card{padding:16px!important;border-radius:20px!important}
+.sm-filter-card{margin-bottom:12px!important}
+.sm-section-title{
+  display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:13px;
+}
+.sm-section-title>div{display:flex;align-items:center;gap:8px;min-width:0}
+.sm-section-title i{color:#0f766e}
+.sm-section-title strong{font-size:.96rem;font-weight:900}
+.sm-section-title small{color:#94a3b8;font-size:.66rem}
+.sm-section-title.compact{margin:0}
+.sm-filters{
+  display:grid;grid-template-columns:2fr 1fr 1fr 1.15fr;gap:10px;
+}
+.sm-field{display:block;min-width:0}
+.sm-field>span{display:block;font-size:.68rem;color:#5f6d72;font-weight:800;margin-bottom:5px}
+.sm-field select,.sm-field input{
+  width:100%;height:44px;border:1px solid #dce6e2;border-radius:12px;background:#fbfdfc;
+  color:var(--text);padding:0 11px;font:inherit;font-size:.75rem;outline:none;transition:.2s;
+}
+.sm-field select:focus,.sm-field input:focus{border-color:#0f766e;box-shadow:0 0 0 3px rgba(15,118,110,.10)}
+.sm-actions{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-top:12px}
+.sm-actions .btn{min-height:44px;width:100%;margin:0;justify-content:center}
+.sm-actions .btn-accent{background:linear-gradient(135deg,#e3a914,#d88b05)}
+
+.sm-list-card{background:#fff}
+.sm-list-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:11px}
+.sm-list-head>div{display:flex;align-items:center;justify-content:space-between;width:100%}
+.sm-list-head small{color:#64748b;font-size:.68rem;background:#f1f5f4;padding:5px 9px;border-radius:999px;font-weight:800}
+
+.sm-movement-card{
+  position:relative;border:1px solid #dfe8e4;border-right:4px solid #cbd5e1;border-radius:17px;
+  background:#fff;padding:13px;margin-bottom:10px;box-shadow:0 5px 16px rgba(20,70,55,.045);
+  overflow:hidden;
+}
+.sm-movement-card.in{border-right-color:#159a72}
+.sm-movement-card.out{border-right-color:#dc4b4b}
+.sm-movement-card.return{border-right-color:#0f766e}
+.sm-movement-card.adjust{border-right-color:#d9911e}
+
+.sm-movement-top{
+  display:grid;grid-template-columns:minmax(0,1fr) auto;gap:10px;align-items:center;
+  padding-bottom:10px;border-bottom:1px solid #edf2ef;
+}
+.sm-movement-type{display:flex;align-items:center;gap:9px;min-width:0}
+.sm-movement-icon{
+  width:42px;height:42px;flex:0 0 42px;border-radius:13px;display:grid;place-items:center;
+  background:#f1f5f4;color:#64748b;font-size:1rem;
+}
+.sm-movement-card.in .sm-movement-icon{background:#e8f7f0;color:#159a72}
+.sm-movement-card.out .sm-movement-icon{background:#fff0f0;color:#dc4b4b}
+.sm-movement-card.return .sm-movement-icon{background:#e8f7f0;color:#0f766e}
+.sm-movement-card.adjust .sm-movement-icon{background:#fff6df;color:#d9911e}
+.sm-movement-type>div{min-width:0}
+.sm-movement-type strong{display:block;font-size:.83rem;line-height:1.45;font-weight:900}
+.sm-movement-type small{display:block;color:#94a3b8;font-size:.63rem;margin-top:2px;line-height:1.4;white-space:normal}
+.sm-movement-date{text-align:left;min-width:82px}
+.sm-movement-date b{display:block;font-size:.66rem;white-space:nowrap;font-weight:900}
+.sm-movement-date span{display:block;color:#94a3b8;font-size:.61rem;margin-top:2px}
+
+.sm-movement-body{
+  display:grid;grid-template-columns:minmax(0,1.55fr) minmax(100px,1fr) minmax(110px,1fr);
+  gap:8px;padding:10px 0;
+}
+.sm-movement-body>div{
+  min-width:0;background:#f8faf9;border:1px solid #eef2f0;border-radius:11px;padding:9px;
+}
+.sm-product{grid-column:auto}
+.sm-movement-body span,.sm-movement-meta span{
+  display:block;color:#94a3b8;font-size:.61rem;margin-bottom:3px;line-height:1.4;
+}
+.sm-product strong,.sm-qty strong,.sm-balance strong{
+  display:block;font-size:.76rem;line-height:1.5;overflow-wrap:anywhere;font-weight:900;
+}
+.sm-qty{text-align:center}
+.sm-balance{text-align:center}
+.sm-qty .positive{color:#159a72}.sm-qty .negative{color:#dc4b4b}
+.sm-movement-body em{font-style:normal;font-size:.59rem;font-weight:700;color:#94a3b8}
+.sm-movement-meta{
+  display:grid;grid-template-columns:minmax(0,1fr) auto;gap:8px;padding-top:9px;border-top:1px dashed #dfe8e4;
+}
+.sm-movement-meta>div{min-width:0}
+.sm-movement-meta>div:last-child{text-align:left}
+.sm-movement-meta strong{
+  display:block;font-size:.66rem;line-height:1.5;overflow-wrap:anywhere;font-weight:800;color:#47565b;
+}
+.sm-empty{text-align:center;padding:38px 15px;color:#94a3b8}
+.sm-empty i{font-size:2.6rem;display:block;margin-bottom:10px;opacity:.45;color:#0f766e}
+.sm-empty strong{display:block;font-size:.88rem;color:#5f6d72}
+.sm-empty p{margin:5px 0 0;font-size:.7rem}
+
+@media(max-width:800px){
+  .sm-summary{grid-template-columns:1fr 1fr}
+  .sm-filters{grid-template-columns:1fr 1fr}
+  .sm-product-field{grid-column:1/-1}
+}
+@media(max-width:560px){
+  .stock-movement-page{padding:0 0 105px}
+  .stock-movement-page .sm-hero{padding:15px;border-radius:19px}
+  .sm-hero-icon{width:46px;height:46px}
+  .sm-hero-copy h2{font-size:1.16rem}
+  .sm-hero-copy p{font-size:.69rem;line-height:1.7}
+  .sm-summary{grid-template-columns:1fr;gap:8px}
+  .sm-stat{min-height:60px;padding:10px}
+  .sm-stat-icon{width:36px;height:36px}
+  .sm-stat strong{font-size:.95rem}
+  .sm-filter-card,.sm-list-card{padding:13px!important}
+  .sm-section-title strong{font-size:.86rem}
+  .sm-section-title small{font-size:.62rem}
+  .sm-filters{grid-template-columns:1fr 1fr;gap:9px}
+  .sm-product-field{grid-column:1/-1}
+  .sm-field>span{font-size:.65rem}
+  .sm-field select,.sm-field input{height:44px;font-size:.72rem;padding:0 9px}
+  .sm-actions{grid-template-columns:1fr 1fr}
+  .sm-actions .btn{min-height:44px;font-size:.76rem;padding:10px 7px}
+  .sm-list-head{margin-bottom:9px}
+  .sm-list-head small{font-size:.61rem}
+  .sm-movement-card{padding:11px;border-radius:16px}
+  .sm-movement-top{grid-template-columns:minmax(0,1fr) auto;gap:7px}
+  .sm-movement-icon{width:38px;height:38px;flex-basis:38px;border-radius:11px;font-size:.9rem}
+  .sm-movement-type{gap:7px}
+  .sm-movement-type strong{font-size:.73rem}
+  .sm-movement-type small{font-size:.59rem}
+  .sm-movement-date{min-width:70px}
+  .sm-movement-date b{font-size:.58rem}
+  .sm-movement-date span{font-size:.57rem}
+  .sm-movement-body{grid-template-columns:1fr 1fr;gap:7px}
+  .sm-product{grid-column:1/-1}
+  .sm-qty,.sm-balance{text-align:right}
+  .sm-movement-body>div{padding:8px}
+  .sm-movement-body span,.sm-movement-meta span{font-size:.58rem}
+  .sm-product strong,.sm-qty strong,.sm-balance strong{font-size:.68rem}
+  .sm-movement-meta{grid-template-columns:1fr 1fr;gap:7px}
+  .sm-movement-meta>div:last-child{text-align:left}
+  .sm-movement-meta strong{font-size:.61rem}
+}
+@media(max-width:380px){
+  .sm-filters{grid-template-columns:1fr}
+  .sm-product-field{grid-column:auto}
+  .sm-actions{grid-template-columns:1fr}
+}
 </style>>
 </body></html>`;
   w.document.open(); w.document.write(doc); w.document.close(); w.focus(); setTimeout(()=>w.print(),300);
@@ -5277,45 +5305,16 @@ function renderStockMovementPage(container){
 
 function stockMovementEsc(v){return String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[c]));}
 function stockMovementNum(v){const n=Number(v);return Number.isFinite(n)?n:0;}
-function stockMovementDateTime(value,fallbackDate=''){
-  const raw=String(value||'').trim();
-  if(!raw) return {date:fallbackDate||today(),time:''};
-  const iso=raw.match(/^(\d{4}-\d{2}-\d{2})[T\s](\d{2}:\d{2}(?::\d{2})?)/);
-  if(iso) return {date:iso[1],time:iso[2].slice(0,5)};
-  const d=raw.match(/^(\d{4}-\d{2}-\d{2})$/);
-  if(d) return {date:d[1],time:''};
-  return {date:fallbackDate||today(),time:raw.slice(0,5)};
-}
-function stockMovementFormatDate(date){
-  const m=String(date||'').match(/^(\d{4})-(\d{2})-(\d{2})$/);
-  return m?`${m[3]}/${m[2]}/${m[1]}`:String(date||'—');
-}
 function getStockMovements(){
   const movements=[];
   const purchases=Store.get('purchases')||[];
-  purchases.forEach(p=>{
-    const qty=stockMovementNum(p.qty);if(!qty||!p.productId)return;
-    const dt=stockMovementDateTime(p.createdAt,p.date||today());
-    movements.push({date:dt.date,time:dt.time,productId:p.productId,productName:p.productName||'صنف',kind:'in',label:'شراء',delta:qty,detail:p.supplierName||'بائع / مورد',ref:p.purchaseBatchId||''});
-  });
+  purchases.forEach(p=>{const qty=stockMovementNum(p.qty);if(qty>0&&p.productId)movements.push({date:p.date||today(),time:p.createdAt||'',productId:p.productId,productName:p.productName||'صنف',kind:'in',label:'شراء',delta:qty,detail:p.supplierName||'بائع/مورد',ref:p.purchaseBatchId||''});});
   const sales=Store.get('sales')||[];
   sales.forEach(s=>{
-    const qty=stockMovementNum(s.qty);
-    if(qty&&s.productId){
-      const dt=stockMovementDateTime(s.time,s.date||today());
-      movements.push({date:dt.date,time:dt.time,productId:s.productId,productName:s.productName||'صنف',kind:'out',label:'بيع',delta:-qty,detail:s.customerName||'عميل عادي',ref:s.invoiceNo||''});
-    }
-    const returned=stockMovementNum(s.returnedQty);
-    if(returned&&s.productId){
-      const dt=stockMovementDateTime(s.returnedAt,s.date||today());
-      movements.push({date:dt.date,time:dt.time,productId:s.productId,productName:s.productName||'صنف',kind:'return',label:'مرتجع بيع',delta:returned,detail:'مرتجع من الفاتورة',ref:s.invoiceNo||''});
-    }
+    const qty=stockMovementNum(s.qty);if(qty>0&&s.productId)movements.push({date:s.date||today(),time:s.time||'',productId:s.productId,productName:s.productName||'صنف',kind:'out',label:'بيع',delta:-qty,detail:s.customerName||'عميل عادي',ref:s.invoiceNo||''});
+    const returned=stockMovementNum(s.returnedQty);if(returned>0&&s.productId)movements.push({date:s.returnedAt||s.date||today(),time:s.returnedAt||'',productId:s.productId,productName:s.productName||'صنف',kind:'return',label:'مرتجع',delta:returned,detail:'مرتجع من فاتورة '+(s.invoiceNo||'غير محددة'),ref:s.invoiceNo||''});
   });
-  (Store.get('stockMovements')||[]).forEach(m=>{
-    const delta=stockMovementNum(m.delta);if(!m.productId||!delta)return;
-    const dt=stockMovementDateTime(m.time,m.date||today());
-    movements.push({date:dt.date,time:dt.time,productId:m.productId,productName:m.productName||'صنف',kind:'adjust',label:m.label||'تسوية جرد',delta,detail:m.reason||'تسوية يدوية',ref:m.id||''});
-  });
+  (Store.get('stockMovements')||[]).forEach(m=>{const delta=stockMovementNum(m.delta);if(m.productId&&delta)movements.push({date:m.date||today(),time:m.time||'',productId:m.productId,productName:m.productName||'صنف',kind:'adjust',label:m.label||'تسوية جرد',delta,detail:m.reason||'تسوية يدوية',ref:m.id||''});});
   return movements.sort((a,b)=>String(b.date).localeCompare(String(a.date))||String(b.time).localeCompare(String(a.time)));
 }
 function renderStockMovementData(){
@@ -5326,56 +5325,67 @@ function renderStockMovementData(){
   const type=document.getElementById('stockMovementType')?.value||'';
   const all=getStockMovements();
   const selectedProduct=productId?(Store.get('products')||[]).find(p=>String(p.id)===String(productId)):null;
-  const filtered=all.filter(m=>(!productId||String(m.productId)===String(productId))&&(!from||m.date>=from)&&(!to||m.date<=to)&&(!type||m.kind===type));
 
-  // احسب الرصيد بعد كل حركة من السجل الكامل أولاً، ثم طبّق الفلاتر.
-  // بهذه الطريقة يظل "الرصيد بعد الحركة" صحيحًا حتى عند اختيار فترة زمنية محددة.
+  // حساب الرصيد التاريخي بشكل صحيح: نبدأ من الرصيد الحالي ونرجع لكل الحركات
+  // ثم نعرض السجل من الأحدث للأقدم، بحيث "قبل/بعد" لا يتغيران مع الفلتر.
   const running={};
-  (Store.get('products')||[]).forEach(p=>running[p.id]=stockMovementNum(p.qty));
-  const balanceAfter=new Map();
-  all.forEach(m=>{
-    const after=running[m.productId]??0;
-    balanceAfter.set(m,after);
-    running[m.productId]=after-m.delta;
+  const totalsByProduct={};
+  (Store.get('products')||[]).forEach(p=>{
+    running[p.id]=stockMovementNum(p.qty);
+    totalsByProduct[p.id]=0;
+  });
+  all.forEach(m=>{totalsByProduct[m.productId]=(totalsByProduct[m.productId]||0)+m.delta;});
+  Object.keys(running).forEach(pid=>{running[pid]-=(totalsByProduct[pid]||0);});
+  const chronological=[...all].sort((a,b)=>String(a.date+' '+a.time).localeCompare(String(b.date+' '+b.time)));
+  const balanceMap=new Map();
+  chronological.forEach(m=>{
+    const before=running[m.productId]??0;
+    const after=before+m.delta;
+    balanceMap.set(m,m);
+    m.beforeBalance=before;
+    m.afterBalance=after;
+    running[m.productId]=after;
   });
 
-  const purchaseIn=filtered.filter(m=>m.kind==='in').reduce((n,m)=>n+m.delta,0);
-  const returnIn=filtered.filter(m=>m.kind==='return').reduce((n,m)=>n+m.delta,0);
-  const totalIn=purchaseIn+returnIn;
-  const totalOut=filtered.filter(m=>m.kind==='out').reduce((n,m)=>n+Math.abs(m.delta),0);
-  const adjustments=filtered.filter(m=>m.kind==='adjust').reduce((n,m)=>n+m.delta,0);
-  const net=totalIn-totalOut+adjustments;
-  const unit=selectedProduct?.unit||'كجم';
+  const filtered=all.filter(m=>(!productId||String(m.productId)===String(productId))&&(!from||m.date>=from)&&(!to||m.date<=to)&&(!type||m.kind===type));
+  const totalIn=filtered.filter(m=>m.delta>0).reduce((n,m)=>n+m.delta,0);
+  const totalOut=filtered.filter(m=>m.delta<0).reduce((n,m)=>n+Math.abs(m.delta),0);
+  const net=filtered.reduce((n,m)=>n+m.delta,0);
+  const returns=filtered.filter(m=>m.kind==='return').reduce((n,m)=>n+m.delta,0);
   const summary=document.getElementById('stockMovementSummary');
   if(summary)summary.innerHTML=`
-    <div class="sm-stat current"><div class="sm-stat-icon"><i class="fas fa-box"></i></div><div><span>الرصيد الحالي</span><strong>${selectedProduct?stockMovementNum(selectedProduct.qty).toFixed(2):'—'}</strong><small>${selectedProduct?stockMovementEsc(unit):'اختر صنفًا'}</small></div></div>
-    <div class="sm-stat in"><div class="sm-stat-icon"><i class="fas fa-arrow-down"></i></div><div><span>إجمالي الدخول</span><strong>+${totalIn.toFixed(2)}</strong><small>شراء ${purchaseIn.toFixed(2)} + مرتجع ${returnIn.toFixed(2)}</small></div></div>
-    <div class="sm-stat out"><div class="sm-stat-icon"><i class="fas fa-arrow-up"></i></div><div><span>إجمالي الخروج</span><strong>-${totalOut.toFixed(2)}</strong><small>مبيعات</small></div></div>
-    <div class="sm-stat net"><div class="sm-stat-icon"><i class="fas fa-scale-balanced"></i></div><div><span>صافي الحركة</span><strong>${net>=0?'+':''}${net.toFixed(2)}</strong><small>دخول − خروج + التسويات</small></div></div>`;
-
+    <div class="sm-stat current"><div class="sm-stat-icon"><i class="fas fa-box"></i></div><div><span>الرصيد الحالي</span><strong>${selectedProduct?stockMovementNum(selectedProduct.qty).toFixed(2):'—'}</strong><small>${selectedProduct?stockMovementEsc(selectedProduct.unit||'كجم'):'اختر صنفًا'}</small></div></div>
+    <div class="sm-stat in"><div class="sm-stat-icon"><i class="fas fa-arrow-down"></i></div><div><span>إجمالي الدخول</span><strong>+${totalIn.toFixed(2)}</strong><small>شراء + مرتجع + زيادة</small></div></div>
+    <div class="sm-stat out"><div class="sm-stat-icon"><i class="fas fa-arrow-up"></i></div><div><span>إجمالي الخروج</span><strong>-${totalOut.toFixed(2)}</strong><small>مبيعات + نقص</small></div></div>
+    <div class="sm-stat net"><div class="sm-stat-icon"><i class="fas fa-scale-balanced"></i></div><div><span>صافي الحركة خلال الفترة</span><strong>${net>=0?'+':''}${net.toFixed(2)}</strong><small>إجمالي الدخول − إجمالي الخروج</small></div></div>`;
   const rows=filtered.map((m,index)=>{
-    const after=balanceAfter.get(m)??0;
-    const before=after-m.delta;
     const positive=m.delta>=0;
-    const typeLabel=m.kind==='in'?'دخول / شراء':m.kind==='out'?'خروج / بيع':m.kind==='return'?'مرتجع بيع':'تسوية جرد';
+    const typeLabel=m.kind==='in'?'دخول / شراء':m.kind==='out'?'خروج / بيع':m.kind==='return'?'دخول / مرتجع':'تسوية جرد';
     const icon=m.kind==='in'?'fa-arrow-down':m.kind==='out'?'fa-arrow-up':m.kind==='return'?'fa-rotate-left':'fa-scale-balanced';
-    const colorClass=m.kind==='in'||m.kind==='return'?'in':m.kind==='out'?'out':'adjust';
-    return `<article class="sm-movement-card ${colorClass}">
+    const refTitle=m.kind==='in'?'فاتورة شراء':m.kind==='out'?'فاتورة بيع':m.kind==='return'?'فاتورة مرتجع':'مرجع الجرد';
+    const unit=selectedProduct?.unit||((Store.get('products')||[]).find(p=>String(p.id)===String(m.productId))?.unit)||'كجم';
+    const before=stockMovementNum(m.beforeBalance);
+    const after=stockMovementNum(m.afterBalance);
+    return `<article class="sm-movement-card ${m.kind}">
       <div class="sm-movement-top">
-        <div class="sm-movement-type"><span class="sm-movement-icon"><i class="fas ${icon}"></i></span><div><strong>${typeLabel}</strong><small>${stockMovementEsc(m.label)}</small></div></div>
-        <div class="sm-movement-date"><b>${stockMovementFormatDate(m.date)}</b>${m.time?`<span>${stockMovementEsc(m.time)}</span>`:''}</div>
+        <div class="sm-movement-type">
+          <span class="sm-movement-icon"><i class="fas ${icon}"></i></span>
+          <div><strong>${typeLabel}</strong><small>${stockMovementEsc(m.label||'')}</small></div>
+        </div>
+        <div class="sm-movement-date"><b>${stockMovementEsc(m.date)}</b>${m.time?`<span>${stockMovementEsc(String(m.time).slice(0,5))}</span>`:''}</div>
       </div>
-      <div class="sm-movement-product"><span>الصنف</span><strong>${stockMovementEsc(m.productName)}</strong><em>${stockMovementEsc(unit)}</em></div>
-      <div class="sm-movement-numbers">
-        <div><span>الرصيد قبل</span><strong>${before.toFixed(2)} <em>${stockMovementEsc(unit)}</em></strong></div>
-        <div class="movement-quantity ${positive?'positive':'negative'}"><span>التغيير</span><strong>${positive?'+':''}${m.delta.toFixed(2)} <em>${stockMovementEsc(unit)}</em></strong></div>
-        <div><span>الرصيد بعد</span><strong>${after.toFixed(2)} <em>${stockMovementEsc(unit)}</em></strong></div>
+      <div class="sm-movement-body">
+        <div class="sm-product"><span>الصنف</span><strong>${stockMovementEsc(m.productName)}</strong></div>
+        <div class="sm-qty"><span>الكمية</span><strong class="${positive?'positive':'negative'}">${positive?'+':''}${m.delta.toFixed(2)} <em>${stockMovementEsc(unit)}</em></strong></div>
+        <div class="sm-balance"><span>الرصيد بعد الحركة</span><strong>${after.toFixed(2)} <em>${stockMovementEsc(unit)}</em></strong></div>
       </div>
-      <div class="sm-movement-meta"><div><span>الطرف / السبب</span><strong>${stockMovementEsc(m.detail||'—')}</strong></div>${m.ref?`<div><span>المرجع</span><strong>${stockMovementEsc(m.ref)}</strong></div>`:''}</div>
+      <div class="sm-movement-meta">
+        <div><span>الرصيد قبل الحركة</span><strong>${before.toFixed(2)} ${stockMovementEsc(unit)}</strong></div>
+        <div><span>${refTitle}</span><strong>${stockMovementEsc(m.ref||m.detail||'—')}</strong></div>
+      </div>
     </article>`;
   }).join('');
-  const count=document.getElementById('stockMovementCount');
-  if(count)count.textContent=`${filtered.length} حركة${selectedProduct?` • ${stockMovementEsc(selectedProduct.name)}`:''}`;
+  const count=document.getElementById('stockMovementCount');if(count)count.textContent=`${filtered.length} حركة${returns?` • مرتجع ${returns.toFixed(2)} ${stockMovementEsc(selectedProduct?.unit||'كجم')}`:''}`;
   list.innerHTML=rows||`<div class="sm-empty"><i class="fas fa-box-open"></i><strong>لا توجد حركات</strong><p>لا توجد حركة مطابقة للفترة أو الصنف المحدد.</p></div>`;
 }
 function openStockAdjustmentModal(){
