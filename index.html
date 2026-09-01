@@ -2282,6 +2282,9 @@ html,body{width:100%;max-width:100%;overflow-x:hidden}
 .pos-invoice-date input{border:0;background:#fff;border-radius:10px;padding:8px 10px;font-weight:800;color:#263238;font-family:inherit;min-width:135px;outline:none}
 @media(max-width:700px){.pos-invoice-date{width:100%;justify-content:space-between;margin-top:8px}.pos-invoice-date input{flex:1;max-width:180px}.pos-advanced-toolbar{flex-wrap:wrap}}
 </style>
+<style id="inventory-count-v173">
+.inventory-count-note{display:flex;gap:9px;align-items:flex-start;background:#f7faf9;border:1px solid var(--border);border-radius:13px;padding:11px 12px;margin-bottom:14px;color:var(--text-muted);font-size:.68rem;line-height:1.7}.inventory-count-note i{color:var(--primary);margin-top:2px}.inventory-adjustment-row{display:flex;justify-content:space-between;gap:12px;align-items:center;padding:12px 0;border-bottom:1px solid var(--border)}.inventory-adjustment-row:last-child{border-bottom:0}.inventory-adjustment-row strong,.inventory-adjustment-row small{display:block}.inventory-adjustment-row strong{font-size:.78rem}.inventory-adjustment-row small{font-size:.6rem;color:var(--text-muted);margin-top:3px}.inventory-adjustment-values{display:flex;align-items:center;gap:8px;flex-wrap:wrap;justify-content:flex-end;font-size:.58rem;color:var(--text-muted)}.inventory-adjustment-values b{font-size:.72rem;padding:5px 8px;border-radius:999px}.inventory-adjustment-values b.up{background:#ecfdf5;color:#087443}.inventory-adjustment-values b.down{background:#fff1f2;color:#b42318}@media(max-width:600px){.inventory-adjustment-row{align-items:flex-start;flex-direction:column}.inventory-adjustment-values{justify-content:flex-start}.inventory-count-page .products-hero{gap:10px}}
+</style>
 </head>
 <body>
 <div id="loading-screen">
@@ -2351,9 +2354,9 @@ html,body{width:100%;max-width:100%;overflow-x:hidden}
 </div>
 <script>
 // ==================== معلومات الإصدار ====================
-const APP_VERSION='v1.7.2';
+const APP_VERSION='v1.7.3';
 const APP_NAME = "متجري";
-const APP_BUILD_DATE = "30 أغسطس 2026 — إصلاح المرتجعات والخزنة وحذف الفاتورة";
+const APP_BUILD_DATE = "1 سبتمبر 2026 — إضافة نظام الجرد وتسويات المخزون";
 
 // =====================================================
 // ☁️ Google Drive — مزامنة تلقائية + نسخة محلية
@@ -2570,7 +2573,8 @@ function buildBackupPayload(){
     customers:Store.get('customers'),
     suppliers:Store.get('suppliers'),
     offers:Store.get('offers'),
-    auditLog:Store.get('auditLog')
+    auditLog:Store.get('auditLog'),
+    stockAdjustments:Store.get('stockAdjustments')
   };
 }
 
@@ -2845,7 +2849,7 @@ window.addEventListener('visibilitychange',()=>{
   }
 });
 
-function getBackupCollections(){return ['products','sales','purchases','expenses','withdrawals','debts','customers','suppliers','offers','auditLog','returns'];}
+function getBackupCollections(){return ['products','sales','purchases','expenses','withdrawals','debts','customers','suppliers','offers','auditLog','returns','stockAdjustments'];}
 
 // =====================================================
 // 📦 نظام التخزين المتقدم (محلي + سحابة)
@@ -3328,6 +3332,7 @@ function navigateTo(tab){
       case 'suppliers':renderSuppliersPage(content);break;
       case 'audit':renderAuditPage(content);break;
       case 'offers':renderOffersPage(content);break;
+      case 'inventoryCount':renderInventoryCountPage(content);break;
     }
   }catch(error){
     console.error('خطأ أثناء عرض الصفحة:', tab, error);
@@ -3428,7 +3433,7 @@ function renderProductsPage(container){
   const out=products.filter(p=>Number(p.qty||0)<=0);
   const value=products.reduce((sum,p)=>sum+Number(p.qty||0)*Number(p.purchase||0),0);
   container.innerHTML=`<div class="fade-in products-v2">
-    <div class="products-hero"><div><span>إدارة المخزون</span><h2>الأصناف والمنتجات 📦</h2><p>تحكم في الأسعار والكميات والصور وحالة المخزون من مكان واحد.</p></div><button class="btn btn-primary" onclick="document.getElementById('pName')?.focus()"><i class="fas fa-plus"></i> إضافة صنف</button></div>
+    <div class="products-hero"><div><span>إدارة المخزون</span><h2>الأصناف والمنتجات 📦</h2><p>تحكم في الأسعار والكميات والصور وحالة المخزون من مكان واحد.</p></div><div style="display:flex;gap:7px;flex-wrap:wrap;justify-content:flex-end"><button class="btn btn-outline" onclick="navigateTo('inventoryCount')"><i class="fas fa-clipboard-check"></i> جرد وتسوية</button><button class="btn btn-primary" onclick="document.getElementById('pName')?.focus()"><i class="fas fa-plus"></i> إضافة صنف</button></div></div>
     <div class="products-kpis"><div><i class="fas fa-boxes-stacked"></i><b>${products.length}</b><span>إجمالي الأصناف</span></div><div class="warning"><i class="fas fa-triangle-exclamation"></i><b>${low.length}</b><span>مخزون منخفض</span></div><div class="danger"><i class="fas fa-circle-xmark"></i><b>${out.length}</b><span>نافد</span></div><div class="success"><i class="fas fa-sack-dollar"></i><b>${fmt(value)}</b><span>قيمة المخزون</span></div></div>
     <div class="card products-add-card"><div class="card-title"><i class="fas fa-circle-plus"></i> إضافة صنف جديد</div>
       <div class="form-grid">
@@ -6600,6 +6605,71 @@ function saveSupplierEdit(id){
 
 function deleteSupplier(id){if(!confirm('حذف المورد؟'))return;Store.delete('suppliers',id);showToast('🗑️ تم الحذف');renderSuppliersPage(document.getElementById('contentArea'));}
 
+// ==================== الجرد وتسويات المخزون (v1.7.3) ====================
+function getStockAdjustments(){ return Store.get('stockAdjustments')||[]; }
+function inventoryCountValue(qty,cost){ return money(Number(qty||0)*Number(cost||0)); }
+function renderInventoryCountPage(container){
+  const products=Store.get('products')||[];
+  const adjustments=getStockAdjustments().slice().sort((a,b)=>String(b.dateTime||'').localeCompare(String(a.dateTime||'')));
+  const totalValue=products.reduce((n,p)=>n+inventoryCountValue(p.qty,p.purchase),0);
+  const diffs=adjustments.reduce((n,a)=>n+Number(a.difference||0),0);
+  container.innerHTML=`<div class="fade-in inventory-count-page">
+    <div class="products-hero"><div><span>مراقبة المخزون</span><h2>الجرد وتسويات المخزون 📋</h2><p>قارن الكمية الفعلية بالكمية المسجلة وسجل فرق الجرد بسبب واضح.</p></div><button class="btn btn-primary" onclick="navigateTo('products')"><i class="fas fa-arrow-right"></i> رجوع للأصناف</button></div>
+    <div class="products-kpis"><div><i class="fas fa-boxes-stacked"></i><b>${products.length}</b><span>الأصناف</span></div><div class="warning"><i class="fas fa-clipboard-list"></i><b>${adjustments.length}</b><span>حركات التسوية</span></div><div class="success"><i class="fas fa-sack-dollar"></i><b>${fmt(totalValue)}</b><span>قيمة المخزون</span></div><div class="${diffs===0?'success':'danger'}"><i class="fas fa-scale-balanced"></i><b>${fmt(diffs)}</b><span>صافي فروق الكمية</span></div></div>
+    <div class="card"><div class="card-title"><i class="fas fa-clipboard-check"></i> بدء جرد صنف</div>
+      <div class="inventory-count-note"><i class="fas fa-circle-info"></i><span>الكمية الدفترية هي الكمية المسجلة حاليًا. أدخل الكمية التي وجدتها فعليًا، وسيحسب البرنامج الفرق ويحدّث المخزون بعد التأكيد.</span></div>
+      <div class="form-grid">
+        <div class="form-group" style="grid-column:1/-1"><label>الصنف</label><select id="icProduct" onchange="updateInventoryCountPreview()"><option value="">اختر الصنف</option>${products.map(p=>`<option value="${p.id}">${escapeHtml(p.name)} — ${formatProductQty(p,Number(p.qty||0))} ${p.unit||'كجم'}</option>`).join('')}</select></div>
+        <div class="form-group"><label>الكمية الدفترية</label><input id="icBookQty" type="number" readonly placeholder="-" step="0.001"></div>
+        <div class="form-group"><label>الكمية الفعلية</label><input id="icActualQty" type="number" min="0" step="0.001" inputmode="decimal" placeholder="أدخل الكمية الفعلية" oninput="updateInventoryCountPreview()"></div>
+        <div class="form-group"><label>الفرق</label><input id="icDifference" type="text" readonly placeholder="-" ></div>
+        <div class="form-group"><label>قيمة الفرق بالتكلفة</label><input id="icDifferenceValue" type="text" readonly placeholder="-" ></div>
+        <div class="form-group" style="grid-column:1/-1"><label>سبب التسوية</label><input id="icReason" type="text" maxlength="200" placeholder="مثال: فرق جرد / تلف / فاقد / خطأ إدخال"></div>
+      </div>
+      <button class="btn btn-primary btn-block" onclick="applyInventoryCount()"><i class="fas fa-check-double"></i> اعتماد الجرد وتحديث المخزون</button>
+    </div>
+    <div class="card"><div class="card-title"><i class="fas fa-history"></i> آخر تسويات الجرد</div><div id="inventoryAdjustmentsList"></div></div>
+  </div>`;
+  renderInventoryAdjustmentsList();
+}
+function updateInventoryCountPreview(){
+  const id=document.getElementById('icProduct')?.value||'';
+  const p=(Store.get('products')||[]).find(x=>String(x.id)===String(id));
+  const book=Number(p?.qty||0);
+  const actualEl=document.getElementById('icActualQty');
+  const actual=actualEl&&actualEl.value!==''?Number(actualEl.value):null;
+  const diff=actual===null?null:money(actual-book);
+  const value=diff===null?null:inventoryCountValue(diff,p?.purchase||0);
+  const set=(id,val)=>{const el=document.getElementById(id);if(el)el.value=val===null?'-':String(val);};
+  set('icBookQty',p?formatProductQty(p,book):'-');
+  set('icDifference',diff===null?null:(diff>0?`+${formatProductQty(p,diff)}`:formatProductQty(p,diff)));
+  set('icDifferenceValue',value===null?null:(value>0?`+${fmt(value)}`:fmt(value)));
+}
+function applyInventoryCount(){
+  const id=document.getElementById('icProduct')?.value||'';
+  const actualRaw=document.getElementById('icActualQty')?.value;
+  const reason=(document.getElementById('icReason')?.value||'').trim();
+  const p=(Store.get('products')||[]).find(x=>String(x.id)===String(id));
+  if(!p)return showToast('اختر الصنف أولًا','warning');
+  if(actualRaw===''||!Number.isFinite(Number(actualRaw))||Number(actualRaw)<0)return showToast('أدخل الكمية الفعلية بشكل صحيح','warning');
+  if(!reason)return showToast('اكتب سبب التسوية','warning');
+  const book=Number(p.qty||0), actual=Number(actualRaw), difference=money(actual-book);
+  if(Math.abs(difference)<0.000001)return showToast('لا يوجد فرق بين الجرد الفعلي والدفتر','info');
+  const cost=Number(p.purchase||0), value=inventoryCountValue(difference,cost), now=cairoDateTimeISO();
+  if(!confirm(`تأكيد تسوية ${p.name}؟\nالدفتر: ${formatProductQty(p,book)} ${p.unit||'كجم'}\nالفعلي: ${formatProductQty(p,actual)} ${p.unit||'كجم'}\nالفرق: ${difference>0?'+':''}${formatProductQty(p,difference)}\nالسبب: ${reason}`))return;
+  const current=(Store.get('products')||[]).find(x=>String(x.id)===String(id));
+  if(!current)return showToast('تعذر العثور على الصنف','error');
+  Store.update('products',id,{qty:actual});
+  Store.add('stockAdjustments',{productId:p.id,productName:p.name,date:now,dateTime:now,bookQty:book,actualQty:actual,difference,costPerUnit:cost,value,unit:p.unit||'كجم',reason,user:currentUser?.name||'مستخدم'});
+  showToast(`✅ تم اعتماد الجرد — ${difference>0?'زيادة':'عجز'} ${formatProductQty(p,Math.abs(difference))} ${p.unit||'كجم'}`,'success');
+  document.getElementById('icActualQty').value=''; document.getElementById('icReason').value=''; updateInventoryCountPreview(); renderInventoryAdjustmentsList();
+}
+function renderInventoryAdjustmentsList(){
+  const box=document.getElementById('inventoryAdjustmentsList'); if(!box)return;
+  const rows=getStockAdjustments().slice().sort((a,b)=>String(b.dateTime||'').localeCompare(String(a.dateTime||''))).slice(0,50);
+  box.innerHTML=rows.map(a=>{const up=Number(a.difference||0)>0;return `<div class="inventory-adjustment-row"><div><strong>${escapeHtml(a.productName||'-')}</strong><small>${formatInvoiceDate(a.date||a.dateTime||'')} • ${escapeHtml(a.reason||'-')} • ${escapeHtml(a.user||'مستخدم')}</small></div><div class="inventory-adjustment-values"><span>دفتر ${fmt(a.bookQty)}</span><span>فعلي ${fmt(a.actualQty)}</span><b class="${up?'up':'down'}">${up?'+':''}${fmt(a.difference)} ${a.unit||''}</b></div></div>`}).join('')||'<div class="empty-state"><i class="fas fa-clipboard-check"></i><p>لا توجد تسويات جرد حتى الآن</p></div>';
+}
+
 // ==================== العروض والخصومات (ميزة جديدة) ====================
 function renderOffersPage(container){
   const offers=Store.get('offers')||[];
@@ -6886,7 +6956,7 @@ function renderMorePage(container){
     </div>
     <div class="more-section-title"><span><i class="fas fa-chart-pie"></i> التقارير والمتابعة</span><small>تحليل الأداء</small></div>
     <div class="menu-grid menu-grid-v3 compact">
-      <div class="menu-item-v3" onclick="navigateTo('offers')"><div class="menu-icon"><i class="fas fa-tags"></i></div><div><b>العروض</b><small>العروض والخصومات</small></div><i class="fas fa-chevron-left arrow"></i></div>
+      <div class="menu-item-v3" onclick="navigateTo('offers')"><div class="menu-icon"><i class="fas fa-tags"></i></div><div><b>العروض</b><small>العروض والخصومات</small></div><i class="fas fa-chevron-left arrow"></i></div><div class="menu-item-v3" onclick="navigateTo('inventoryCount')"><div class="menu-icon"><i class="fas fa-clipboard-check"></i></div><div><b>الجرد والتسويات</b><small>مطابقة المخزون الفعلي بالدفتر</small></div><i class="fas fa-chevron-left arrow"></i></div>
       <div class="menu-item-v3" onclick="navigateTo('summary')"><div class="menu-icon"><i class="fas fa-chart-column"></i></div><div><b>ملخص الشهر</b><small>الأرقام والنتائج</small></div><i class="fas fa-chevron-left arrow"></i></div>
       <div class="menu-item-v3" onclick="navigateTo('reports')"><div class="menu-icon"><i class="fas fa-chart-line"></i></div><div><b>التقارير</b><small>تقارير تفصيلية</small></div><i class="fas fa-chevron-left arrow"></i></div>
       <div class="menu-item-v3" onclick="navigateTo('audit')"><div class="menu-icon"><i class="fas fa-clock-rotate-left"></i></div><div><b>سجل التعديلات</b><small>آخر التغييرات</small></div><i class="fas fa-chevron-left arrow"></i></div>
@@ -7497,9 +7567,97 @@ async function replaceCloudDataWithLocal() {
 
 </script>
 <script>
+/* =========================================================
+   🔄 مدير تحديثات متجري — آمن + تلقائي + مناسب لـ GitHub Pages
+   - يفحص version.json فقط، ولا يلمس بيانات المستخدم.
+   - ينفذ نسخة احتياطية قبل التحديث إذا كانت الدالة متاحة.
+   - يدعم تأجيل التحديث.
+   - بعد تحديث Service Worker يعيد تحميل النسخة الجديدة.
+========================================================= */
+(function(){
+  const UPDATE_CONFIG={
+    manifestUrl:'version.json?v='+Date.now(),
+    checkEveryMs:30*60*1000,
+    skipKey:'bm_update_skip_version',
+    lastCheckKey:'bm_update_last_check'
+  };
+  function normalizeVersion(v){return String(v||'').trim().replace(/^v/i,'').split('.').map(x=>parseInt(x,10)||0);}
+  function compareVersions(a,b){const A=normalizeVersion(a),B=normalizeVersion(b);for(let i=0;i<3;i++){if((A[i]||0)!==(B[i]||0))return (A[i]||0)>(B[i]||0)?1:-1;}return 0;}
+  function currentVersion(){return typeof APP_VERSION!=='undefined'?APP_VERSION:'v0.0.0';}
+  function showUpdateCard(remote){
+    if(document.getElementById('matgaryUpdateCard'))return;
+    const card=document.createElement('div');card.id='matgaryUpdateCard';
+    card.dir='rtl';
+    card.innerHTML=`<div class="matgary-update-backdrop"></div><div class="matgary-update-box">
+      <div class="matgary-update-icon">↻</div>
+      <h3>تحديث جديد لمتجري</h3>
+      <p>الإصدار الحالي <b>${currentVersion()}</b></p>
+      <p>الإصدار الجديد <b>${remote.version}</b></p>
+      ${remote.notes?`<div class="matgary-update-notes">${escapeHtml(String(remote.notes))}</div>`:''}
+      <div class="matgary-update-actions"><button id="matgaryUpdateNow" class="btn btn-primary">تحديث الآن</button><button id="matgaryUpdateLater" class="btn btn-outline">لاحقًا</button></div>
+    </div>`;
+    document.body.appendChild(card);
+    document.getElementById('matgaryUpdateLater').onclick=()=>{localStorage.setItem(UPDATE_CONFIG.skipKey,String(remote.version));card.remove();};
+    document.getElementById('matgaryUpdateNow').onclick=()=>performUpdate(remote,card);
+  }
+  async function performUpdate(remote,card){
+    const btn=document.getElementById('matgaryUpdateNow');if(btn){btn.disabled=true;btn.textContent='جاري تجهيز التحديث...';}
+    try{
+      // نسخة احتياطية قبل أي تغيير في الكاش/النسخة المعروضة.
+      if(typeof buildBackupPayload==='function' && typeof backupToGoogle==='function' && typeof driveAccessTokenValid==='function' && driveAccessTokenValid()){
+        await backupToGoogle({silent:true});
+      }
+      localStorage.removeItem(UPDATE_CONFIG.skipKey);
+      if('serviceWorker' in navigator){
+        const reg=await navigator.serviceWorker.getRegistration();
+        if(reg){
+          await reg.update();
+          if(reg.waiting){reg.waiting.postMessage({type:'SKIP_WAITING'});}
+          else if(reg.installing){
+            await new Promise(resolve=>{reg.installing.addEventListener('statechange',function(){if(this.state==='installed')resolve();});});
+            if(reg.waiting)reg.waiting.postMessage({type:'SKIP_WAITING'});
+          }
+        }
+      }
+      // كسر كاش HTML على GitHub Pages.
+      window.location.replace(window.location.pathname+'?updated='+encodeURIComponent(remote.version)+'&t='+Date.now());
+    }catch(e){
+      console.error('Update failed',e);
+      if(btn){btn.disabled=false;btn.textContent='إعادة المحاولة';}
+      if(typeof showToast==='function')showToast('تعذر إكمال التحديث. بياناتك لم يتم حذفها.','error');
+    }
+  }
+  async function checkForUpdate(force){
+    try{
+      const last=Number(localStorage.getItem(UPDATE_CONFIG.lastCheckKey)||0);
+      if(!force && Date.now()-last<UPDATE_CONFIG.checkEveryMs)return;
+      localStorage.setItem(UPDATE_CONFIG.lastCheckKey,String(Date.now()));
+      const r=await fetch(UPDATE_CONFIG.manifestUrl,{cache:'no-store',headers:{'Cache-Control':'no-cache'}});
+      if(!r.ok)return;
+      const remote=await r.json();
+      if(!remote || !remote.version || compareVersions(remote.version,currentVersion())<=0)return;
+      if(localStorage.getItem(UPDATE_CONFIG.skipKey)===String(remote.version))return;
+      showUpdateCard(remote);
+    }catch(e){console.warn('Update check skipped:',e);}
+  }
+  function injectStyle(){
+    if(document.getElementById('matgary-update-style'))return;
+    const st=document.createElement('style');st.id='matgary-update-style';st.textContent=`
+      #matgaryUpdateCard{position:fixed;inset:0;z-index:999999;font-family:inherit}
+      .matgary-update-backdrop{position:absolute;inset:0;background:rgba(15,23,42,.48);backdrop-filter:blur(4px)}
+      .matgary-update-box{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:min(92vw,420px);background:#fff;border-radius:24px;padding:26px;text-align:center;box-shadow:0 24px 80px rgba(0,0,0,.25)}
+      .matgary-update-icon{width:58px;height:58px;margin:0 auto 12px;border-radius:18px;display:grid;place-items:center;background:rgba(15,118,110,.10);font-size:32px;color:#0f766e;font-weight:900}
+      .matgary-update-box h3{margin:0 0 10px;font-size:1.15rem}.matgary-update-box p{margin:6px 0;color:#64748b;font-size:.9rem}.matgary-update-notes{margin:14px 0;padding:10px;border-radius:12px;background:#f8fafc;color:#475569;font-size:.8rem}
+      .matgary-update-actions{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-top:18px}.matgary-update-actions button{min-height:46px;border-radius:13px;border:0;font:inherit;font-weight:800;cursor:pointer}.matgary-update-actions .btn-outline{border:1px solid #d8e4df;background:#fff}
+    `;document.head.appendChild(st);
+  }
+  window.matgaryCheckForUpdate=()=>checkForUpdate(true);
+  document.addEventListener('DOMContentLoaded',()=>{injectStyle();setTimeout(()=>checkForUpdate(false),4500);setInterval(()=>checkForUpdate(false),UPDATE_CONFIG.checkEveryMs);});
+})();
+
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', function() {
-    navigator.serviceWorker.register('sw.js?v=1.7.0')
+    navigator.serviceWorker.register('sw.js?v=1.7.3')
       .then(function(registration) {
         registration.update().catch(function(){});
         console.log('SW registered: ', registration.scope);
