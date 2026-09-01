@@ -556,7 +556,7 @@ tr:hover td{background:rgba(15,118,110,.045)}
 @media(max-width:800px){.dash-kpis,.products-kpis{grid-template-columns:repeat(2,1fr)}.dash-grid-2{grid-template-columns:1fr}.products-filters{grid-template-columns:1fr}.products-filter-buttons{order:2}.products-filters select{order:3}.sales-today-strip{grid-template-columns:repeat(2,1fr)}}
 @media(max-width:480px){.dash-welcome,.products-hero{align-items:flex-start;flex-direction:column}.dash-date{align-self:stretch;text-align:center}.dash-kpi strong{font-size:1.05rem}.products-kpis>div{padding:10px}.products-kpis>div{display:grid;grid-template-columns:32px 1fr}.products-kpis i{width:32px;height:32px;grid-row:1/3}.products-list-view .product-item{display:grid;grid-template-columns:64px 1fr}.products-list-view .product-item .p-image{width:64px;height:64px}.products-list-view .product-item .p-actions{grid-column:2;grid-row:auto}.products-list-view .product-item .p-actions .btn:first-child{display:inline-flex}.sales-today-strip>div{padding:8px}.sales-today-strip strong{font-size:.72rem}}
 
-/* ==================== متجري v1.5.12 - تحسين لوحة التحكم ==================== */
+/* ==================== كنوز الطبيعة v1.5.12 - تحسين لوحة التحكم ==================== */
 .dashboard-v2{padding-bottom:8px}
 .dashboard-v2 .dash-welcome{position:relative;overflow:hidden;min-height:142px;padding:22px 20px;background:linear-gradient(135deg,#0b655e 0%,#0f766e 48%,#1d857a 72%,#c99a22 155%);box-shadow:0 14px 34px rgba(15,118,110,.20)}
 .dashboard-v2 .dash-welcome::before{content:'';position:absolute;width:220px;height:220px;border-radius:50%;left:-90px;top:-125px;background:rgba(255,255,255,.07);pointer-events:none}
@@ -2353,7 +2353,7 @@ html,body{width:100%;max-width:100%;overflow-x:hidden}
 // ==================== معلومات الإصدار ====================
 const APP_VERSION='v1.7.8';
 const APP_NAME = "متجري";
-const APP_BUILD_DATE = "1 سبتمبر 2026 — نظام تحديث جذري وإصلاحات التحديث";
+const APP_BUILD_DATE = "1 سبتمبر 2026 — تحسين نظام التحديث الذكي";
 
 // =====================================================
 // ☁️ Google Drive — مزامنة تلقائية + نسخة محلية
@@ -4328,7 +4328,7 @@ function sharePOSOnWhatsApp(){
 function invoiceTextPro(inv,sales){
   const date=formatInvoiceDate(inv.date||'');
   const typeLabel=inv.type==='wholesale'?'جملة':'قطاعي';
-  let t=`🧾 *متجري — فاتورة بيع*
+  let t=`🧾 *كنوز الطبيعة — فاتورة بيع*
 `;
   t+=`━━━━━━━━━━━━━━
 `;
@@ -4414,7 +4414,7 @@ function openPOSReceiptPreview(invoice){
   const payLabel=({cash:'نقدي',credit:'آجل',transfer:'تحويل',card:'بطاقة'})[inv.method]||inv.method||'نقدي';
   openModal(`<div class="modal-header"><h2><i class="fas fa-file-invoice" style="color:var(--primary);margin-left:8px"></i> فاتورة بيع رقم ${inv.invoiceSeq||inv.invoiceNo}</h2><button class="modal-close" onclick="closeModal()">&times;</button></div>
     <div class="pos-receipt-preview receipt-pro-new">
-      <div class="receipt-brand">متجري</div>
+      <div class="receipt-brand">كنوز الطبيعة</div>
       <div class="receipt-title">فاتورة بيع</div>
       <div class="receipt-info-grid">
         <div><small>رقم الفاتورة</small><strong>${inv.invoiceSeq||inv.invoiceNo}</strong></div>
@@ -4444,7 +4444,7 @@ function printPOSReceipt(){
   const w=window.open('','_blank','width=760,height=900'); if(!w)return showToast('المتصفح منع نافذة الطباعة','warning');
   const doc=`<!doctype html><html lang="ar" dir="rtl"><head><meta charset="utf-8"><title>${inv.invoiceNo}</title><style>
   @page{size:A4;margin:14mm}body{font-family:Arial,sans-serif;color:#222;margin:0;background:#fff}.page{max-width:760px;margin:0 auto;padding:18px}.brand{text-align:center;font-size:24px;font-weight:900;margin-bottom:4px}.sub{text-align:center;color:#666;font-size:12px;line-height:1.8}.line{border-top:1px dashed #888;margin:14px 0}table{width:100%;border-collapse:collapse;font-size:13px}th,td{padding:9px 5px;border-bottom:1px solid #ddd;text-align:right}.r{display:flex;justify-content:space-between;padding:8px 0}.grand{font-size:19px;font-weight:900;border-top:2px solid #222;margin-top:8px;padding-top:12px}.thanks{text-align:center;margin-top:20px;font-size:12px;color:#666}@media print{.page{padding:0}}
-  </style></head><body><div class="page"><div class="brand">متجري</div><div class="sub">فاتورة بيع رقم ${inv.invoiceSeq||inv.invoiceNo}<br>${formatInvoiceDate(inv.date)}${inv.time?' • '+inv.time:''}<br>العميل: ${inv.customerName}<br>نوع البيع: ${inv.type==='wholesale'?'جملة':'قطاعي'}</div><div class="line"></div><table><thead><tr><th>الصنف</th><th>الكمية</th><th>الإجمالي</th></tr></thead><tbody>${rows}</tbody></table><div class="line"></div><div class="r"><span>الإجمالي قبل الخصم</span><b>${fmt(inv.subtotal)}</b></div><div class="r"><span>الخصم</span><b>${fmt(inv.discount)}</b></div><div class="r"><span>الضريبة</span><b>${fmt(inv.tax)}</b></div><div class="r grand"><span>الإجمالي النهائي</span><b>${fmt(inv.total)}</b></div><div class="r"><span>المدفوع</span><b>${fmt(inv.paid)}</b></div><div class="r"><span>${inv.method==='cash'?'الباقي':'المتبقي'}</span><b>${fmt(inv.method==='cash'?inv.change:inv.remaining)}</b></div><div class="r"><span>السداد</span><b>${({cash:'نقدي',credit:'آجل',transfer:'تحويل',card:'بطاقة'})[inv.method]||inv.method||'نقدي'}</b></div><div class="thanks">شكرًا لتعاملكم معنا ❤️</div></div>
+  </style></head><body><div class="page"><div class="brand">كنوز الطبيعة</div><div class="sub">فاتورة بيع رقم ${inv.invoiceSeq||inv.invoiceNo}<br>${formatInvoiceDate(inv.date)}${inv.time?' • '+inv.time:''}<br>العميل: ${inv.customerName}<br>نوع البيع: ${inv.type==='wholesale'?'جملة':'قطاعي'}</div><div class="line"></div><table><thead><tr><th>الصنف</th><th>الكمية</th><th>الإجمالي</th></tr></thead><tbody>${rows}</tbody></table><div class="line"></div><div class="r"><span>الإجمالي قبل الخصم</span><b>${fmt(inv.subtotal)}</b></div><div class="r"><span>الخصم</span><b>${fmt(inv.discount)}</b></div><div class="r"><span>الضريبة</span><b>${fmt(inv.tax)}</b></div><div class="r grand"><span>الإجمالي النهائي</span><b>${fmt(inv.total)}</b></div><div class="r"><span>المدفوع</span><b>${fmt(inv.paid)}</b></div><div class="r"><span>${inv.method==='cash'?'الباقي':'المتبقي'}</span><b>${fmt(inv.method==='cash'?inv.change:inv.remaining)}</b></div><div class="r"><span>السداد</span><b>${({cash:'نقدي',credit:'آجل',transfer:'تحويل',card:'بطاقة'})[inv.method]||inv.method||'نقدي'}</b></div><div class="thanks">شكرًا لتعاملكم معنا ❤️</div></div>
 
 </body></html>`;
   w.document.open(); w.document.write(doc); w.document.close(); w.focus(); setTimeout(()=>w.print(),300);
@@ -5984,7 +5984,7 @@ function debtShareMessage(name,remaining,type){
   const relation=type==='علينا'?'المبلغ المستحق لكم':'المبلغ المتبقي عليك';
   return `السلام عليكم ${name}،
 
-ده ملخص حسابك لدى متجري:
+ده ملخص حسابك لدى كنوز الطبيعة:
 ${relation}: ${fmt(remaining)}
 
 لو محتاج تفاصيل الحساب أنا تحت أمرك.`;
@@ -7107,7 +7107,7 @@ function renderSettingsPage(container){
             <div class="backup-head-icon"><i class="fas fa-shield-halved"></i></div>
             <div style="min-width:0">
               <h3>مركز النسخ الاحتياطي</h3>
-              <p>احفظ بيانات متجري على جهازك أو Google Drive مع التحقق من سلامة النسخة.</p>
+              <p>احفظ بيانات كنوز الطبيعة على جهازك أو Google Drive مع التحقق من سلامة النسخة.</p>
             </div>
           </div>
           <div class="backup-head-status" id="backupOverallStatus"><i class="fas fa-circle"></i> جاهز</div>
@@ -7397,83 +7397,11 @@ async function applyBundledOriginalDataOnce(){
   }catch(e){ console.error('تعذر تطبيق البيانات الأصلية المدمجة:',e); return false; }
 }
 
-/* v1.7.2 — تصحيح حالة تحصيلات أحمد عطا وإسلام الوحدة الصحية
-   الهدف: إعادة الفواتير لحالة آجل حقيقية عندما لا توجد حركة تحصيل فعلية في الخزنة.
-   يعمل فقط عند اكتشاف الحالة القديمة المحددة، لذلك لا يعيد تصفير أي تحصيل جديد لاحقًا. */
-function restorePendingDebtStateV172(){
-  try{
-    // تنفيذ التصحيح مرة واحدة فقط. بعد نجاحه لا يُعاد تعديل أي فاتورة مستقبلًا.
-    const MIGRATION_FLAG='bm_debt_state_reset_v172';
-    if(localStorage.getItem(MIGRATION_FLAG)==='1') return false;
-    const sales=Store.get('sales')||[];
-    const debts=Store.get('debts')||[];
-    const targets=[
-      {person:'أحمد عطا', seq:'57', invoiceNo:'INV-20260821-947970', total:500, paid:100, remaining:400},
-      {person:'اسلام الوحدة الصحية', seq:'17', invoiceNo:'', total:500, paid:500, remaining:0}
-    ];
-    let changed=false;
-    targets.forEach(target=>{
-      const matches=sales.filter(s=>{
-        const person=String(s.customerName||'').trim();
-        const seq=String(s.invoiceSeq||'');
-        const no=String(s.invoiceNo||'');
-        return person===target.person &&
-          ((target.invoiceNo && no===target.invoiceNo) || seq===target.seq);
-      });
-      if(!matches.length)return;
-      const batchIds=[...new Set(matches.map(s=>String(s.saleBatchId||s.invoiceNo||s.id||'')))].filter(Boolean);
-      batchIds.forEach(batchId=>{
-        const batch=sales.filter(s=>String(s.saleBatchId||s.invoiceNo||s.id||'')===batchId);
-        const total=Math.max(...batch.map(s=>Number(s.total||0)),0);
-        const paid=Math.max(...batch.map(s=>Number(s.paid||0)),0);
-        const remaining=Math.max(...batch.map(s=>Number(s.remaining||0)),0);
-        const isExpectedState=Math.abs(total-target.total)<0.01 &&
-          Math.abs(paid-target.paid)<0.01 && Math.abs(remaining-target.remaining)<0.01;
-        if(!isExpectedState)return;
-        batch.forEach(s=>{
-          Store.update('sales',s.id,{
-            paid:0,
-            remaining:Math.max(0,Number(s.total||0)),
-            initialPaid:0,
-            collectionHistory:[]
-          });
-        });
-        debts.filter(d=>{
-          return d && d.source==='sale' && d.type==='لنا' &&
-            String(d.saleBatchId||d.invoiceNo||'')===batchId;
-        }).forEach(d=>{
-          Store.update('debts',d.id,{
-            amount:total,
-            paidAmount:0,
-            paymentHistory:[],
-            paid:false,
-            debtVersion:2,
-            source:'sale',
-            type:'لنا',
-            person:target.person,
-            saleTotal:total
-          });
-        });
-        changed=true;
-      });
-    });
-    if(changed){
-      try{localStorage.setItem(MIGRATION_FLAG,'1');}catch(e){}
-      console.log('v1.7.2 debt-state correction applied');
-    }
-    return changed;
-  }catch(e){
-    console.error('تعذر تصحيح حالة ديون أحمد وإسلام:',e);
-    return false;
-  }
-}
-
 window.addEventListener('DOMContentLoaded', async () => {
   applyAppTheme();
   applyAppIdentity();
   try { await initIndexedDBStore(); } catch (e) { console.warn('IndexedDB init:', e); }
   await applyBundledOriginalDataOnce();
-  restorePendingDebtStateV172();
   const user = Store.getUser();
   if (user && !isLockEnabled()) {
     currentUser = user;
@@ -7496,7 +7424,18 @@ async function replaceCloudDataWithLocal() {
 
 
 </script>
-
+<script>
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', function() {
+    navigator.serviceWorker.register('sw.js?v=1.7.8')
+      .then(function(registration) {
+        registration.update().catch(function(){});
+        console.log('SW registered: ', registration.scope);
+      })
+      .catch(function(error) { console.log('SW registration failed: ', error); });
+  });
+}
+</script>
 <style id="sales-purchases-final-fixes">
 .sale-ref-service-row{display:grid!important;grid-template-columns:minmax(0,1fr) 150px!important;gap:8px!important;align-items:center!important;margin:10px 0!important}
 .sale-ref-service-row .sale-ref-service{width:100%!important}
@@ -7642,7 +7581,7 @@ async function replaceCloudDataWithLocal() {
   function esc(v){return String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
   function invoiceTotalText(inv){return fmt(inv.total);}
   function invoiceText(inv){
-    let t=`🧾 *متجري — فاتورة بيع*\n`;
+    let t=`🧾 *كنوز الطبيعة — فاتورة بيع*\n`;
     t+=`━━━━━━━━━━━━━━\n`;
     t+=`🔢 رقم الفاتورة: *${inv.invoiceSeq||inv.invoiceNo}*\n`;
     t+=`📅 التاريخ: *${formatInvoiceDate(inv.date)}${inv.time?' — '+inv.time:''}*\n`;
@@ -7782,7 +7721,7 @@ async function replaceCloudDataWithLocal() {
     const inv=findInvoice(key);if(!inv)return;
     const rows=inv.lines.map(s=>{const q=money(s.packages||s.qty||1),w=money(s.weight||1);const p=productForSaleLine(s);const qty=isKgProduct(p)||s.isWeightSale?saleQuantityLabel(p,q,w):`${q} ${isFixedPackProduct(p)?'علبة':(s.sellUnit||p?.unit||'علبة')}`;return `<tr><td>${esc(s.productName||'صنف')}</td><td>${esc(qty)}</td><td>${fmt(s.price||0)}</td><td>${fmt(s.total)}</td></tr>`}).join('');
     const w=window.open('','_blank','width=900,height=800');if(!w){showToast('اسمح بفتح نافذة الطباعة','warning');return;}
-    const html='<!doctype html><html lang="ar" dir="rtl"><head><meta charset="UTF-8"><title>'+esc(inv.invoiceNo)+'</title><style>@page{size:A4;margin:12mm}body{margin:0;font-family:Arial,Tahoma,sans-serif;color:#173b32;background:#fff}.page{width:100%;max-width:190mm;margin:auto;padding:6mm;box-sizing:border-box}.brand{text-align:center;font-size:28px;font-weight:900;color:#0f766e;margin-bottom:4px}.sub{text-align:center;color:#66756f;font-size:12px;line-height:1.8}.line{border-top:1px solid #dce8e3;margin:14px 0}table{width:100%;border-collapse:collapse;margin:10px 0;font-size:12px}th{background:#eef7f3;color:#0f766e}th,td{padding:9px 7px;border-bottom:1px solid #e6eeeb;text-align:right}.r{display:flex;justify-content:space-between;padding:6px 0;font-size:13px}.grand{font-size:19px;font-weight:900;border-top:2px solid #0f766e;margin-top:8px;padding-top:10px}.thanks{text-align:center;margin-top:25px;color:#71827b;font-size:12px}.meta{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px}.meta div{border:1px solid #dfeae5;border-radius:10px;padding:8px}.meta small{display:block;color:#778780;font-size:10px}.meta b{display:block;margin-top:3px;font-size:12px}@media print{button{display:none}}</style></head><body><div class="page"><div class="brand">متجري</div><div class="sub">فاتورة بيع — '+esc(inv.invoiceNo)+'<br>'+esc(inv.date)+' '+esc(inv.time)+'</div><div class="line"></div><div class="meta"><div><small>العميل</small><b>'+esc(inv.customerName)+'</b></div><div><small>نوع البيع</small><b>'+(inv.type==='wholesale'?'جملة':'قطاعي')+'</b></div><div><small>السداد</small><b>'+paymentLabel(inv.paymentMethod)+'</b></div></div><div class="line"></div><table><thead><tr><th>الصنف</th><th>الكمية</th><th>السعر</th><th>الإجمالي</th></tr></thead><tbody>'+rows+'</tbody></table><div class="line"></div><div class="r"><span>الإجمالي</span><b>'+fmt(inv.total)+'</b></div><div class="r"><span>المدفوع</span><b>'+fmt(inv.paid)+'</b></div><div class="r grand"><span>المتبقي</span><b>'+fmt(inv.remaining)+'</b></div>'+(inv.note?'<div class="line"></div><div class="r"><span>ملاحظات</span><b>'+esc(inv.note)+'</b></div>':'')+'<div class="thanks">شكرًا لتعاملكم معنا ❤️</div></div></body></html>';
+    const html='<!doctype html><html lang="ar" dir="rtl"><head><meta charset="UTF-8"><title>'+esc(inv.invoiceNo)+'</title><style>@page{size:A4;margin:12mm}body{margin:0;font-family:Arial,Tahoma,sans-serif;color:#173b32;background:#fff}.page{width:100%;max-width:190mm;margin:auto;padding:6mm;box-sizing:border-box}.brand{text-align:center;font-size:28px;font-weight:900;color:#0f766e;margin-bottom:4px}.sub{text-align:center;color:#66756f;font-size:12px;line-height:1.8}.line{border-top:1px solid #dce8e3;margin:14px 0}table{width:100%;border-collapse:collapse;margin:10px 0;font-size:12px}th{background:#eef7f3;color:#0f766e}th,td{padding:9px 7px;border-bottom:1px solid #e6eeeb;text-align:right}.r{display:flex;justify-content:space-between;padding:6px 0;font-size:13px}.grand{font-size:19px;font-weight:900;border-top:2px solid #0f766e;margin-top:8px;padding-top:10px}.thanks{text-align:center;margin-top:25px;color:#71827b;font-size:12px}.meta{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px}.meta div{border:1px solid #dfeae5;border-radius:10px;padding:8px}.meta small{display:block;color:#778780;font-size:10px}.meta b{display:block;margin-top:3px;font-size:12px}@media print{button{display:none}}</style></head><body><div class="page"><div class="brand">كنوز الطبيعة</div><div class="sub">فاتورة بيع — '+esc(inv.invoiceNo)+'<br>'+esc(inv.date)+' '+esc(inv.time)+'</div><div class="line"></div><div class="meta"><div><small>العميل</small><b>'+esc(inv.customerName)+'</b></div><div><small>نوع البيع</small><b>'+(inv.type==='wholesale'?'جملة':'قطاعي')+'</b></div><div><small>السداد</small><b>'+paymentLabel(inv.paymentMethod)+'</b></div></div><div class="line"></div><table><thead><tr><th>الصنف</th><th>الكمية</th><th>السعر</th><th>الإجمالي</th></tr></thead><tbody>'+rows+'</tbody></table><div class="line"></div><div class="r"><span>الإجمالي</span><b>'+fmt(inv.total)+'</b></div><div class="r"><span>المدفوع</span><b>'+fmt(inv.paid)+'</b></div><div class="r grand"><span>المتبقي</span><b>'+fmt(inv.remaining)+'</b></div>'+(inv.note?'<div class="line"></div><div class="r"><span>ملاحظات</span><b>'+esc(inv.note)+'</b></div>':'')+'<div class="thanks">شكرًا لتعاملكم معنا ❤️</div></div></body></html>';
     w.document.open();w.document.write(html);w.document.close();w.focus();setTimeout(()=>w.print(),350);
   };
 
@@ -8168,7 +8107,7 @@ window.addEventListener('online',()=>{try{if(typeof markCloudSyncPending==='func
 </script>
 
 <script>
-/* v1.7.2 — إصلاح نهائي للمرتجع والخزنة وحذف الفاتورة */
+/* v1.7.7 — نظام التحديث الذكي */
 (function(){
   try{
     const rows=Store.get('returns');
@@ -8185,181 +8124,212 @@ window.addEventListener('online',()=>{try{if(typeof markCloudSyncPending==='func
 })();
 </script>
 
+<!-- =========================================================
+     متجري — نظام التحديث الذكي v2
+     - التحقق من version.json بدون كاش.
+     - لا يحذف localStorage أو بيانات البرنامج.
+     - لا يحاول "تثبيت APK" أو حذف بيانات المستخدم.
+     - يحدّث Service Worker ثم يعيد تحميل index.html من الشبكة.
+     - يمنع حلقة التحديث إذا لم تتغير النسخة فعليًا.
+     ========================================================= -->
+<style id="matgary-update-style">
+  #matgaryUpdateCard{position:fixed;inset:0;z-index:100000;display:flex;align-items:center;justify-content:center;padding:20px;direction:rtl}
+  .matgary-update-backdrop{position:absolute;inset:0;background:rgba(15,23,42,.48);backdrop-filter:blur(6px)}
+  .matgary-update-box{position:relative;width:min(100%,430px);background:#fff;border-radius:28px;padding:28px 22px 22px;text-align:center;box-shadow:0 25px 70px rgba(0,0,0,.25);font-family:'Tajawal','Segoe UI',sans-serif}
+  .matgary-update-icon{width:78px;height:78px;margin:0 auto 16px;border-radius:22px;display:flex;align-items:center;justify-content:center;font-size:38px;color:#0f766e;background:#edf8f5}
+  .matgary-update-box h3{margin:0 0 10px;font-size:1.35rem;font-weight:900;color:#243238}
+  .matgary-update-box p{margin:7px 0;color:#64748b;font-size:.95rem}
+  .matgary-update-notes{margin:16px 0;padding:13px 12px;border-radius:15px;background:#f5f8f7;color:#475569;font-size:.86rem;line-height:1.8}
+  .matgary-update-actions{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:20px}
+  .matgary-update-actions button{min-height:52px;border-radius:15px;border:0;font:inherit;font-weight:900;font-size:.95rem;cursor:pointer}
+  .matgary-update-now{background:linear-gradient(135deg,#075e54,#6d28d9,#c99a22);color:#fff;box-shadow:0 8px 24px rgba(109,40,217,.22)}
+  .matgary-update-later{border:1px solid #d8e4df!important;background:#fff;color:#7c3aed}
+  .matgary-update-status{margin-top:12px;color:#64748b;font-size:.78rem;min-height:20px}
+  @media(max-width:430px){.matgary-update-box{padding:24px 16px 18px}.matgary-update-actions{gap:8px}}
+</style>
+
 <script>
-/* ==========================================================
-   متجري — نظام التحديث الجذري v1.7.8
-   - مصدر الإصدار: version.json على GitHub Pages
-   - مصدر التطبيق عند التثبيت: GitHub Raw (خارج نطاق Service Worker)
-   - لا يحذف localStorage ولا بيانات البرنامج
-   - يمنع حلقة التحديث المتكررة
-   ========================================================== */
-(function () {
+(function(){
   'use strict';
 
-  const MATGARY_UPDATE = {
-    versionUrl: 'https://123Alfa.github.io/matgary-mobile/version.json',
-    appUrl: 'https://raw.githubusercontent.com/123Alfa/matgary-mobile/main/index.html',
-    keyInstalled: 'matgary_update_installed_version',
-    keyDismissed: 'matgary_update_dismissed_version',
-    keyBusy: 'matgary_update_busy'
+  const MATGARY_UPDATE={
+    manifest:'version.json',
+    current:(typeof APP_VERSION!=='undefined'?APP_VERSION:'v0.0.0'),
+    targetKey:'matgary_update_target',
+    busyKey:'matgary_update_busy'
   };
 
-  function normalizeVersion(v) {
-    const m = String(v || '').trim().replace(/^v/i, '').match(/^(\d+)(?:\.(\d+))?(?:\.(\d+))?/);
-    return m ? [m[1], m[2] || '0', m[3] || '0'].map(Number) : [0,0,0];
+  function normalizeVersion(v){
+    return String(v||'').trim().replace(/^v/i,'').split('.').map(function(x){return parseInt(x,10)||0;});
   }
-
-  function compareVersions(a, b) {
-    const A = normalizeVersion(a), B = normalizeVersion(b);
-    for (let i = 0; i < 3; i++) {
-      if (A[i] > B[i]) return 1;
-      if (A[i] < B[i]) return -1;
+  function compareVersions(a,b){
+    const A=normalizeVersion(a),B=normalizeVersion(b);
+    for(let i=0;i<3;i++){
+      const x=A[i]||0,y=B[i]||0;
+      if(x>y)return 1;
+      if(x<y)return -1;
     }
     return 0;
   }
-
-  function showUpdateModal(remote) {
-    if (document.getElementById('matgaryUpdateModal')) return;
-
-    const overlay = document.createElement('div');
-    overlay.id = 'matgaryUpdateModal';
-    overlay.dir = 'rtl';
-    overlay.innerHTML = `
-      <div class="matgary-update-backdrop"></div>
-      <div class="matgary-update-card" role="dialog" aria-modal="true" aria-label="تحديث متجري">
-        <div class="matgary-update-icon">↻</div>
-        <h2>تحديث جديد لمتجري</h2>
-        <div class="matgary-update-version">
-          <span>الإصدار الحالي</span><b>${escapeHtml(String(APP_VERSION))}</b>
-        </div>
-        <div class="matgary-update-version new">
-          <span>الإصدار الجديد</span><b>${escapeHtml(String(remote.version))}</b>
-        </div>
-        <div class="matgary-update-notes">${escapeHtml(remote.notes || 'إصلاحات وتحسينات للبرنامج')}</div>
-        <div class="matgary-update-actions">
-          <button type="button" id="matgaryUpdateLater">لاحقًا</button>
-          <button type="button" id="matgaryUpdateNow">تحديث الآن</button>
-        </div>
-        <div id="matgaryUpdateStatus" class="matgary-update-status" hidden></div>
-      </div>`;
-
-    document.body.appendChild(overlay);
-    const now = overlay.querySelector('#matgaryUpdateNow');
-    const later = overlay.querySelector('#matgaryUpdateLater');
-    const status = overlay.querySelector('#matgaryUpdateStatus');
-
-    later.onclick = function () {
-      try { localStorage.setItem(MATGARY_UPDATE.keyDismissed, String(remote.version)); } catch (_) {}
-      overlay.remove();
-    };
-
-    now.onclick = async function () {
-      if (sessionStorage.getItem(MATGARY_UPDATE.keyBusy) === '1') return;
-      sessionStorage.setItem(MATGARY_UPDATE.keyBusy, '1');
-      now.disabled = true;
-      later.disabled = true;
-      now.textContent = 'جاري تجهيز التحديث…';
-      status.hidden = false;
-      status.textContent = 'يتم تنزيل النسخة الجديدة بأمان…';
-
-      try {
-        const url = MATGARY_UPDATE.appUrl + '?matgary_update=' + encodeURIComponent(remote.version) + '&t=' + Date.now();
-        const response = await fetch(url, { cache: 'no-store', redirect: 'follow' });
-        if (!response.ok) throw new Error('HTTP ' + response.status);
-        const html = await response.text();
-
-        // لا نسمح بتثبيت ملف لا يحتوي على الإصدار المطلوب.
-        const expected = normalizeVersion(remote.version).join('.');
-        const found = html.match(/APP_VERSION\s*=\s*['"]v?(\d+(?:\.\d+){0,2})['"]/i);
-        if (!found || normalizeVersion(found[1]).join('.') !== expected) {
-          throw new Error('النسخة التي تم تنزيلها لا تطابق رقم التحديث');
-        }
-
-        // تسجيل نجاح التثبيت قبل استبدال الصفحة لمنع حلقة التحديث.
-        try {
-          localStorage.setItem(MATGARY_UPDATE.keyInstalled, String(remote.version));
-          localStorage.removeItem(MATGARY_UPDATE.keyDismissed);
-        } catch (_) {}
-
-        // إلغاء Service Workers القديمة والكاشات القديمة قبل تشغيل النسخة الجديدة.
-        if ('serviceWorker' in navigator) {
-          try {
-            const regs = await navigator.serviceWorker.getRegistrations();
-            await Promise.all(regs.map(r => r.unregister()));
-          } catch (_) {}
-        }
-        if (window.caches) {
-          try {
-            const names = await caches.keys();
-            await Promise.all(names.map(n => caches.delete(n)));
-          } catch (_) {}
-        }
-
-        // استبدال الصفحة نفسها بالنسخة التي تم تنزيلها من GitHub Raw.
-        document.open();
-        document.write(html);
-        document.close();
-      } catch (error) {
-        console.error('Matgary update failed:', error);
-        sessionStorage.removeItem(MATGARY_UPDATE.keyBusy);
-        now.disabled = false;
-        later.disabled = false;
-        now.textContent = 'تحديث الآن';
-        status.hidden = false;
-        status.textContent = 'تعذر تثبيت التحديث الآن. تأكد من الاتصال بالإنترنت وحاول مرة أخرى.';
-      }
-    };
+  function escapeUpdateText(v){
+    return String(v??'').replace(/[&<>"']/g,function(ch){
+      return ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'})[ch];
+    });
+  }
+  function removeUpdateCard(){
+    document.getElementById('matgaryUpdateCard')?.remove();
   }
 
-  async function checkMatgaryUpdate() {
-    try {
-      const response = await fetch(MATGARY_UPDATE.versionUrl + '?t=' + Date.now(), {
-        cache: 'no-store',
-        headers: { 'Cache-Control': 'no-cache' }
-      });
-      if (!response.ok) throw new Error('HTTP ' + response.status);
-      const remote = await response.json();
-      if (!remote || !remote.version) return;
+  function showUpdate(remote){
+    if(document.getElementById('matgaryUpdateCard'))return;
+    const card=document.createElement('div');
+    card.id='matgaryUpdateCard';
+    card.innerHTML=
+      '<div class="matgary-update-backdrop"></div>'+
+      '<div class="matgary-update-box">'+
+        '<div class="matgary-update-icon">↻</div>'+
+        '<h3>تحديث جديد لمتجري</h3>'+
+        '<p>الإصدار الحالي <b>'+escapeUpdateText(MATGARY_UPDATE.current)+'</b></p>'+
+        '<p>الإصدار الجديد <b>'+escapeUpdateText(remote.version)+'</b></p>'+
+        (remote.notes?'<div class="matgary-update-notes">'+escapeUpdateText(remote.notes)+'</div>':'')+
+        '<div class="matgary-update-status" id="matgaryUpdateStatus"></div>'+
+        '<div class="matgary-update-actions">'+
+          '<button class="matgary-update-later" id="matgaryUpdateLater">لاحقًا</button>'+
+          '<button class="matgary-update-now" id="matgaryUpdateNow">تحديث الآن</button>'+
+        '</div>'+ 
+      '</div>';
+    document.body.appendChild(card);
 
-      // لا نعرض إلا إذا كان الإصدار الموجود على السيرفر أحدث فعلاً.
-      if (compareVersions(remote.version, APP_VERSION) <= 0) {
-        try { localStorage.setItem(MATGARY_UPDATE.keyInstalled, String(APP_VERSION)); } catch (_) {}
-        return;
+    document.getElementById('matgaryUpdateLater').onclick=function(){removeUpdateCard();};
+    document.getElementById('matgaryUpdateNow').onclick=function(){performUpdate(remote,this);};
+  }
+
+  function waitForControllerChange(timeoutMs){
+    return new Promise(function(resolve){
+      if(!('serviceWorker' in navigator)){resolve(false);return;}
+      let done=false;
+      const timer=setTimeout(function(){finish(false);},timeoutMs||6000);
+      function finish(value){
+        if(done)return;
+        done=true;
+        clearTimeout(timer);
+        navigator.serviceWorker.removeEventListener('controllerchange',onChange);
+        resolve(value);
+      }
+      function onChange(){finish(true);}
+      navigator.serviceWorker.addEventListener('controllerchange',onChange);
+    });
+  }
+
+  async function activateLatestServiceWorker(){
+    if(!('serviceWorker' in navigator))return false;
+    try{
+      const reg=await navigator.serviceWorker.getRegistration();
+      if(!reg)return false;
+
+      if(reg.waiting){
+        reg.waiting.postMessage({type:'SKIP_WAITING'});
+        await waitForControllerChange(6000);
+        return true;
       }
 
-      const dismissed = localStorage.getItem(MATGARY_UPDATE.keyDismissed);
-      if (dismissed === String(remote.version)) return;
-      showUpdateModal(remote);
-    } catch (e) {
-      console.warn('تعذر فحص تحديث متجري:', e);
+      const installingBefore=reg.installing;
+      if(installingBefore){
+        installingBefore.postMessage?.({type:'SKIP_WAITING'});
+        await new Promise(function(resolve){
+          const started=Date.now();
+          const timer=setInterval(function(){
+            if(!reg.installing || Date.now()-started>6000){clearInterval(timer);resolve();}
+          },100);
+        });
+      }
+
+      await reg.update();
+      if(reg.waiting){
+        reg.waiting.postMessage({type:'SKIP_WAITING'});
+        await waitForControllerChange(6000);
+        return true;
+      }
+      return false;
+    }catch(e){
+      console.warn('Matgary service worker update skipped:',e);
+      return false;
     }
   }
 
-  window.checkMatgaryUpdate = checkMatgaryUpdate;
+  async function performUpdate(remote,btn){
+    if(localStorage.getItem(MATGARY_UPDATE.busyKey)==='1')return;
+    localStorage.setItem(MATGARY_UPDATE.busyKey,'1');
+    btn.disabled=true;
+    const later=document.getElementById('matgaryUpdateLater');
+    if(later)later.disabled=true;
+    const status=document.getElementById('matgaryUpdateStatus');
+    const setStatus=function(t){if(status)status.textContent=t;};
+    btn.textContent='جاري التحديث...';
 
-  // يبدأ الفحص بعد اكتمال تحميل البرنامج حتى لا يؤثر على التشغيل.
-  window.addEventListener('load', function () {
-    setTimeout(checkMatgaryUpdate, 1200);
-  }, { once: true });
+    try{
+      // مهم: لا نحذف أي بيانات أعمال أو localStorage.
+      localStorage.setItem(MATGARY_UPDATE.targetKey,String(remote.version));
+      setStatus('جاري تجهيز النسخة الجديدة...');
+
+      // حدّث الـ Service Worker الحالي إن وجد.
+      await activateLatestServiceWorker();
+
+      // امسح Cache Storage فقط؛ لا نلمس localStorage أو IndexedDB.
+      if(window.caches){
+        const keys=await caches.keys();
+        await Promise.all(keys.map(function(k){return caches.delete(k).catch(function(){});}));
+      }
+
+      setStatus('جاري فتح النسخة الجديدة...');
+      const u=new URL('./index.html',window.location.href);
+      u.searchParams.set('matgary_update',String(remote.version).replace(/^v/i,''));
+      u.searchParams.set('t',String(Date.now()));
+      window.location.replace(u.href);
+    }catch(err){
+      console.error('Matgary update failed:',err);
+      localStorage.removeItem(MATGARY_UPDATE.busyKey);
+      btn.disabled=false;
+      if(later)later.disabled=false;
+      btn.textContent='إعادة المحاولة';
+      setStatus('لم يكتمل التحديث. بيانات البرنامج لم تُحذف.');
+    }
+  }
+
+  async function checkForUpdate(){
+    try{
+      const response=await fetch(MATGARY_UPDATE.manifest+'?t='+Date.now(),{
+        method:'GET',cache:'no-store',
+        headers:{'Cache-Control':'no-cache, no-store, must-revalidate','Pragma':'no-cache'}
+      });
+      if(!response.ok)return;
+      const remote=await response.json();
+      if(!remote||!remote.version)return;
+
+      // لو كنا راجعين من عملية تحديث، نتأكد أن النسخة الجديدة وصلت فعلًا.
+      const target=localStorage.getItem(MATGARY_UPDATE.targetKey);
+      if(target && compareVersions(MATGARY_UPDATE.current,target)>=0){
+        localStorage.removeItem(MATGARY_UPDATE.targetKey);
+        localStorage.removeItem(MATGARY_UPDATE.busyKey);
+      }
+
+      // لا تعرض رسالة إلا عندما يكون السيرفر أحدث فعلًا.
+      if(compareVersions(remote.version,MATGARY_UPDATE.current)>0){
+        showUpdate(remote);
+      }
+    }catch(err){
+      console.warn('Matgary update check skipped:',err);
+    }finally{
+      localStorage.removeItem(MATGARY_UPDATE.busyKey);
+    }
+  }
+
+  window.matgaryCheckForUpdate=checkForUpdate;
+  document.addEventListener('DOMContentLoaded',function(){
+    setTimeout(checkForUpdate,800);
+  });
 })();
 </script>
-<style id="matgary-update-system">
-#matgaryUpdateModal{position:fixed;inset:0;z-index:2147483647;display:flex;align-items:flex-end;justify-content:center;padding:0;box-sizing:border-box;font-family:inherit}
-.matgary-update-backdrop{position:absolute;inset:0;background:rgba(20,28,34,.58);backdrop-filter:blur(7px)}
-.matgary-update-card{position:relative;width:min(100%,720px);background:#fff;border-radius:34px 34px 0 0;padding:48px 28px 30px;box-sizing:border-box;text-align:center;box-shadow:0 -12px 45px rgba(0,0,0,.2);animation:matgaryUpdateIn .28s ease-out}
-.matgary-update-icon{width:92px;height:92px;margin:0 auto 22px;border-radius:28px;display:flex;align-items:center;justify-content:center;background:#e9f6f4;color:#147d75;font-size:55px;font-weight:700;line-height:1}
-.matgary-update-card h2{margin:0 0 24px;color:#26343a;font-size:30px;font-weight:800}
-.matgary-update-version{display:flex;justify-content:center;align-items:center;gap:12px;margin:9px auto;color:#6c7b82;font-size:17px}
-.matgary-update-version b{color:#34454d;font-size:20px}
-.matgary-update-version.new b{color:#6f2bd7}
-.matgary-update-notes{margin:24px 0;padding:18px 16px;border-radius:18px;background:#f4f8f8;color:#66767d;font-size:17px;line-height:1.8}
-.matgary-update-actions{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:18px}
-.matgary-update-actions button{height:58px;border-radius:18px;border:1px solid #dbe3e4;background:#fff;color:#6f2bd7;font:inherit;font-size:20px;font-weight:800;cursor:pointer}
-.matgary-update-actions button:last-child{border:0;background:linear-gradient(110deg,#075e63,#7127db,#d5a83b);color:#fff;box-shadow:0 8px 24px rgba(104,48,190,.25)}
-.matgary-update-actions button:disabled{opacity:.6;cursor:wait}
-.matgary-update-status{margin-top:14px;color:#64747b;font-size:14px;line-height:1.6}
-@keyframes matgaryUpdateIn{from{transform:translateY(35px);opacity:0}to{transform:translateY(0);opacity:1}}
-@media(max-width:520px){.matgary-update-card{padding:38px 18px 22px;border-radius:30px 30px 0 0}.matgary-update-icon{width:82px;height:82px;font-size:48px;margin-bottom:18px}.matgary-update-card h2{font-size:25px;margin-bottom:20px}.matgary-update-version{font-size:15px}.matgary-update-version b{font-size:18px}.matgary-update-notes{font-size:15px;padding:14px}.matgary-update-actions button{height:55px;font-size:18px}}
-</style>
+
 </body>
   </html>

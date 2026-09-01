@@ -1,65 +1,67 @@
-const CACHE_NAME = 'matgary-update-safe-v1.7.7';
-
-const APP_SHELL = [
-  './',
-  './index.html',
-  './manifest.json',
-  './icon-192.png',
-  './icon-512.png'
-];
+const CACHE_NAME = 'matgary-v1.7.8-20260901';
+const APP_SHELL = ['./','./index.html','./manifest.json','./icon-192.png','./icon-512.png'];
 
 self.addEventListener('install', event => {
   event.waitUntil(
     caches.open(CACHE_NAME)
-      .then(cache => cache.addAll(APP_SHELL).catch(()=>{}))
-      .then(()=>self.skipWaiting())
+      .then(cache => cache.addAll(APP_SHELL).catch(() => {}))
+      .then(() => self.skipWaiting())
   );
 });
 
 self.addEventListener('activate', event => {
   event.waitUntil(
-    caches.keys().then(keys =>
-      Promise.all(keys.filter(k=>k!==CACHE_NAME).map(k=>caches.delete(k)))
-    ).then(()=>self.clients.claim())
+    caches.keys()
+      .then(keys => Promise.all(keys.filter(k => k.startsWith('matgary-') && k !== CACHE_NAME).map(k => caches.delete(k))))
+      .then(() => self.clients.claim())
   );
 });
 
-self.addEventListener('fetch', event => {
-  const req=event.request;
-  if(req.method!=='GET') return;
-  const url=new URL(req.url);
+self.addEventListener('message', event => {
+  if (event.data && event.data.type === 'SKIP_WAITING') self.skipWaiting();
+});
 
-  // Never cache the update manifest.
-  if(url.pathname.endsWith('/version.json')){
-    event.respondWith(fetch(req,{cache:'no-store'}));
+function isExternalService(url) {
+  return url.hostname.includes('firebase') ||
+         url.hostname.includes('googleapis.com') ||
+         url.hostname.includes('identitytoolkit') ||
+         url.hostname.includes('gstatic.com');
+}
+
+self.addEventListener('fetch', event => {
+  const request = event.request;
+  if (request.method !== 'GET') return;
+  const url = new URL(request.url);
+  if (isExternalService(url)) return;
+
+  if (url.pathname.endsWith('/version.json')) {
+    event.respondWith(fetch(request, {cache:'no-store'}));
     return;
   }
 
-  // Always ask the network first for the application HTML.
-  if(req.mode==='navigate' || url.pathname.endsWith('/index.html') || url.pathname.endsWith('/')){
+  if (request.mode === 'navigate' || request.destination === 'document' || url.pathname.endsWith('/index.html')) {
     event.respondWith(
-      fetch(req,{cache:'no-store'})
-        .then(res=>{
-          if(res && res.ok){
-            const copy=res.clone();
-            caches.open(CACHE_NAME).then(c=>c.put('./index.html',copy)).catch(()=>{});
+      fetch(request, {cache:'no-store'})
+        .then(response => {
+          if (response && response.ok) {
+            caches.open(CACHE_NAME).then(c => c.put('./index.html', response.clone())).catch(() => {});
           }
-          return res;
+          return response;
         })
-        .catch(()=>caches.match('./index.html'))
+        .catch(() => caches.match(request).then(c => c || caches.match('./index.html')).then(c => c || Response.error()))
     );
     return;
   }
 
-  if(url.origin===self.location.origin){
+  if (url.origin === self.location.origin) {
     event.respondWith(
-      caches.match(req).then(cached=>cached||fetch(req).then(res=>{
-        if(res && res.ok){
-          const copy=res.clone();
-          caches.open(CACHE_NAME).then(c=>c.put(req,copy)).catch(()=>{});
-        }
-        return res;
-      }))
+      caches.match(request).then(cached => {
+        if (cached) return cached;
+        return fetch(request).then(response => {
+          if (response && response.ok) caches.open(CACHE_NAME).then(c => c.put(request, response.clone())).catch(() => {});
+          return response;
+        });
+      })
     );
   }
 });
