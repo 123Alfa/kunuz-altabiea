@@ -2354,9 +2354,9 @@ html,body{width:100%;max-width:100%;overflow-x:hidden}
 </div>
 <script>
 // ==================== معلومات الإصدار ====================
-const APP_VERSION='v1.7.4';
+const APP_VERSION='v1.7.5';
 const APP_NAME = "متجري";
-const APP_BUILD_DATE = "1 سبتمبر 2026 — اختبار نظام التحديث الذكي";
+const APP_BUILD_DATE = "1 سبتمبر 2026 — سجل حركة الأصناف والتحسينات";
 
 // =====================================================
 // ☁️ Google Drive — مزامنة تلقائية + نسخة محلية
@@ -7954,7 +7954,41 @@ if ('serviceWorker' in navigator) {
     const inv=findInvoice(key);if(!inv)return;
     const rows=inv.lines.map(s=>{const q=money(s.packages||s.qty||1),w=money(s.weight||1);const p=productForSaleLine(s);const qty=isKgProduct(p)||s.isWeightSale?saleQuantityLabel(p,q,w):`${q} ${isFixedPackProduct(p)?'علبة':(s.sellUnit||p?.unit||'علبة')}`;return `<tr><td>${esc(s.productName||'صنف')}</td><td>${esc(qty)}</td><td>${fmt(s.price||0)}</td><td>${fmt(s.total)}</td></tr>`}).join('');
     const w=window.open('','_blank','width=900,height=800');if(!w){showToast('اسمح بفتح نافذة الطباعة','warning');return;}
-    const html='<!doctype html><html lang="ar" dir="rtl"><head><meta charset="UTF-8"><title>'+esc(inv.invoiceNo)+'</title><style>@page{size:A4;margin:12mm}body{margin:0;font-family:Arial,Tahoma,sans-serif;color:#173b32;background:#fff}.page{width:100%;max-width:190mm;margin:auto;padding:6mm;box-sizing:border-box}.brand{text-align:center;font-size:28px;font-weight:900;color:#0f766e;margin-bottom:4px}.sub{text-align:center;color:#66756f;font-size:12px;line-height:1.8}.line{border-top:1px solid #dce8e3;margin:14px 0}table{width:100%;border-collapse:collapse;margin:10px 0;font-size:12px}th{background:#eef7f3;color:#0f766e}th,td{padding:9px 7px;border-bottom:1px solid #e6eeeb;text-align:right}.r{display:flex;justify-content:space-between;padding:6px 0;font-size:13px}.grand{font-size:19px;font-weight:900;border-top:2px solid #0f766e;margin-top:8px;padding-top:10px}.thanks{text-align:center;margin-top:25px;color:#71827b;font-size:12px}.meta{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px}.meta div{border:1px solid #dfeae5;border-radius:10px;padding:8px}.meta small{display:block;color:#778780;font-size:10px}.meta b{display:block;margin-top:3px;font-size:12px}@media print{button{display:none}}</style></head><body><div class="page"><div class="brand">متجري</div><div class="sub">فاتورة بيع — '+esc(inv.invoiceNo)+'<br>'+esc(inv.date)+' '+esc(inv.time)+'</div><div class="line"></div><div class="meta"><div><small>العميل</small><b>'+esc(inv.customerName)+'</b></div><div><small>نوع البيع</small><b>'+(inv.type==='wholesale'?'جملة':'قطاعي')+'</b></div><div><small>السداد</small><b>'+paymentLabel(inv.paymentMethod)+'</b></div></div><div class="line"></div><table><thead><tr><th>الصنف</th><th>الكمية</th><th>السعر</th><th>الإجمالي</th></tr></thead><tbody>'+rows+'</tbody></table><div class="line"></div><div class="r"><span>الإجمالي</span><b>'+fmt(inv.total)+'</b></div><div class="r"><span>المدفوع</span><b>'+fmt(inv.paid)+'</b></div><div class="r grand"><span>المتبقي</span><b>'+fmt(inv.remaining)+'</b></div>'+(inv.note?'<div class="line"></div><div class="r"><span>ملاحظات</span><b>'+esc(inv.note)+'</b></div>':'')+'<div class="thanks">شكرًا لتعاملكم معنا ❤️</div></div></body></html>';
+    const html='<!doctype html><html lang="ar" dir="rtl"><head><meta charset="UTF-8"><title>'+esc(inv.invoiceNo)+'</title><style>@page{size:A4;margin:12mm}body{margin:0;font-family:Arial,Tahoma,sans-serif;color:#173b32;background:#fff}.page{width:100%;max-width:190mm;margin:auto;padding:6mm;box-sizing:border-box}.brand{text-align:center;font-size:28px;font-weight:900;color:#0f766e;margin-bottom:4px}.sub{text-align:center;color:#66756f;font-size:12px;line-height:1.8}.line{border-top:1px solid #dce8e3;margin:14px 0}table{width:100%;border-collapse:collapse;margin:10px 0;font-size:12px}th{background:#eef7f3;color:#0f766e}th,td{padding:9px 7px;border-bottom:1px solid #e6eeeb;text-align:right}.r{display:flex;justify-content:space-between;padding:6px 0;font-size:13px}.grand{font-size:19px;font-weight:900;border-top:2px solid #0f766e;margin-top:8px;padding-top:10px}.thanks{text-align:center;margin-top:25px;color:#71827b;font-size:12px}.meta{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px}.meta div{border:1px solid #dfeae5;border-radius:10px;padding:8px}.meta small{display:block;color:#778780;font-size:10px}.meta b{display:block;margin-top:3px;font-size:12px}@media print{button{display:none}}</style>
+<style id="matgary-stock-ledger-style">
+/* v1.7.5 — سجل حركة الأصناف */
+.stock-ledger-hero{background:linear-gradient(135deg,#0f766e 0%,#176f68 58%,#c99a22 145%);color:#fff;border-radius:20px;padding:20px;margin-bottom:16px;box-shadow:0 12px 30px rgba(15,118,110,.18)}
+.stock-ledger-hero-top{display:flex;align-items:center;justify-content:space-between;gap:12px}
+.stock-ledger-hero h2{margin:3px 0 0;font-size:1.2rem;font-weight:950}
+.stock-ledger-hero p{margin:6px 0 0;color:rgba(255,255,255,.82);font-size:.76rem}
+.stock-ledger-back{border:1px solid rgba(255,255,255,.35);background:rgba(255,255,255,.12);color:#fff;border-radius:11px;padding:9px 12px;font-family:inherit;font-weight:900;cursor:pointer}
+.stock-ledger-kpis{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-bottom:16px}
+.stock-ledger-kpi{background:#fff;border:1px solid var(--border);border-radius:15px;padding:13px;text-align:center;box-shadow:var(--shadow)}
+.stock-ledger-kpi i{display:block;font-size:1.15rem;color:var(--primary);margin-bottom:5px}
+.stock-ledger-kpi b{display:block;font-size:1.05rem;font-weight:950;color:var(--text)}
+.stock-ledger-kpi span{display:block;color:var(--text-muted);font-size:.67rem;margin-top:3px;font-weight:800}
+.stock-ledger-filters{display:grid;grid-template-columns:1.5fr 1fr 1fr;gap:9px;margin-bottom:12px}
+.stock-ledger-filters input,.stock-ledger-filters select{width:100%;padding:11px 12px;border:1.5px solid var(--border);border-radius:11px;background:#fbfdfc;font:inherit;font-size:.75rem;font-weight:800;color:var(--text)}
+.stock-ledger-product{display:flex;align-items:center;gap:10px;background:#f7faf9;border:1px solid #e2ebe7;border-radius:13px;padding:10px;margin-bottom:12px}
+.stock-ledger-product .icon{width:44px;height:44px;border-radius:12px;display:grid;place-items:center;background:#fff;border:1px solid var(--border);font-size:1.35rem}
+.stock-ledger-product .info{flex:1;min-width:0}.stock-ledger-product strong{display:block;font-size:.9rem;font-weight:950}.stock-ledger-product small{display:block;color:var(--text-muted);font-size:.67rem;margin-top:2px}
+.stock-ledger-balance{text-align:center;background:#fff;border:1px solid #dce9e4;border-radius:12px;padding:8px 10px;min-width:92px}
+.stock-ledger-balance small{display:block;color:var(--text-muted);font-size:.6rem}.stock-ledger-balance b{display:block;color:var(--primary);font-size:.95rem}
+.stock-ledger-table-wrap{overflow:auto;border:1px solid var(--border);border-radius:14px;-webkit-overflow-scrolling:touch}
+.stock-ledger-table{width:100%;min-width:690px;border-collapse:collapse}
+.stock-ledger-table th,.stock-ledger-table td{padding:9px 7px;border-bottom:1px solid var(--border);font-size:.7rem;text-align:right;white-space:nowrap}
+.stock-ledger-table th{background:#eef4f1;color:var(--primary);font-weight:950}
+.stock-ledger-table tr:last-child td{border-bottom:0}
+.stock-ledger-in{color:#08796d;font-weight:950}.stock-ledger-out{color:#c63f3f;font-weight:950}.stock-ledger-neutral{color:#7b5d13;font-weight:950}
+.stock-ledger-type{display:inline-flex;align-items:center;gap:4px;padding:4px 7px;border-radius:8px;background:#f4f8f6;font-weight:900}
+.stock-ledger-running{font-weight:950;color:var(--text)}
+.stock-ledger-empty{text-align:center;padding:38px 15px;color:var(--text-muted)}
+.stock-ledger-note{font-size:.68rem;color:var(--text-muted);line-height:1.7;margin-top:10px;padding:10px;border-radius:11px;background:#fffaf0;border:1px solid #f1e5c5}
+.stock-ledger-actions{display:flex;gap:7px;flex-wrap:wrap;margin-top:10px}.stock-ledger-actions .btn{flex:1;min-width:130px}
+.product-ledger-btn{width:100%;margin-top:8px!important}
+@media(max-width:700px){.stock-ledger-filters{grid-template-columns:1fr 1fr}.stock-ledger-filters input{grid-column:1/-1}.stock-ledger-hero-top{align-items:flex-start}.stock-ledger-product{align-items:flex-start}.stock-ledger-balance{min-width:82px}}
+</style>
+</head><body><div class="page"><div class="brand">متجري</div><div class="sub">فاتورة بيع — '+esc(inv.invoiceNo)+'<br>'+esc(inv.date)+' '+esc(inv.time)+'</div><div class="line"></div><div class="meta"><div><small>العميل</small><b>'+esc(inv.customerName)+'</b></div><div><small>نوع البيع</small><b>'+(inv.type==='wholesale'?'جملة':'قطاعي')+'</b></div><div><small>السداد</small><b>'+paymentLabel(inv.paymentMethod)+'</b></div></div><div class="line"></div><table><thead><tr><th>الصنف</th><th>الكمية</th><th>السعر</th><th>الإجمالي</th></tr></thead><tbody>'+rows+'</tbody></table><div class="line"></div><div class="r"><span>الإجمالي</span><b>'+fmt(inv.total)+'</b></div><div class="r"><span>المدفوع</span><b>'+fmt(inv.paid)+'</b></div><div class="r grand"><span>المتبقي</span><b>'+fmt(inv.remaining)+'</b></div>'+(inv.note?'<div class="line"></div><div class="r"><span>ملاحظات</span><b>'+esc(inv.note)+'</b></div>':'')+'<div class="thanks">شكرًا لتعاملكم معنا ❤️</div></div></body></html>';
     w.document.open();w.document.write(html);w.document.close();w.focus();setTimeout(()=>w.print(),350);
   };
 
@@ -8354,6 +8388,202 @@ window.addEventListener('online',()=>{try{if(typeof markCloudSyncPending==='func
       if(cleaned.length!==rows.length) Store.set('returns',cleaned);
     }
   }catch(e){ console.warn('تعذر تنظيف حركات المرتجع القديمة:',e); }
+})();
+</script>
+
+<script id="matgary-stock-ledger-v175">
+/* =========================================================
+   متجري v1.7.5 — سجل حركة الأصناف
+   يعتمد على السجلات الحالية: المشتريات، المبيعات، المرتجعات
+   وتسويات الجرد، ولا يغيّر أرصدة المخزون بمجرد فتح الشاشة.
+   ========================================================= */
+(function(){
+  const esc=v=>String(v??'').replace(/[&<>'"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c]));
+  const num=v=>{const n=Number(v);return Number.isFinite(n)?n:0;};
+  const moneySafe=v=>typeof money==='function'?money(v):Math.round((num(v)+Number.EPSILON)*100)/100;
+  const dateText=v=>{
+    const s=String(v||'');
+    if(!s)return '-';
+    try{return new Date(s.includes('T')?s:s+'T00:00:00').toLocaleString('ar-EG',{dateStyle:'short',timeStyle:s.includes('T')?'short':undefined,timeZone:'Africa/Cairo'});}
+    catch(e){return s.slice(0,16).replace('T',' ');}
+  };
+  const qtyText=(p,q)=>typeof formatProductQty==='function'?formatProductQty(p,q):String(moneySafe(q));
+  const typeInfo=t=>{
+    if(t==='purchase')return ['📥','شراء','in'];
+    if(t==='sale')return ['🛒','بيع','out'];
+    if(t==='return')return ['↩️','مرتجع','in'];
+    if(t==='adjustment')return ['⚖️','تسوية جرد','neutral'];
+    if(t==='initial')return ['📦','رصيد مسجل','neutral'];
+    return ['•','حركة','neutral'];
+  };
+
+  function buildMovements(productId){
+    const pid=String(productId);
+    const products=Store.get('products')||[];
+    const p=products.find(x=>String(x.id)===pid);
+    if(!p)return [];
+    const rows=[];
+
+    (Store.get('purchases')||[]).forEach(x=>{
+      if(String(x.productId)!==pid)return;
+      const q=num(x.qty);
+      if(q<=0)return;
+      rows.push({date:x.date||x.createdAt||'',time:x.createdAt||x.updatedAt||'',type:'purchase',qty:q,value:moneySafe(x.total??q*num(x.price)),ref:x.purchaseBatchId||x.id||'',party:x.supplierName||'مورد',note:x.note||''});
+    });
+
+    (Store.get('sales')||[]).forEach(x=>{
+      if(String(x.productId)!==pid)return;
+      const q=num(x.qty);
+      if(q<=0)return;
+      rows.push({date:x.date||x.createdAt||'',time:x.createdAt||x.updatedAt||'',type:'sale',qty:-q,value:moneySafe(x.total),ref:x.invoiceSeq||x.invoiceNo||x.saleBatchId||x.id||'',party:x.customerName||'عميل عادي',note:x.note||''});
+      /* إذا كان هناك مرتجع محفوظ داخل سطر البيع، نظهره كحركة موجبة.
+         تاريخ المرتجع يُستنتج من updatedAt الذي يحدّثه Store.update. */
+      const returned=num(x.returnedQty);
+      if(returned>0){
+        rows.push({date:x.updatedAt||x.date||'',time:x.updatedAt||'',type:'return',qty:returned,value:moneySafe(x.returnedAmount||0),ref:x.invoiceSeq||x.invoiceNo||x.saleBatchId||x.id||'',party:x.customerName||'عميل عادي',note:'مرتجع مسجل على الفاتورة'});
+      }
+    });
+
+    (Store.get('stockAdjustments')||[]).forEach(x=>{
+      if(String(x.productId)!==pid)return;
+      const q=num(x.difference);
+      if(Math.abs(q)<0.0000001)return;
+      rows.push({date:x.date||x.dateTime||'',time:x.dateTime||x.date||'',type:'adjustment',qty:q,value:moneySafe(x.value),ref:x.id||'جرد',party:x.user||'مستخدم',note:x.reason||'تسوية جرد'});
+    });
+
+    rows.sort((a,b)=>String(a.date||'').localeCompare(String(b.date||''))||String(a.time||'').localeCompare(String(b.time||'')));
+    return rows;
+  }
+
+  function productOptions(selected){
+    return (Store.get('products')||[]).slice().sort((a,b)=>String(a.name).localeCompare(String(b.name),'ar'))
+      .map(p=>`<option value="${esc(p.id)}" ${String(p.id)===String(selected||'')?'selected':''}>${esc(p.name)} — ${qtyText(p,num(p.qty))} ${esc(p.unit||'كجم')}</option>`).join('');
+  }
+
+  function renderStockLedgerPage(container, selectedId){
+    const products=Store.get('products')||[];
+    if(!products.length){
+      container.innerHTML='<div class="card stock-ledger-empty">لا توجد أصناف لعرض حركة المخزون.</div>';
+      return;
+    }
+    const selected=selectedId||window.stockLedgerSelectedId||products[0].id;
+    window.stockLedgerSelectedId=selected;
+    const p=products.find(x=>String(x.id)===String(selected))||products[0];
+    window.stockLedgerSelectedId=p.id;
+    const rows=buildMovements(p.id);
+    const incoming=rows.filter(x=>x.qty>0).reduce((n,x)=>n+x.qty,0);
+    const outgoing=rows.filter(x=>x.qty<0).reduce((n,x)=>n+Math.abs(x.qty),0);
+    const adjustments=rows.filter(x=>x.type==='adjustment').length;
+    const current=num(p.qty);
+
+    container.innerHTML=`<div class="fade-in stock-ledger-page">
+      <div class="stock-ledger-hero">
+        <div class="stock-ledger-hero-top">
+          <div><span>مراقبة المخزون بالتفصيل</span><h2>📦 سجل حركة الصنف</h2><p>تتبّع كل دخول وخروج وتسوية للصنف المختار من السجلات الموجودة بالفعل.</p></div>
+          <button class="stock-ledger-back" onclick="navigateTo('products')"><i class="fas fa-arrow-right"></i> الأصناف</button>
+        </div>
+      </div>
+      <div class="stock-ledger-kpis">
+        <div class="stock-ledger-kpi"><i class="fas fa-box"></i><b>${qtyText(p,current)} ${esc(p.unit||'كجم')}</b><span>الرصيد الحالي</span></div>
+        <div class="stock-ledger-kpi"><i class="fas fa-arrow-down"></i><b>${qtyText(p,incoming)} ${esc(p.unit||'كجم')}</b><span>إجمالي الداخل</span></div>
+        <div class="stock-ledger-kpi"><i class="fas fa-arrow-up"></i><b>${qtyText(p,outgoing)} ${esc(p.unit||'كجم')}</b><span>إجمالي الخارج</span></div>
+        <div class="stock-ledger-kpi"><i class="fas fa-scale-balanced"></i><b>${adjustments}</b><span>تسويات الجرد</span></div>
+      </div>
+      <div class="card">
+        <div class="card-title"><i class="fas fa-filter"></i> اختيار الصنف والفترة</div>
+        <div class="stock-ledger-filters">
+          <select id="stockLedgerProduct" onchange="window.stockLedgerSelectedId=this.value;renderStockLedgerPage(document.getElementById('contentArea'),this.value)">
+            ${productOptions(p.id)}
+          </select>
+          <input type="date" id="stockLedgerFrom" onchange="filterStockLedger()" aria-label="من تاريخ">
+          <input type="date" id="stockLedgerTo" onchange="filterStockLedger()" aria-label="إلى تاريخ">
+        </div>
+        <div class="stock-ledger-product">
+          <div class="icon">${p.type==='cheese'?'🧀':'❄️'}</div>
+          <div class="info"><strong>${esc(p.name)}</strong><small>سعر التكلفة: ${fmt(num(p.purchase))} ج.م • حد التنبيه: ${fmt(num(p.minStock||0))} ${esc(p.unit||'كجم')}</small></div>
+          <div class="stock-ledger-balance"><small>الرصيد الآن</small><b>${qtyText(p,current)} ${esc(p.unit||'كجم')}</b></div>
+        </div>
+        <div id="stockLedgerTableBox"></div>
+        <div class="stock-ledger-note"><i class="fas fa-circle-info"></i> الحركات هنا تُقرأ من سجل المبيعات والمشتريات والمرتجعات وتسويات الجرد الحالية. البرنامج لا يغيّر المخزون من شاشة السجل.</div>
+      </div>
+    </div>`;
+    filterStockLedger();
+  }
+
+  function filterStockLedger(){
+    const p=(Store.get('products')||[]).find(x=>String(x.id)===String(window.stockLedgerSelectedId));
+    const box=document.getElementById('stockLedgerTableBox');
+    if(!p||!box)return;
+    const from=document.getElementById('stockLedgerFrom')?.value||'';
+    const to=document.getElementById('stockLedgerTo')?.value||'';
+    let rows=buildMovements(p.id).filter(x=>{
+      const d=String(x.date||'').slice(0,10);
+      return (!from||d>=from)&&(!to||d<=to);
+    });
+    // استنتاج رصيد ما قبل أول حركة من الرصيد الحالي وصافي الحركات المسجلة،
+    // حتى يكون الرصيد التراكمي مفيدًا بدل أن يبدأ من صفر.
+    const netMovements=rows.reduce((n,x)=>n+num(x.qty),0);
+    let running=moneySafe(num(p.qty)-netMovements);
+    const display=rows.map((x,i)=>{
+      running=moneySafe(running+x.qty);
+      const [icon,label,cls]=typeInfo(x.type);
+      const qty=x.qty>0?`+${qtyText(p,x.qty)}`:qtyText(p,x.qty);
+      return `<tr>
+        <td>${i+1}</td><td>${icon} ${esc(dateText(x.date||x.time))}</td>
+        <td><span class="stock-ledger-type">${label}</span></td>
+        <td class="${cls==='in'?'stock-ledger-in':cls==='out'?'stock-ledger-out':'stock-ledger-neutral'}">${qty} ${esc(p.unit||'كجم')}</td>
+        <td>${fmt(x.value||0)} ج.م</td><td class="stock-ledger-running">${qtyText(p,running)} ${esc(p.unit||'كجم')}</td>
+        <td>${esc(x.party||'-')}</td><td>${esc(x.note||x.ref||'-')}</td>
+      </tr>`;
+    }).join('');
+    box.innerHTML=rows.length?`<div class="stock-ledger-table-wrap"><table class="stock-ledger-table"><thead><tr><th>#</th><th>التاريخ</th><th>الحركة</th><th>الكمية</th><th>القيمة</th><th>الرصيد بعد الحركة</th><th>الطرف</th><th>البيان</th></tr></thead><tbody>${display}</tbody></table></div>
+      <div class="stock-ledger-actions"><button class="btn btn-outline" onclick="window.print()"><i class="fas fa-print"></i> طباعة السجل</button><button class="btn btn-primary" onclick="navigateTo('inventoryCount')"><i class="fas fa-clipboard-check"></i> جرد وتسوية الصنف</button></div>`
+      :'<div class="stock-ledger-empty"><i class="fas fa-box-open" style="font-size:2.3rem;display:block;margin-bottom:8px"></i>لا توجد حركات مطابقة للفترة المحددة.</div>';
+  }
+
+  window.openStockLedger=function(productId){
+    window.stockLedgerSelectedId=productId||window.stockLedgerSelectedId||(Store.get('products')||[])[0]?.id;
+    const content=document.getElementById('contentArea');
+    if(content)renderStockLedgerPage(content,window.stockLedgerSelectedId);
+  };
+  window.renderStockLedgerPage=renderStockLedgerPage;
+  window.filterStockLedger=filterStockLedger;
+
+  // إضافة زر سجل الحركة إلى صفحة الأصناف بدون استبدال تصميم الصفحة الحالي.
+  const originalProducts=window.renderProductsPage;
+  if(typeof originalProducts==='function'){
+    window.renderProductsPage=function(container){
+      originalProducts(container);
+      const hero=container?.querySelector('.products-hero > div:last-child');
+      if(hero && !hero.querySelector('[data-stock-ledger]')){
+        const b=document.createElement('button');
+        b.className='btn btn-outline';
+        b.setAttribute('data-stock-ledger','1');
+        b.innerHTML='<i class="fas fa-clock-rotate-left"></i> سجل حركة الأصناف';
+        b.onclick=()=>openStockLedger();
+        hero.insertBefore(b,hero.firstChild);
+      }
+    };
+  }
+
+  // زر "حركة" صغير داخل كل بطاقة صنف.
+  const originalFilter=window.filterProducts;
+  if(typeof originalFilter==='function'){
+    window.filterProducts=function(){
+      originalFilter();
+      document.querySelectorAll('#productsGrid .product-item').forEach(card=>{
+        const edit=card.querySelector('[onclick*="editProduct"]');
+        if(!edit || card.querySelector('.product-ledger-btn'))return;
+        const m=String(edit.getAttribute('onclick')||'').match(/editProduct\('([^']+)'\)/);
+        if(!m)return;
+        const btn=document.createElement('button');
+        btn.className='btn btn-sm btn-outline product-ledger-btn';
+        btn.innerHTML='<i class="fas fa-clock-rotate-left"></i> حركة الصنف';
+        btn.onclick=e=>{e.stopPropagation();openStockLedger(m[1]);};
+        card.querySelector('.p-actions')?.appendChild(btn);
+      });
+    };
+  }
 })();
 </script>
 </body>
