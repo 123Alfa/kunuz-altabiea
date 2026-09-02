@@ -2667,7 +2667,7 @@ const APP_BUILD_DATE = "1 سبتمبر 2026 — تحسين نظام التحدي
 const GOOGLE_CLIENT_ID = '795977355730-q1sckt9ldq3fi8vrgtjr960q3pabqttv.apps.googleusercontent.com';
 const GOOGLE_DRIVE_SCOPE = 'https://www.googleapis.com/auth/drive.file';
 const GOOGLE_USERINFO_SCOPE = 'openid email profile';
-const GOOGLE_BACKUP_FILE = 'كنوز_الطبيعة_Backup.json';
+const GOOGLE_BACKUP_FILE = 'Matgary_Backup.json';
 
 let googleTokenClient = null;
 let googleAccessToken = '';
@@ -2859,7 +2859,7 @@ async function findUsableGoogleBackupFile(){
 
 function buildBackupPayload(){
   return {
-    backupType:'kanouz-al-tabia-data',
+    backupType:'matgary-data',
     backupVersion:2,
     appName:getAppName(),
     version:APP_VERSION,
@@ -3374,7 +3374,15 @@ function runLocalTransaction(keys, operation){
 
 function getAppName(){
   const s=getAppSettings();
-  return String(s.appName||'متجري').trim()||'متجري';
+  const raw=String(s.appName||'').trim();
+  // ترحيل اسم الهوية السابقة المحفوظ محليًا إلى هوية متجري.
+  const legacyName='\u0643\u0646\u0648\u0632\u0020\u0627\u0644\u0637\u0628\u064a\u0639\u0629';
+  if(raw===legacyName){
+    s.appName=APP_NAME;
+    saveAppSettings(s);
+    return APP_NAME;
+  }
+  return raw||APP_NAME;
 }
 function applyAppIdentity(){
   const name=getAppName();
