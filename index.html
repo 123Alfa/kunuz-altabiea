@@ -2570,6 +2570,22 @@ html,body{width:100%;max-width:100%;overflow-x:hidden}
 @media(max-width:480px){.sale-compact-card{padding:9px;border-radius:15px}.sc-icon{width:30px;height:30px;flex-basis:30px}.sc-invoice b{font-size:.72rem}.sc-status{font-size:.5rem;padding:4px 6px}.sc-product strong{font-size:.69rem}.sc-total{min-width:72px;padding:6px}.sc-total b{font-size:.82rem}.sc-grid{gap:4px}.sc-grid>div{padding:5px 2px}.sc-actions{grid-template-columns:1.45fr 1fr 1fr 1fr 31px 31px 31px;gap:3px}.sc-actions button{min-height:30px;font-size:.5rem}.sc-actions button i{font-size:.68rem}}
 @media(max-width:370px){.sc-actions{grid-template-columns:1.5fr 1fr 1fr 1fr 29px 29px 29px}.sc-grid b{font-size:.53rem}.sc-product span,.sc-product small{font-size:.52rem}}
 </style>
+
+<style id="matgary-purchase-history-match-sales">
+.purchases-cards-v6{display:grid;gap:10px;margin-top:13px}
+.purchase-compact-card{background:var(--bg-card,#fff);border:1px solid #e0ebe7;border-radius:16px;padding:10px 11px;box-shadow:0 3px 12px rgba(20,70,55,.045);direction:rtl;overflow:hidden;transition:.15s}
+.purchase-compact-card:hover{border-color:#b9d8cd;box-shadow:0 6px 18px rgba(20,70,55,.075)}
+.pc-head{display:flex;align-items:center;justify-content:space-between;gap:7px;padding-bottom:8px;border-bottom:1px solid #edf2ef}
+.pc-title{display:flex;align-items:center;gap:7px;min-width:0}.pc-icon{width:32px;height:32px;border-radius:10px;background:#eaf7f2;color:var(--primary);display:grid;place-items:center;flex:0 0 32px;font-size:.8rem}.pc-title b{display:block;font-size:.76rem;font-weight:950;color:var(--text)}.pc-title small{display:block;margin-top:2px;color:var(--text-muted);font-size:.56rem}.pc-title small i{color:var(--primary);margin-left:2px}
+.pc-status{display:inline-flex;align-items:center;gap:4px;padding:4px 7px;border-radius:999px;font-size:.54rem;font-weight:950;white-space:nowrap}.pc-status.paid{background:#eaf8f1;color:#087443}.pc-status.due{background:#fff5e3;color:#a66500}.pc-status.partial{background:#eef5ff;color:#2f67a7}
+.pc-main{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:8px 0}.pc-product{min-width:0;flex:1}.pc-product strong{display:block;font-size:.72rem;font-weight:950;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.pc-product span{display:block;color:var(--text-light);font-size:.57rem;margin-top:3px}.pc-product small{display:block;color:var(--text-muted);font-size:.55rem;margin-top:3px}.pc-product i{color:var(--primary);margin-left:2px}
+.pc-total{min-width:78px;padding:6px 8px;border-radius:11px;background:#edf8f4;text-align:center}.pc-total small{display:block;color:var(--text-muted);font-size:.5rem}.pc-total b{display:block;color:var(--primary);font-size:.86rem;font-weight:950;margin-top:1px}
+.pc-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:5px;border-top:1px dashed #e3ece9;padding-top:7px}.pc-grid>div{background:#f8fbfa;border-radius:8px;padding:5px 3px;text-align:center;min-width:0}.pc-grid span{display:block;color:var(--text-muted);font-size:.48rem}.pc-grid b{display:block;color:var(--text);font-size:.56rem;font-weight:900;margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.pc-grid b.due{color:#b42318}.pc-grid b.paid{color:#087443}
+.pc-note{margin-top:6px;padding:5px 7px;border-radius:8px;background:#fff9e9;color:#6d6240;font-size:.54rem;font-weight:800}.pc-note i{margin-left:5px}
+.pc-actions{display:grid;grid-template-columns:1.3fr 1fr 34px;gap:4px;margin-top:7px}.pc-actions button{min-height:32px;border-radius:8px;border:1px solid #e0e8e5;background:#f8faf9;color:#56636a;padding:3px 4px;font:inherit;font-size:.53rem;font-weight:900;display:flex;align-items:center;justify-content:center;gap:3px;cursor:pointer}.pc-actions button:disabled{opacity:.75;cursor:default}.pc-actions .pay{background:#eef8f4;border-color:#cfe6dd;color:#087443}.pc-actions .edit{background:#f8fbfa;color:#56636a}.pc-actions .delete{background:#fff4f4;border-color:#f0d9d9;color:#c62828}
+@media(max-width:700px){.pc-grid{grid-template-columns:repeat(2,1fr)}.pc-actions{grid-template-columns:1.2fr 1fr 34px}}
+@media(max-width:380px){.pc-title b{font-size:.72rem}.pc-product strong{font-size:.68rem}}
+</style>
 </head>
 <body>
 <div id="loading-screen">
@@ -3769,8 +3785,8 @@ function getProductQtyDecimals(p){
 
   const name = String(p.name || '').trim().toLowerCase();
 
-  // موزاريلا + كيري + قشطة + رومي: رقمان عشريان
-  if (/موزاريلا|موتزاريلا|mozzarella|كيري|kiri|قشطة|قشطه|cream|رومي|رومى|romy/.test(name)) {
+  // موزاريلا + كيري + قشطة + رومي + الجبنة القديمة: رقمان عشريان
+  if (/موزاريلا|موتزاريلا|mozzarella|كيري|kiri|قشطة|قشطه|cream|رومي|رومى|romy|قديمة|قديم/.test(name)) {
     return 2;
   }
 
@@ -5773,25 +5789,85 @@ function renderPurchasesTable(){
   const q=(document.getElementById('purchaseSearch')?.value||'').trim().toLowerCase();
   const from=document.getElementById('purchaseFrom')?.value||'';
   const to=document.getElementById('purchaseTo')?.value||'';
-  const supplier=document.getElementById('purchaseSupplierFilter')?.value||'';
+  const supplier=(document.getElementById('purchaseSupplierFilter')?.value||'');
+  const products=Store.get('products')||[];
+
   const filtered=purchases.filter(p=>{
     const text=`${p.productName||''} ${p.supplierName||''} ${p.note||''}`.toLowerCase();
-    return (!q||text.includes(q))&&(!from||(p.date||'')>=from)&&(!to||(p.date||'')<=to)&&(!supplier||String(p.supplierId||'')===String(supplier));
-  }).sort((a,b)=>String(b.date||'').localeCompare(String(a.date||'')));
+    return (!q||text.includes(q))
+      &&(!from||(p.date||'')>=from)
+      &&(!to||(p.date||'')<=to)
+      &&(!supplier||String(p.supplierId||'')===String(supplier));
+  }).sort((a,b)=>{
+    const da=String(a.date||''), db=String(b.date||'');
+    return db.localeCompare(da);
+  });
+
   target.innerHTML=filtered.map(p=>{
     const total=Number(p.total ?? (Number(p.qty||0)*Number(p.price||0)));
-    const linkedDebt=(Store.get('debts')||[]).find(d=>d.source==='purchase'&&d.type==='علينا'&&String(d.purchaseBatchId||'')===String(p.purchaseBatchId||''));
-    const debtRemaining=linkedDebt?Math.max(0,Number(linkedDebt.amount||0)-Number(linkedDebt.paidAmount||0)):Math.max(0,Number(p.remaining||0));
-    const hasInvoiceDebt=!!(linkedDebt&&debtRemaining>0);
-    return `<article class="purchase-card-v6">
-      <div class="purchase-card-head-v6"><div><small>${p.date||'-'}</small><h3>${p.productName||'-'}</h3></div><strong>${fmt(total)}</strong></div>
-      <div class="purchase-card-data-v6"><div><span>الكمية</span><b>${Number(p.qty||0).toLocaleString('ar-EG',{maximumFractionDigits:3})}</b></div><div><span>سعر الوحدة</span><b>${fmt(p.price||0)}</b></div><div><span>المورد</span><b>${p.supplierName||'بدون مورد'}</b></div><div><span>السداد</span><b>${debtRemaining>0?`آجل: ${fmt(debtRemaining)}`:'مدفوع'}</b></div></div>
-      ${p.note?`<div class="purchase-note-v6"><i class="fas fa-note-sticky"></i>${p.note}</div>`:''}
-      <div class="purchase-card-actions-v6">${hasInvoiceDebt?`<button type="button" onclick="openPurchaseInvoicePayment('${p.id}')"><i class="fas fa-money-bill-wave"></i> سداد الفاتورة</button>`:''}<button type="button" onclick="editPurchase('${p.id}')"><i class="fas fa-edit"></i> تعديل</button><button type="button" onclick="deletePurchase('${p.id}')"><i class="fas fa-trash"></i> حذف</button></div>
+    const linkedDebt=(Store.get('debts')||[]).find(d=>
+      d.source==='purchase' &&
+      d.type==='علينا' &&
+      String(d.purchaseBatchId||'')===String(p.purchaseBatchId||'')
+    );
+    const debtRemaining=linkedDebt
+      ? Math.max(0,Number(linkedDebt.amount||0)-Number(linkedDebt.paidAmount||0))
+      : Math.max(0,Number(p.remaining||0));
+
+    const totalPaid=Math.max(0,total-debtRemaining);
+    const initialPaid=Math.max(0,Number(p.paid||0));
+    const statusClass=debtRemaining<=0.005?'paid':(initialPaid>0?'partial':'due');
+    const statusText=debtRemaining<=0.005?'مدفوع بالكامل':(initialPaid>0?'مدفوع جزئي':'آجل');
+    const statusIcon=debtRemaining<=0.005?'fa-circle-check':(initialPaid>0?'fa-hourglass-half':'fa-clock');
+
+    const product=products.find(x=>String(x.id)===String(p.productId));
+    const qty=Number(p.qty||0);
+    const qtyText=formatProductQty(product||{name:p.productName},qty);
+    const unit=product?.unit||'كجم';
+    const pid=String(p.id||'').replace(/'/g,"\\'");
+
+    return `<article class="purchase-compact-card">
+      <div class="pc-head">
+        <div class="pc-title">
+          <span class="pc-icon"><i class="fas fa-cart-flatbed"></i></span>
+          <div>
+            <b>فاتورة شراء</b>
+            <small><i class="fas fa-calendar-day"></i> ${escapeHtml(p.date||'-')}</small>
+          </div>
+        </div>
+        <span class="pc-status ${statusClass}">
+          <i class="fas ${statusIcon}"></i>${statusText}
+        </span>
+      </div>
+
+      <div class="pc-main">
+        <div class="pc-product">
+          <strong>${escapeHtml(p.productName||'شراء')}</strong>
+          <span><i class="fas fa-truck-field"></i> ${escapeHtml(p.supplierName||'بدون مورد')}</span>
+          <small><i class="fas fa-box"></i> ${escapeHtml(qtyText)} ${escapeHtml(unit)}</small>
+        </div>
+        <div class="pc-total"><small>الإجمالي</small><b>${fmt(total)}</b></div>
+      </div>
+
+      <div class="pc-grid">
+        <div><span>الكمية</span><b>${escapeHtml(qtyText)} ${escapeHtml(unit)}</b></div>
+        <div><span>سعر الوحدة</span><b>${fmt(p.price||0)}</b></div>
+        <div><span>المدفوع</span><b class="paid">${fmt(totalPaid)}</b></div>
+        <div><span>${debtRemaining>0?'المتبقي':'الحالة'}</span><b class="${debtRemaining>0?'due':'paid'}">${debtRemaining>0?fmt(debtRemaining):'مكتمل'}</b></div>
+      </div>
+
+      ${p.note?`<div class="pc-note"><i class="fas fa-note-sticky"></i>${escapeHtml(p.note)}</div>`:''}
+
+      <div class="pc-actions">
+        ${debtRemaining>0
+          ?`<button type="button" class="pay" onclick="openPurchaseInvoicePayment('${pid}')"><i class="fas fa-money-bill-wave"></i> سداد</button>`
+          :`<button type="button" class="pay" disabled><i class="fas fa-check"></i> مسدد</button>`}
+        <button type="button" class="edit" onclick="editPurchase('${pid}')"><i class="fas fa-pen"></i> تعديل</button>
+        <button type="button" class="delete" onclick="deletePurchase('${pid}')"><i class="fas fa-trash"></i></button>
+      </div>
     </article>`;
   }).join('')||`<div class="purchase-empty-v6"><i class="fas fa-box-open"></i><strong>لا توجد مشتريات</strong><span>غيّر البحث أو الفلاتر لعرض العمليات</span></div>`;
 }
-
 function editPurchase(id){
   const purchases=Store.get('purchases');
   const purchase=purchases.find(p=>p.id===id);
