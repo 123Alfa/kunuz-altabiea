@@ -2557,6 +2557,17 @@ html,body{width:100%;max-width:100%;overflow-x:hidden}
  #contentArea .stock-movement-page .sm-movement-meta strong{font-size:.64rem!important}
 }
 </style>
+<style id="purchase-invoice-reference-v183">
+/* v1.8.3 — سجل المشتريات بنفس روح كارت الفاتورة القديم، بدون تغيير منطق الحسابات */
+.purchase-invoice-card{background:#fff;border:1px solid #dfeae5;border-radius:18px;padding:12px;box-shadow:0 5px 16px rgba(20,70,55,.045);overflow:hidden}
+.purchase-invoice-top{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:10px}
+.purchase-invoice-number{display:block;color:var(--primary);font-weight:950;font-size:.86rem}.purchase-invoice-top small{display:block;color:var(--text-muted);font-size:.61rem;margin-top:4px}
+.purchase-invoice-top small i{color:var(--primary);margin-left:3px}.purchase-status-pill{padding:5px 10px;border-radius:999px;font-size:.58rem;font-weight:900}.purchase-status-pill.paid{background:#eef8f4;color:#087443}.purchase-status-pill.due{background:#fff7e7;color:#a56400}
+.purchase-invoice-main{display:flex;align-items:center;justify-content:space-between;gap:9px}.purchase-invoice-icon{width:43px;height:43px;flex:0 0 43px;border-radius:13px;background:#eef8f5;color:var(--primary);display:grid;place-items:center;font-size:1rem}.purchase-invoice-info{flex:1;min-width:0}.purchase-invoice-info strong{display:block;font-size:.82rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.purchase-invoice-info span{display:block;color:var(--text-light);font-size:.64rem;margin-top:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.purchase-invoice-info small{display:block;color:var(--text-muted);font-size:.59rem;margin-top:3px}.purchase-invoice-total{text-align:left;flex:0 0 auto}.purchase-invoice-total small{display:block;color:var(--text-muted);font-size:.56rem}.purchase-invoice-total b{display:block;color:var(--primary);font-size:.94rem;margin-top:2px}
+.purchase-invoice-meta{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-top:10px;padding-top:9px;border-top:1px dashed #e5ece9}.purchase-invoice-meta span{background:#f7faf9;border-radius:9px;padding:7px 5px;text-align:center;color:var(--text-light);font-size:.61rem;font-weight:850}.purchase-invoice-meta i{color:var(--primary);margin-left:3px}.purchase-invoice-meta .due-text{color:#a56400}.purchase-invoice-meta .profit-text{color:#087443}
+.purchase-invoice-note{margin-top:8px;padding:8px 9px;border-radius:9px;background:#fff9e9;color:#6d6240;font-size:.64rem}.purchase-invoice-note i{margin-left:5px}.purchase-invoice-actions{display:grid;grid-template-columns:minmax(0,1fr) 40px 40px;gap:6px;margin-top:9px}.purchase-invoice-actions button{border:0;border-radius:9px;min-height:38px;font-family:inherit;font-weight:900;cursor:pointer}.purchase-pay-btn{background:#e8f6f1;color:var(--primary)}.purchase-edit-btn{background:#eef3ff;color:#315db7}.purchase-delete-btn{background:#fff0f0;color:#b42318}.purchase-invoice-actions:has(.purchase-pay-btn){grid-template-columns:minmax(0,1fr) 40px 40px}.purchase-invoice-actions:not(:has(.purchase-pay-btn)){grid-template-columns:minmax(0,1fr) 40px}
+@media(max-width:430px){.purchase-invoice-card{padding:10px}.purchase-invoice-info strong{font-size:.76rem}.purchase-invoice-actions button{min-height:36px}.purchase-invoice-meta span{font-size:.57rem;padding:6px 3px}}
+</style>
 </head>
 <body>
 <div id="loading-screen">
@@ -2626,7 +2637,7 @@ html,body{width:100%;max-width:100%;overflow-x:hidden}
 </div>
 <script>
 // ==================== معلومات الإصدار ====================
-const APP_VERSION='v1.8.0';
+const APP_VERSION='v1.8.3';
 const APP_NAME = "متجري";
 const APP_BUILD_DATE = "1 سبتمبر 2026 — تحسين نظام التحديث الذكي";
 
@@ -4604,7 +4615,7 @@ function sharePOSOnWhatsApp(){
 function invoiceTextPro(inv,sales){
   const date=formatInvoiceDate(inv.date||'');
   const typeLabel=inv.type==='wholesale'?'جملة':'قطاعي';
-  let t=`🧾 *كنوز الطبيعة — فاتورة بيع*
+  let t=`🧾 *متجري — فاتورة بيع*
 `;
   t+=`━━━━━━━━━━━━━━
 `;
@@ -4690,7 +4701,7 @@ function openPOSReceiptPreview(invoice){
   const payLabel=({cash:'نقدي',credit:'آجل',transfer:'تحويل',card:'بطاقة'})[inv.method]||inv.method||'نقدي';
   openModal(`<div class="modal-header"><h2><i class="fas fa-file-invoice" style="color:var(--primary);margin-left:8px"></i> فاتورة بيع رقم ${inv.invoiceSeq||inv.invoiceNo}</h2><button class="modal-close" onclick="closeModal()">&times;</button></div>
     <div class="pos-receipt-preview receipt-pro-new">
-      <div class="receipt-brand">كنوز الطبيعة</div>
+      <div class="receipt-brand">متجري</div>
       <div class="receipt-title">فاتورة بيع</div>
       <div class="receipt-info-grid">
         <div><small>رقم الفاتورة</small><strong>${inv.invoiceSeq||inv.invoiceNo}</strong></div>
@@ -4720,7 +4731,7 @@ function printPOSReceipt(){
   const w=window.open('','_blank','width=760,height=900'); if(!w)return showToast('المتصفح منع نافذة الطباعة','warning');
   const doc=`<!doctype html><html lang="ar" dir="rtl"><head><meta charset="utf-8"><title>${inv.invoiceNo}</title><style>
   @page{size:A4;margin:14mm}body{font-family:Arial,sans-serif;color:#222;margin:0;background:#fff}.page{max-width:760px;margin:0 auto;padding:18px}.brand{text-align:center;font-size:24px;font-weight:900;margin-bottom:4px}.sub{text-align:center;color:#666;font-size:12px;line-height:1.8}.line{border-top:1px dashed #888;margin:14px 0}table{width:100%;border-collapse:collapse;font-size:13px}th,td{padding:9px 5px;border-bottom:1px solid #ddd;text-align:right}.r{display:flex;justify-content:space-between;padding:8px 0}.grand{font-size:19px;font-weight:900;border-top:2px solid #222;margin-top:8px;padding-top:12px}.thanks{text-align:center;margin-top:20px;font-size:12px;color:#666}@media print{.page{padding:0}}
-  </style></head><body><div class="page"><div class="brand">كنوز الطبيعة</div><div class="sub">فاتورة بيع رقم ${inv.invoiceSeq||inv.invoiceNo}<br>${formatInvoiceDate(inv.date)}${inv.time?' • '+inv.time:''}<br>العميل: ${inv.customerName}<br>نوع البيع: ${inv.type==='wholesale'?'جملة':'قطاعي'}</div><div class="line"></div><table><thead><tr><th>الصنف</th><th>الكمية</th><th>الإجمالي</th></tr></thead><tbody>${rows}</tbody></table><div class="line"></div><div class="r"><span>الإجمالي قبل الخصم</span><b>${fmt(inv.subtotal)}</b></div><div class="r"><span>الخصم</span><b>${fmt(inv.discount)}</b></div><div class="r"><span>الضريبة</span><b>${fmt(inv.tax)}</b></div><div class="r grand"><span>الإجمالي النهائي</span><b>${fmt(inv.total)}</b></div><div class="r"><span>المدفوع</span><b>${fmt(inv.paid)}</b></div><div class="r"><span>${inv.method==='cash'?'الباقي':'المتبقي'}</span><b>${fmt(inv.method==='cash'?inv.change:inv.remaining)}</b></div><div class="r"><span>السداد</span><b>${({cash:'نقدي',credit:'آجل',transfer:'تحويل',card:'بطاقة'})[inv.method]||inv.method||'نقدي'}</b></div><div class="thanks">شكرًا لتعاملكم معنا ❤️</div></div>
+  </style></head><body><div class="page"><div class="brand">متجري</div><div class="sub">فاتورة بيع رقم ${inv.invoiceSeq||inv.invoiceNo}<br>${formatInvoiceDate(inv.date)}${inv.time?' • '+inv.time:''}<br>العميل: ${inv.customerName}<br>نوع البيع: ${inv.type==='wholesale'?'جملة':'قطاعي'}</div><div class="line"></div><table><thead><tr><th>الصنف</th><th>الكمية</th><th>الإجمالي</th></tr></thead><tbody>${rows}</tbody></table><div class="line"></div><div class="r"><span>الإجمالي قبل الخصم</span><b>${fmt(inv.subtotal)}</b></div><div class="r"><span>الخصم</span><b>${fmt(inv.discount)}</b></div><div class="r"><span>الضريبة</span><b>${fmt(inv.tax)}</b></div><div class="r grand"><span>الإجمالي النهائي</span><b>${fmt(inv.total)}</b></div><div class="r"><span>المدفوع</span><b>${fmt(inv.paid)}</b></div><div class="r"><span>${inv.method==='cash'?'الباقي':'المتبقي'}</span><b>${fmt(inv.method==='cash'?inv.change:inv.remaining)}</b></div><div class="r"><span>السداد</span><b>${({cash:'نقدي',credit:'آجل',transfer:'تحويل',card:'بطاقة'})[inv.method]||inv.method||'نقدي'}</b></div><div class="thanks">شكرًا لتعاملكم معنا ❤️</div></div>
 
 
 <style id="stock-movement-style">
@@ -5347,27 +5358,106 @@ function renderSalesTable(){
   }).join('')||`<div class="sales-empty"><div><i class="fas fa-receipt"></i></div><strong>لا توجد مبيعات</strong><span>جرّب تغيير الفلاتر أو البحث عن عملية أخرى</span></div>`;
 }
 function deleteSale(id,productId,qty){
-  if(!confirm('حذف عملية البيع؟'))return;
   const sales=Store.get('sales')||[];
-  const sale=sales.find(x=>String(x.id)===String(id));
-  const batchId=sale?.saleBatchId||'';
-  if(productId){const p=Store.get('products').find(x=>String(x.id)===String(productId));if(p)Store.update('products',productId,{qty:(p.qty||0)+qty});}
-  Store.delete('sales',id);
+  const clickedSale=sales.find(x=>String(x.id)===String(id));
+  if(!clickedSale)return showToast('❌ الفاتورة غير موجودة','error');
 
-  // حذف الدين المرتبط بالفاتورة عند حذف آخر بند من نفس الفاتورة
-  if(batchId){
-    const remainingBatch=(Store.get('sales')||[]).some(x=>x.saleBatchId===batchId);
-    if(!remainingBatch){
-      (Store.get('debts')||[]).filter(d=>d.saleBatchId===batchId && d.source==='sale' && d.type==='لنا').forEach(d=>Store.delete('debts',d.id));
+  const batchId=clickedSale.saleBatchId||'';
+  const batch=batchId
+    ? sales.filter(x=>String(x.saleBatchId||'')===String(batchId))
+    : [clickedSale];
+
+  const invoiceTotal=batch.reduce((n,s)=>n+Number(s.total||0),0);
+  const customerName=clickedSale.customerName||'عميل عادي';
+  const invoiceNo=clickedSale.invoiceNo||clickedSale.invoiceSeq||'';
+
+  const linkedDebts=(Store.get('debts')||[]).filter(d=>{
+    if(d.source!=='sale'||d.type!=='لنا')return false;
+    if(batchId)return String(d.saleBatchId||'')===String(batchId);
+    return d.sourceSaleId===clickedSale.id;
+  });
+
+  const initialPaid=batch.length
+    ? Math.min(invoiceTotal,Math.max(0,Number(batch[0].initialPaid||0)))
+    : Math.max(0,Number(clickedSale.initialPaid||clickedSale.paid||0));
+
+  const laterPaid=linkedDebts.reduce((sum,d)=>{
+    const hist=Array.isArray(d.paymentHistory)?d.paymentHistory:[];
+    return sum+hist.reduce((n,h)=>n+Math.max(0,Number(h?.amount)||0),0);
+  },0);
+
+  const totalCollected=Math.min(invoiceTotal,Math.max(0,initialPaid+laterPaid));
+  const customerId=clickedSale.customerId||'';
+
+  const msg = `⚠️ حذف الفاتورة ${invoiceNo ? `(${invoiceNo})` : ''}
+
+الإجمالي: ${fmt(invoiceTotal)}
+المدفوع/المحصّل: ${fmt(totalCollected)}
+المتبقي: ${fmt(Math.max(0,invoiceTotal-totalCollected))}
+
+سيتم:
+• إرجاع كل كميات الفاتورة للمخزون.
+• إلغاء الدين المرتبط بها.
+• عكس الدفعة الأولى والتحصيلات من الخزنة.
+• تحديث حساب العميل إن كان مسجلاً.
+
+هل أنت متأكد من حذف الفاتورة بالكامل؟`;
+
+  if(!confirm(msg))return;
+
+  // لقطة أمان: إذا حدث خطأ نرجع كل البيانات كما كانت.
+  const keys=['products','sales','debts','customers','auditLog'];
+  const snapshot={};
+  keys.forEach(k=>{
+    try{snapshot[k]=JSON.parse(JSON.stringify(Store.get(k)||[]));}
+    catch(e){snapshot[k]=[];}
+  });
+
+  try{
+    // 1) إعادة كل الكميات للمخزون.
+    const products=Store.get('products')||[];
+    batch.forEach(s=>{
+      if(!s.productId)return;
+      const p=products.find(x=>String(x.id)===String(s.productId));
+      if(p){
+        const restored=(Number(p.qty)||0)+(Number(s.qty)||0);
+        Store.update('products',p.id,{qty:restored});
+      }
+    });
+
+    // 2) عكس إجمالي الفاتورة من إحصائيات العميل والنقاط.
+    if(customerId){
+      const customers=Store.get('customers')||[];
+      const c=customers.find(x=>String(x.id)===String(customerId));
+      if(c){
+        c.totalSpent=Math.max(0,Number(c.totalSpent||0)-invoiceTotal);
+        const earnedPoints=Math.floor(invoiceTotal/10);
+        c.points=Math.max(0,Number(c.points||0)-earnedPoints);
+        Store.set('customers',customers);
+      }
     }
-  } else if(sale?.customerId && Number(sale?.remaining||0)>0){
-    // توافق مع الفواتير القديمة التي لم يكن لها رقم فاتورة موحد
-    const candidates=(Store.get('debts')||[]).filter(d=>d.source==='sale'&&d.type==='لنا'&&!d.paid&&String(d.person||'')===String(sale.customerName||''));
-    const match=candidates.find(d=>Math.abs(Number(d.amount||0)-Number(sale.remaining||0))<0.01 && d.date===sale.date);
-    if(match)Store.delete('debts',match.id);
+
+    // 3) حذف كل بنود الفاتورة.
+    const allSales=Store.get('sales')||[];
+    batch.forEach(s=>Store.delete('sales',s.id));
+
+    // 4) حذف الدين المرتبط بالفاتورة بالكامل.
+    linkedDebts.forEach(d=>Store.delete('debts',d.id));
+
+    // 5) تحديث الواجهات والخزنة.
+    if(typeof renderCashboxData==='function')renderCashboxData();
+    if(typeof renderDebtsList==='function')renderDebtsList();
+    renderSalesTable();
+
+    showToast(`🗑️ تم حذف الفاتورة ${invoiceNo ? invoiceNo+' ' : ''} بالكامل وعكس أثرها من المخزون والحسابات والخزنة`,'success');
+  }catch(error){
+    keys.forEach(k=>{
+      try{Store.set(k,snapshot[k]||[]);}
+      catch(e){}
+    });
+    console.error('فشل حذف الفاتورة وتم التراجع:',error);
+    showToast('❌ تعذر حذف الفاتورة — تم التراجع عن العملية بالكامل','error');
   }
-  showToast('🗑️ تم حذف البيع والدين المرتبط به إن وجد');
-  renderSalesTable();
 }
 
 // ==================== حركة الصنف ====================
@@ -5624,7 +5714,7 @@ function addPurchase(){
   const supplierId=document.getElementById('purSupplier').value;
   const supplierName=supplierId?(Store.get('suppliers').find(s=>s.id===supplierId)?.name||''):'بائع/مورد';
   const purchaseBatchId='PUR-'+Date.now()+'-'+Math.random().toString(36).slice(2,8);
-  Store.add('purchases',{purchaseBatchId,date:document.getElementById('purDate').value||today(),productId:pid,productName:product.name,qty,price,total,paid,remaining,supplierId:supplierId||null,supplierName,note:document.getElementById('purNote').value,paymentMethod:remaining>0?'credit':'cash'});
+  Store.add('purchases',{purchaseBatchId,date:document.getElementById('purDate').value||today(),createdAt:typeof cairoDateTimeISO==='function'?cairoDateTimeISO():new Date().toISOString(),time:typeof cairoTimeNow==='function'?cairoTimeNow():(new Date().toTimeString().slice(0,5)),productId:pid,productName:product.name,qty,price,total,paid,remaining,supplierId:supplierId||null,supplierName,note:document.getElementById('purNote').value,paymentMethod:remaining>0?'credit':'cash'});
   if(remaining>0){
     Store.add('debts',{purchaseBatchId,sourcePurchaseId:null,supplierId:supplierId||null,date:document.getElementById('purDate').value||today(),person:supplierName,type:'علينا',amount:remaining,paidAmount:0,paymentHistory:[],debtVersion:2,due:'',note:`آجل من شراء ${product.name}`,paid:false,source:'purchase',purchaseTotal:total});
   }
@@ -5642,14 +5732,21 @@ function renderPurchasesTable(){
   const filtered=purchases.filter(p=>{
     const text=`${p.productName||''} ${p.supplierName||''} ${p.note||''}`.toLowerCase();
     return (!q||text.includes(q))&&(!from||(p.date||'')>=from)&&(!to||(p.date||'')<=to)&&(!supplier||String(p.supplierId||'')===String(supplier));
-  }).sort((a,b)=>String(b.date||'').localeCompare(String(a.date||'')));
+  }).sort((a,b)=>String((b.date||'')+' '+(b.time||b.createdAt||'')).localeCompare(String((a.date||'')+' '+(a.time||a.createdAt||''))));
+  const escP=v=>String(v??'').replace(/[&<>'"]/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[ch]));
   target.innerHTML=filtered.map(p=>{
     const total=Number(p.total ?? (Number(p.qty||0)*Number(p.price||0)));
-    return `<article class="purchase-card-v6">
-      <div class="purchase-card-head-v6"><div><small>${p.date||'-'}</small><h3>${p.productName||'-'}</h3></div><strong>${fmt(total)}</strong></div>
-      <div class="purchase-card-data-v6"><div><span>الكمية</span><b>${Number(p.qty||0).toLocaleString('ar-EG',{maximumFractionDigits:3})}</b></div><div><span>سعر الوحدة</span><b>${fmt(p.price||0)}</b></div><div><span>المورد</span><b>${p.supplierName||'بدون مورد'}</b></div><div><span>السداد</span><b>${Number(p.remaining||0)>0?`آجل: ${fmt(p.remaining)}`:'مدفوع'}</b></div></div>
-      ${p.note?`<div class="purchase-note-v6"><i class="fas fa-note-sticky"></i>${p.note}</div>`:''}
-      <div class="purchase-card-actions-v6"><button type="button" onclick="editPurchase('${p.id}')"><i class="fas fa-edit"></i> تعديل</button><button type="button" onclick="deletePurchase('${p.id}')"><i class="fas fa-trash"></i> حذف</button></div>
+    const linkedDebt=(Store.get('debts')||[]).find(d=>d.source==='purchase'&&d.type==='علينا'&&String(d.purchaseBatchId||'')===String(p.purchaseBatchId||''));
+    const debtRemaining=linkedDebt?Math.max(0,Number(linkedDebt.amount||0)-Number(linkedDebt.paidAmount||0)):Math.max(0,Number(p.remaining||0));
+    const hasInvoiceDebt=!!(linkedDebt&&debtRemaining>0);
+    const time=p.time||((p.createdAt&&String(p.createdAt).length>=16)?String(p.createdAt).slice(11,16):'');
+    const status=debtRemaining>0?`<span class="purchase-status-pill due">آجل</span>`:`<span class="purchase-status-pill paid">مدفوع</span>`;
+    return `<article class="purchase-invoice-card">
+      <div class="purchase-invoice-top"><div><span class="purchase-invoice-number"><i class="fas fa-file-invoice"></i> عملية شراء</span><small><i class="fas fa-calendar-day"></i> ${escP(p.date||'-')} ${time?` • ${escP(time)}`:''}</small></div>${status}</div>
+      <div class="purchase-invoice-main"><div class="purchase-invoice-icon"><i class="fas fa-box-open"></i></div><div class="purchase-invoice-info"><strong>${escP(p.productName||'-')}</strong><span><i class="fas fa-truck-field"></i> ${escP(p.supplierName||'بدون مورد')}</span><small>${Number(p.qty||0).toLocaleString('ar-EG',{maximumFractionDigits:3})} كمية • ${fmt(p.price||0)} سعر الوحدة</small></div><div class="purchase-invoice-total"><small>الإجمالي</small><b>${fmt(total)}</b></div></div>
+      <div class="purchase-invoice-meta"><span><i class="fas fa-boxes-stacked"></i> ${Number(p.qty||0).toLocaleString('ar-EG',{maximumFractionDigits:3})}</span><span><i class="fas fa-coins"></i> ${fmt(p.paid||0)}</span><span class="${debtRemaining>0?'due-text':'profit-text'}">${debtRemaining>0?'متبقي '+fmt(debtRemaining):'مدفوع بالكامل'}</span></div>
+      ${p.note?`<div class="purchase-invoice-note"><i class="fas fa-note-sticky"></i> ${escP(p.note)}</div>`:''}
+      <div class="purchase-invoice-actions">${hasInvoiceDebt?`<button class="purchase-pay-btn" type="button" onclick="openPurchaseInvoicePayment('${p.id}')"><i class="fas fa-money-bill-wave"></i> سداد</button>`:''}<button class="purchase-edit-btn" type="button" onclick="editPurchase('${p.id}')"><i class="fas fa-pen"></i></button><button class="purchase-delete-btn" type="button" onclick="deletePurchase('${p.id}')"><i class="fas fa-trash"></i></button></div>
     </article>`;
   }).join('')||`<div class="purchase-empty-v6"><i class="fas fa-box-open"></i><strong>لا توجد مشتريات</strong><span>غيّر البحث أو الفلاتر لعرض العمليات</span></div>`;
 }
@@ -5677,98 +5774,194 @@ function editPurchase(id){
 }
 
 function savePurchaseEdit(id){
-  const purchases=Store.get('purchases');
+  const purchases=Store.get('purchases')||[];
   const original=purchases.find(p=>p.id===id);
   if(!original)return;
 
-  const pid=document.getElementById('epurProduct').value;
-  const qty=parseFloat(document.getElementById('epurQty').value)||0;
-  const price=parseFloat(document.getElementById('epurPrice').value)||0;
+  const pid=document.getElementById('epurProduct')?.value||'';
+  const qty=parseFloat(document.getElementById('epurQty')?.value)||0;
+  const price=parseFloat(document.getElementById('epurPrice')?.value)||0;
   const total=qty*price;
-  let paid=parseFloat(document.getElementById('epurPaid')?.value)||0;
-  if(paid<0)paid=0;
-  if(paid>total)return showToast('المبلغ المدفوع أكبر من إجمالي الشراء','warning');
-  const remaining=Math.max(0,total-paid);
-
+  let requestedPaid=parseFloat(document.getElementById('epurPaid')?.value)||0;
+  if(requestedPaid<0)requestedPaid=0;
   if(!pid||qty<=0||price<=0)return showToast('أكمل البيانات','warning');
+  if(requestedPaid>total+0.0001)return showToast('المبلغ المدفوع أكبر من إجمالي الشراء','warning');
 
-  const product=Store.get('products').find(p=>p.id===pid);
+  const products=Store.get('products')||[];
+  const product=products.find(p=>String(p.id)===String(pid));
   if(!product)return;
 
-  if(original.productId){
-    const origProduct=Store.get('products').find(p=>p.id===original.productId);
-    if(origProduct){
-      const restoredQty=(origProduct.qty||0)-original.qty;
-      Store.update('products',original.productId,{qty:Math.max(0,restoredQty)});
-    }
+  // المدفوعات السابقة للمورد جزء من تاريخ الفاتورة ولا يجوز حذفها أو تصفيرها
+  // بمجرد تعديل الكمية/السعر.
+  const oldDebt=(Store.get('debts')||[]).find(d=>String(d.purchaseBatchId||'')===String(original.purchaseBatchId||'' )&&d.source==='purchase'&&d.type==='علينا');
+  const oldHistory=oldDebt&&Array.isArray(oldDebt.paymentHistory)
+    ?oldDebt.paymentHistory.map(h=>({...h,amount:Number(h.amount)||0})).filter(h=>h.amount>0):[];
+  const laterPaid=oldHistory.reduce((n,h)=>n+(Number(h.amount)||0),0);
+  const originalPaid=Math.max(0,Number(original.paid)||0);
+  const historicalPaid=Math.max(originalPaid,Number(oldDebt?.paidAmount)||0,originalPaid+laterPaid);
+
+  // لا نسمح بتعديل الإجمالي إلى أقل من المبلغ الذي تم دفعه بالفعل.
+  if(total+0.0001<historicalPaid){
+    return showToast(`❌ لا يمكن جعل إجمالي الشراء أقل من المدفوع بالفعل (${fmt(historicalPaid)})`,'warning');
   }
 
-  const currentProduct=Store.get('products').find(p=>p.id===pid);
-  const oldQty=currentProduct.qty||0;
-  const oldPurchasePrice=currentProduct.purchase||0;
-  const totalNewQty=oldQty+qty;
-  const netUnitPrice=qty>0?total/qty:price;
-  const avgPurchasePrice=totalNewQty>0?((oldQty*oldPurchasePrice)+(qty*netUnitPrice))/totalNewQty:netUnitPrice;
+  const supplierId=document.getElementById('epurSupplier')?.value||'';
+  const supplierName=supplierId?(Store.get('suppliers')||[]).find(s=>String(s.id)===String(supplierId))?.name||'':'';
+  const oldSupplierId=original.supplierId||oldDebt?.supplierId||'';
 
-  Store.update('products',pid,{qty:totalNewQty,purchase:avgPurchasePrice});
+  // إذا كان هناك سداد سابق، لا ننقل الفاتورة لمورد آخر؛ حتى لا تنتقل أموال سُددت
+  // لمورد إلى حساب مورد مختلف.
+  if(historicalPaid>0 && String(oldSupplierId)!==String(supplierId)){
+    return showToast('❌ لا يمكن تغيير المورد بعد وجود سداد سابق. تراجع عن السداد أولًا ثم غيّر المورد.','warning');
+  }
 
-  const supplierId=document.getElementById('epurSupplier').value;
-  const supplierName=supplierId?(Store.get('suppliers').find(s=>s.id===supplierId)?.name||''):'';
-  const purchaseBatchId=original.purchaseBatchId||('PUR-'+Date.now()+'-'+Math.random().toString(36).slice(2,8));
+  const newPaid=Math.min(total,historicalPaid>0?historicalPaid:Math.max(0,requestedPaid));
+  const remaining=Math.max(0,total-newPaid);
+  const batchId=original.purchaseBatchId||('PUR-'+Date.now()+'-'+Math.random().toString(36).slice(2,8));
 
-  Store.update('purchases',id,{
-    date:document.getElementById('epurDate').value||today(),
-    productId:pid,
-    productName:product.name,
-    qty,
-    price,
-    total,
-    paid,
-    remaining,
-    paymentMethod:remaining>0?'credit':'cash',
-    purchaseBatchId:original.purchaseBatchId||('PUR-'+Date.now()+'-'+Math.random().toString(36).slice(2,8)),
-    supplierId:supplierId||null,
-    supplierName:supplierName,
-    note:document.getElementById('epurNote').value
+  // لقطة أمان: أي فشل أثناء التعديل يعيد المخزون والمشتريات والديون كما كانت.
+  const snapshot={};
+  ['products','purchases','debts'].forEach(k=>{
+    try{snapshot[k]=JSON.parse(JSON.stringify(Store.get(k)||[]));}catch(e){snapshot[k]=[];}
   });
 
-  // إعادة ضبط دين المورد المرتبط بهذه الفاتورة
-  const batchId=original.purchaseBatchId;
-  if(batchId){
-    Store.get('debts').filter(d=>d.purchaseBatchId===batchId).forEach(d=>Store.delete('debts',d.id));
-  }
-  if(remaining>0){
-    Store.add('debts',{purchaseBatchId:original.purchaseBatchId||purchaseBatchId,supplierId:supplierId||null,date:document.getElementById('epurDate').value||today(),person:supplierName||'بائع/مورد',type:'علينا',amount:remaining,paidAmount:0,paymentHistory:[],debtVersion:2,due:'',note:`آجل من شراء ${product.name}`,paid:false,source:'purchase',purchaseTotal:total});
-  }
+  try{
+    // أولًا نعكس كمية الشراء القديمة من نفس الصنف.
+    if(original.productId){
+      const origProduct=(Store.get('products')||[]).find(p=>String(p.id)===String(original.productId));
+      if(origProduct){
+        const restored=Math.max(0,Number(origProduct.qty)||0)-(Number(original.qty)||0);
+        if(restored< -0.0001)throw new Error('INVALID_OLD_STOCK');
+        Store.update('products',origProduct.id,{qty:Math.max(0,restored)});
+      }
+    }
 
-  closeModal();showToast('✅ تم التعديل');renderPurchasesPage(document.getElementById('contentArea'));
+    const currentProducts=Store.get('products')||[];
+    const currentProduct=currentProducts.find(p=>String(p.id)===String(pid));
+    if(!currentProduct)throw new Error('PRODUCT_NOT_FOUND');
+    const oldQty=Math.max(0,Number(currentProduct.qty)||0);
+    const oldPurchasePrice=Math.max(0,Number(currentProduct.purchase)||0);
+    const finalQty=oldQty+qty;
+    const avgPurchasePrice=finalQty>0?((oldQty*oldPurchasePrice)+(qty*price))/finalQty:price;
+    Store.update('products',currentProduct.id,{qty:finalQty,purchase:avgPurchasePrice});
+
+    const date=document.getElementById('epurDate')?.value||original.date||today();
+    const note=document.getElementById('epurNote')?.value||'';
+    Store.update('purchases',id,{
+      date,productId:pid,productName:product.name,qty,price,total,
+      paid:newPaid,remaining,paymentMethod:remaining>0?'credit':'cash',
+      purchaseBatchId:batchId,supplierId:supplierId||null,supplierName,note
+    });
+
+    // نحدّث نفس دين المورد ونحتفظ بتاريخ كل السداد السابق.
+    if(batchId){
+      const debts=(Store.get('debts')||[]).filter(d=>String(d.purchaseBatchId||'')===String(batchId)&&d.source==='purchase'&&d.type==='علينا');
+      debts.forEach(d=>Store.delete('debts',d.id));
+      if(remaining>0){
+        Store.add('debts',{
+          purchaseBatchId:batchId,sourcePurchaseId:id,supplierId:supplierId||null,
+          date,person:supplierName||'بائع/مورد',type:'علينا',amount:remaining,
+          paidAmount:newPaid,paymentHistory:oldHistory,debtVersion:2,due:'',
+          note:`آجل من شراء ${product.name}`,paid:newPaid>=total-0.0001,
+          source:'purchase',purchaseTotal:total
+        });
+      }
+    }
+
+    closeModal();
+    showToast('✅ تم تعديل الشراء مع الحفاظ على المدفوعات السابقة','success');
+    renderPurchasesPage(document.getElementById('contentArea'));
+    if(typeof renderCashboxData==='function')renderCashboxData();
+  }catch(error){
+    ['products','purchases','debts'].forEach(k=>{
+      try{localStorage.setItem('bm_'+k,JSON.stringify(snapshot[k]||[]));}catch(e){}
+    });
+    console.error('فشل تعديل الشراء وتم التراجع:',error);
+    showToast('❌ تعذر تعديل الشراء — تم التراجع عن العملية','error');
+  }
 }
 
 function deletePurchase(id){
-  if(!confirm('حذف عملية الشراء؟ سيتم خصم الكمية من المخزون.'))return;
+  const purchases=Store.get('purchases')||[];
+  const purchase=purchases.find(p=>String(p.id)===String(id));
+  if(!purchase)return showToast('❌ عملية الشراء غير موجودة','error');
 
-  const purchases=Store.get('purchases');
-  const purchase=purchases.find(p=>p.id===id);
-  if(!purchase){showToast('❌ العملية غير موجودة','error');return;}
+  const debts=Store.get('debts')||[];
+  const linkedDebts=debts.filter(d=>
+    d.source==='purchase' &&
+    d.type==='علينا' &&
+    String(d.purchaseBatchId||'')===String(purchase.purchaseBatchId||'')
+  );
 
-  const products=Store.get('products');
-  const product=products.find(p=>p.id===purchase.productId);
-  if(!product){Store.delete('purchases',id);showToast('🗑️ تم الحذف');renderPurchasesTable();return;}
+  const historyTotal=linkedDebts.reduce((sum,d)=>{
+    const hist=Array.isArray(d.paymentHistory)?d.paymentHistory:[];
+    return sum+hist.reduce((n,h)=>n+Math.max(0,Number(h?.amount)||0),0);
+  },0);
+  const paidNow=Math.max(0,Number(purchase.paid||0));
+  const debtPaid=linkedDebts.reduce((sum,d)=>sum+Math.max(0,Number(d.paidAmount)||0),0);
+  const totalPaid=Math.max(paidNow,debtPaid,historyTotal);
+  const total=Number(purchase.total||purchase.qty*purchase.price||0);
+  const remaining=Math.max(0,total-totalPaid);
 
-  const newQty=(product.qty||0)-(purchase.qty||0);
+  const supplierName=purchase.supplierName||linkedDebts[0]?.person||'المورد';
+  const msg=`⚠️ حذف عملية الشراء
 
-  if(newQty<0){
-    if(!confirm('⚠️ الكمية في المخزون أقل من الكمية المشتراة! سيتم جعل الكمية صفر. متأكد؟'))return;
+الصنف: ${purchase.productName||'شراء'}
+الإجمالي: ${fmt(total)}
+المدفوع/المسدّد: ${fmt(totalPaid)}
+المتبقي: ${fmt(remaining)}
+
+سيتم:
+• عكس كمية الشراء من المخزون.
+• حذف حساب المديونية المرتبط بالعملية.
+• عكس أي مبلغ مدفوع أو سداد سابق من الخزنة.
+• حذف العملية من سجل المشتريات.
+
+المورد: ${supplierName}
+
+هل أنت متأكد من حذف عملية الشراء بالكامل؟`;
+
+  if(!confirm(msg))return;
+
+  const keys=['products','purchases','debts','auditLog'];
+  const snapshot={};
+  keys.forEach(k=>{
+    try{snapshot[k]=JSON.parse(JSON.stringify(Store.get(k)||[]));}
+    catch(e){snapshot[k]=[];}
+  });
+
+  try{
+    const productId=purchase.productId;
+    const products=Store.get('products')||[];
+    const product=products.find(p=>String(p.id)===String(productId));
+
+    if(product){
+      const newQty=(Number(product.qty)||0)-(Number(purchase.qty)||0);
+      if(newQty<0){
+        if(!confirm(`⚠️ الكمية الحالية في المخزون (${formatProductQty(product,Number(product.qty)||0)}) أقل من كمية هذه العملية (${formatProductQty(product,Number(purchase.qty)||0)}).
+سيتم جعل الكمية صفر بعد الحذف.
+هل تريد المتابعة؟`))return;
+      }
+      Store.update('products',product.id,{qty:Math.max(0,newQty)});
+    }
+
+    // حذف العملية وكل الدين المرتبط بها؛ الخزنة تُعاد حسابها تلقائياً من السجلات الحالية.
+    linkedDebts.forEach(d=>Store.delete('debts',d.id));
+    Store.delete('purchases',purchase.id);
+
+    if(typeof renderCashboxData==='function')renderCashboxData();
+    if(typeof renderDebtsList==='function')renderDebtsList();
+    renderPurchasesTable();
+
+    showToast(`🗑️ تم حذف عملية الشراء وعكس أثرها من المخزون والحسابات والخزنة`,'success');
+  }catch(error){
+    keys.forEach(k=>{
+      try{Store.set(k,snapshot[k]||[]);}
+      catch(e){}
+    });
+    console.error('فشل حذف الشراء وتم التراجع:',error);
+    showToast('❌ تعذر حذف عملية الشراء — تم التراجع عن العملية بالكامل','error');
   }
-
-  Store.update('products',purchase.productId,{qty:Math.max(0,newQty)});
-
-  const batchId=purchase.purchaseBatchId;
-  if(batchId){Store.get('debts').filter(d=>d.purchaseBatchId===batchId).forEach(d=>Store.delete('debts',d.id));}
-  Store.delete('purchases',id);
-
-  showToast('🗑️ تم الحذف وتحديث المخزون');
-  renderPurchasesTable();
 }
 
 // ==================== الخزنة ====================
@@ -6779,7 +6972,7 @@ function filterSuppliers(){
         <button class="btn btn-sm btn-primary" onclick="paySupplierFull('${s.id}')">✅ سداد كامل</button>
       </div>`:''}
 
-      ${f.remaining>0&&getSupplierLastPaymentGroup(s.id)?`
+      ${getSupplierLastPaymentGroup(s.id)?`
       <button class="supplier-undo-btn" onclick="undoSupplierLastPayment('${s.id}')">↩️ تراجع عن آخر سداد</button>`:''}
 
       <div class="supplier-compact-bottom">
@@ -6897,13 +7090,73 @@ function applySupplierPayment(supplierId,amount){
       debtVersion:2,
       lastPaymentAt:now
     });
+
+    // مزامنة الفاتورة نفسها: السداد العام يجب أن يظهر أيضًا في سجل المشتريات.
+    const purchases=Store.get('purchases')||[];
+    const purchase=purchases.find(p=>String(p.purchaseBatchId||'')===String(d.purchaseBatchId||''));
+    if(purchase){
+      const initialPaid=Math.max(0,Number(purchase.paid||0));
+      const newPaid=Math.min(Number(purchase.total||0),initialPaid+pay);
+      Store.update('purchases',purchase.id,{paid:newPaid,remaining:Math.max(0,Number(purchase.total||0)-newPaid),paymentMethod:newPaid>=Number(purchase.total||0)-0.0001?'cash':'credit'});
+    }
     left-=pay;
   }
 
   closeModal();
   showToast('✅ تم تسجيل السداد وتوزيعه على فواتير المورد');
   renderSuppliersPage(document.getElementById('contentArea'));
+  if(typeof renderPurchasesTable==='function')renderPurchasesTable();
+  if(typeof renderCashboxData==='function')renderCashboxData();
 }
+
+function openPurchaseInvoicePayment(purchaseId){
+  const purchase=(Store.get('purchases')||[]).find(p=>String(p.id)===String(purchaseId));
+  if(!purchase)return showToast('الفاتورة غير موجودة','error');
+  const debt=(Store.get('debts')||[]).find(d=>d.source==='purchase'&&d.type==='علينا'&&String(d.purchaseBatchId||'')===String(purchase.purchaseBatchId||''));
+  if(!debt)return showToast('لا يوجد حساب آجل مرتبط بهذه الفاتورة','warning');
+  const remaining=Math.max(0,Number(debt.amount||0)-Number(debt.paidAmount||0));
+  if(remaining<=0)return showToast('الفاتورة مسددة بالكامل','info');
+  const supplierName=purchase.supplierName||debt.person||'المورد';
+  openModal(`<div class="modal-header"><h2>💳 سداد هذه الفاتورة</h2><button class="modal-close" onclick="closeModal()">&times;</button></div>
+    <div class="group-payment-summary">
+      <div style="font-weight:950;font-size:1rem">${purchase.productName||'فاتورة شراء'}</div>
+      <div style="color:var(--text-muted);font-size:.68rem;margin-top:4px">المورد: ${supplierName}</div>
+      <strong>${fmt(remaining)}</strong><small>المتبقي في هذه الفاتورة فقط</small>
+    </div>
+    <div class="form-group"><label>مبلغ السداد الآن</label><input type="number" id="purchaseInvoicePayAmount" min="0.01" max="${remaining}" step="0.01" value="${Math.min(remaining,100)}" inputmode="decimal"></div>
+    <div class="group-payment-note">💡 السداد هنا يخص هذه الفاتورة فقط، ولا يخصم من أي فاتورة أخرى للمورد.</div>
+    <button class="btn btn-success btn-block" onclick="confirmPurchaseInvoicePayment('${purchase.id}')">✅ تسجيل السداد</button>`);
+}
+
+function confirmPurchaseInvoicePayment(purchaseId){
+  const purchase=(Store.get('purchases')||[]).find(p=>String(p.id)===String(purchaseId));
+  if(!purchase)return showToast('الفاتورة غير موجودة','error');
+  const debt=(Store.get('debts')||[]).find(d=>d.source==='purchase'&&d.type==='علينا'&&String(d.purchaseBatchId||'')===String(purchase.purchaseBatchId||''));
+  if(!debt)return showToast('لا يوجد حساب آجل مرتبط بهذه الفاتورة','warning');
+  const remaining=Math.max(0,Number(debt.amount||0)-Number(debt.paidAmount||0));
+  const amount=Number(document.getElementById('purchaseInvoicePayAmount')?.value)||0;
+  if(amount<=0)return showToast('أدخل مبلغ السداد','warning');
+  if(amount>remaining+0.0001)return showToast(`مبلغ السداد لا يمكن أن يتجاوز متبقي الفاتورة (${fmt(remaining)})`,'warning');
+
+  const now=cairoDateTimeISO();
+  const history=Array.isArray(debt.paymentHistory)?debt.paymentHistory.slice():[];
+  const paidBefore=Math.max(0,Number(debt.paidAmount||0));
+  const paidAfter=Math.min(Number(debt.amount||0),paidBefore+amount);
+  const groupId='SUPINV-'+Date.now()+'-'+Math.random().toString(36).slice(2,7);
+  history.push({amount,date:now,type:paidAfter>=Number(debt.amount||0)-0.0001?'full':'partial',groupId,source:'purchase_invoice'});
+
+  Store.update('debts',debt.id,{paidAmount:paidAfter,paid:paidAfter>=Number(debt.amount||0)-0.0001,paymentHistory:history,debtVersion:2,lastPaymentAt:now});
+  const initialPaid=Math.max(0,Number(purchase.paid||0));
+  const newPaid=Math.min(Number(purchase.total||0),initialPaid+amount);
+  Store.update('purchases',purchase.id,{paid:newPaid,remaining:Math.max(0,Number(purchase.total||0)-newPaid),paymentMethod:newPaid>=Number(purchase.total||0)-0.0001?'cash':'credit'});
+
+  closeModal();
+  showToast(paidAfter>=Number(debt.amount||0)-0.0001?`🎉 تم سداد الفاتورة بالكامل — ${fmt(newPaid)}`:`✅ تم سداد ${fmt(amount)} من هذه الفاتورة — المتبقي ${fmt(Math.max(0,Number(debt.amount||0)-paidAfter))}`,'success');
+  renderPurchasesPage(document.getElementById('contentArea'));
+  if(typeof renderSuppliersPage==='function')renderSuppliersPage(document.getElementById('contentArea'));
+  if(typeof renderCashboxData==='function')renderCashboxData();
+}
+
 
 function undoSupplierLastPayment(supplierId){
   const groupId=getSupplierLastPaymentGroup(supplierId);
@@ -6926,11 +7179,17 @@ function undoSupplierLastPayment(supplierId){
     const paidAfter=Math.max(0,Number(d.paidAmount||0)-amount);
     Store.update('debts',d.id,{
       paidAmount:paidAfter,
-      paid:false,
+      paid:paidAfter>=Number(d.amount||0)-0.0001,
       paymentHistory:remainingHistory,
       lastPaymentAt:remainingHistory.length?remainingHistory[remainingHistory.length-1].date:null,
       debtVersion:2
     });
+    const purchase=(Store.get('purchases')||[]).find(p=>String(p.purchaseBatchId||'')===String(d.purchaseBatchId||''));
+    if(purchase){
+      const currentPaid=Math.max(0,Number(purchase.paid||0));
+      const newPaid=Math.max(0,currentPaid-amount);
+      Store.update('purchases',purchase.id,{paid:newPaid,remaining:Math.max(0,Number(purchase.total||0)-newPaid),paymentMethod:newPaid>=Number(purchase.total||0)-0.0001?'cash':'credit'});
+    }
     changed++;
   });
   showToast(changed?'↩️ تم التراجع عن آخر سداد':'لا يوجد سداد يمكن التراجع عنه','info');
@@ -8026,7 +8285,7 @@ if ('serviceWorker' in navigator) {
   function esc(v){return String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
   function invoiceTotalText(inv){return fmt(inv.total);}
   function invoiceText(inv){
-    let t=`🧾 *كنوز الطبيعة — فاتورة بيع*\n`;
+    let t=`🧾 *متجري — فاتورة بيع*\n`;
     t+=`━━━━━━━━━━━━━━\n`;
     t+=`🔢 رقم الفاتورة: *${inv.invoiceSeq||inv.invoiceNo}*\n`;
     t+=`📅 التاريخ: *${formatInvoiceDate(inv.date)}${inv.time?' — '+inv.time:''}*\n`;
@@ -8173,7 +8432,7 @@ if ('serviceWorker' in navigator) {
 #contentArea .stock-movement-page .sm-adjust-delete i{font-size:1rem!important}
 #contentArea .stock-movement-page .sm-movement-card.adjust{padding-bottom:14px!important}
 </style>
-</head><body><div class="page"><div class="brand">كنوز الطبيعة</div><div class="sub">فاتورة بيع — '+esc(inv.invoiceNo)+'<br>'+esc(inv.date)+' '+esc(inv.time)+'</div><div class="line"></div><div class="meta"><div><small>العميل</small><b>'+esc(inv.customerName)+'</b></div><div><small>نوع البيع</small><b>'+(inv.type==='wholesale'?'جملة':'قطاعي')+'</b></div><div><small>السداد</small><b>'+paymentLabel(inv.paymentMethod)+'</b></div></div><div class="line"></div><table><thead><tr><th>الصنف</th><th>الكمية</th><th>السعر</th><th>الإجمالي</th></tr></thead><tbody>'+rows+'</tbody></table><div class="line"></div><div class="r"><span>الإجمالي</span><b>'+fmt(inv.total)+'</b></div><div class="r"><span>المدفوع</span><b>'+fmt(inv.paid)+'</b></div><div class="r grand"><span>المتبقي</span><b>'+fmt(inv.remaining)+'</b></div>'+(inv.note?'<div class="line"></div><div class="r"><span>ملاحظات</span><b>'+esc(inv.note)+'</b></div>':'')+'<div class="thanks">شكرًا لتعاملكم معنا ❤️</div></div></body></html>';
+</head><body><div class="page"><div class="brand">متجري</div><div class="sub">فاتورة بيع — '+esc(inv.invoiceNo)+'<br>'+esc(inv.date)+' '+esc(inv.time)+'</div><div class="line"></div><div class="meta"><div><small>العميل</small><b>'+esc(inv.customerName)+'</b></div><div><small>نوع البيع</small><b>'+(inv.type==='wholesale'?'جملة':'قطاعي')+'</b></div><div><small>السداد</small><b>'+paymentLabel(inv.paymentMethod)+'</b></div></div><div class="line"></div><table><thead><tr><th>الصنف</th><th>الكمية</th><th>السعر</th><th>الإجمالي</th></tr></thead><tbody>'+rows+'</tbody></table><div class="line"></div><div class="r"><span>الإجمالي</span><b>'+fmt(inv.total)+'</b></div><div class="r"><span>المدفوع</span><b>'+fmt(inv.paid)+'</b></div><div class="r grand"><span>المتبقي</span><b>'+fmt(inv.remaining)+'</b></div>'+(inv.note?'<div class="line"></div><div class="r"><span>ملاحظات</span><b>'+esc(inv.note)+'</b></div>':'')+'<div class="thanks">شكرًا لتعاملكم معنا ❤️</div></div></body></html>';
     w.document.open();w.document.write(html);w.document.close();w.focus();setTimeout(()=>w.print(),350);
   };
 
