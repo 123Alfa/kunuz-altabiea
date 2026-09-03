@@ -12,7 +12,7 @@
 
 <!-- لون شريط المتصفح العلوي في الموبايل -->
 <meta name="theme-color" content="#0B4DA2">
-<script defer src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js" async></script>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800;900&display=swap" rel="stylesheet">
 
@@ -3275,8 +3275,8 @@ function idbPut(key,value){
 async function initIndexedDBStore(){
   try{
     matgaryDB=await openMatgaryDB();
-    const migrations=[];
-    for(const key of IDB_COLLECTIONS){
+    // قراءة مجموعات IndexedDB بالتوازي بدل انتظار كل مجموعة على حدة.
+    const migrations=await Promise.all(IDB_COLLECTIONS.map(async key=>{
       const remote=await idbGet(key);
       const local=Array.isArray(storeMemory[key]) ? storeMemory[key] : [];
       // لا نستبدل بيانات محلية موجودة بنسخة IndexedDB فارغة بالخطأ.
@@ -3289,8 +3289,8 @@ async function initIndexedDBStore(){
           throw new Error('INDEXEDDB_MIGRATION_VERIFY_FAILED:'+key);
         }
       }
-      migrations.push(key);
-    }
+      return key;
+    }));
     idbReady=true;
     // لا نحذف النسخة القديمة إلا بعد نجاح كل عمليات النقل والتحقق.
     for(const key of migrations){
@@ -4116,7 +4116,7 @@ function renderSalesPage(container){
     <section class="sales-history-card sales-history-modern sales-history-collapsed" id="salesHistorySection" style="margin-top:18px">
       <div class="sales-history-head sales-history-toggle-head" onclick="toggleSalesHistory()"><div class="sales-history-title"><div class="sales-history-icon"><i class="fas fa-receipt"></i></div><div><h3>سجل المبيعات</h3><small>اضغط لعرض الفواتير والمبالغ والأرباح</small></div></div><div class="sales-history-head-actions"><button type="button" class="sales-refresh-btn" onclick="event.stopPropagation();renderSalesTable()" title="تحديث السجل"><i class="fas fa-rotate"></i></button><button type="button" class="sales-history-open-btn" id="salesHistoryOpenBtn" title="فتح سجل المبيعات"><i class="fas fa-chevron-down"></i></button></div></div>
       <div class="sales-history-body" id="salesHistoryBody"><div class="sales-stats-grid"><div class="sales-stat"><span class="sales-stat-icon"><i class="fas fa-file-invoice"></i></span><div><small>العمليات</small><strong id="salesStatCount">0</strong></div></div><div class="sales-stat"><span class="sales-stat-icon"><i class="fas fa-money-bill-wave"></i></span><div><small>المبيعات</small><strong id="salesStatTotal">0 ج.م</strong></div></div><div class="sales-stat"><span class="sales-stat-icon"><i class="fas fa-hand-holding-dollar"></i></span><div><small>المدفوع</small><strong id="salesStatPaid">0 ج.م</strong></div></div><div class="sales-stat"><span class="sales-stat-icon"><i class="fas fa-chart-line"></i></span><div><small>الربح</small><strong id="salesStatProfit">0 ج.م</strong></div></div></div>
-        <div class="sales-filters"><div class="sales-search-wrap"><i class="fas fa-search"></i><input type="text" id="saleSearch" placeholder="ابحث عن صنف أو عميل أو ملاحظة..." oninput="renderSalesTable()"><button type="button" onclick="document.getElementById('saleSearch').value='';renderSalesTable()"><i class="fas fa-xmark"></i></button></div><div class="sales-quick-filters"><button type="button" class="active" data-range="all" onclick="setSalesRange('all',this)">الكل</button><button type="button" data-range="today" onclick="setSalesRange('today',this)">اليوم</button><button type="button" data-range="week" onclick="setSalesRange('week',this)">هذا الأسبوع</button><button type="button" data-range="month" onclick="setSalesRange('month',this)">هذا الشهر</button></div><div class="sales-filter-row"><select id="saleTypeFilter" onchange="renderSalesTable()"><option value="">كل أنواع البيع</option><option value="retail">🛍️ قطاعي</option><option value="wholesale">📦 جملة</option></select><select id="salePaymentFilter" onchange="renderSalesTable()"><option value="">كل طرق السداد</option><option value="cash">💵 نقدي</option><option value="credit">⏳ آجل</option><option value="transfer">📱 تحويل</option><option value="card">💳 بطاقة</option></select><label class="sales-date-wrap" title="اختيار تاريخ محدد"><i class="fas fa-calendar-days"></i><span>اختر التاريخ</span><input type="date" id="saleFilterDate" onchange="setSalesRange('custom')" class="sales-date-filter" aria-label="اختيار تاريخ محدد"></label><button type="button" class="sales-clear-filters" onclick="clearSalesFilters()"><i class="fas fa-filter-circle-xmark"></i> مسح الفلاتر</button></div></div><div id="salesTable" class="sales-cards-list"></div></div>
+        <div class="sales-filters"><div class="sales-search-wrap"><i class="fas fa-search"></i><input type="text" id="saleSearch" placeholder="ابحث عن صنف أو عميل أو ملاحظة..." oninput="renderSalesTable()"><button type="button" onclick="document.getElementById('saleSearch').value='';renderSalesTable()"><i class="fas fa-xmark"></i></button></div><div class="sales-quick-filters"><button type="button" class="active" data-range="all" onclick="setSalesRange('all',this)">الكل</button><button type="button" data-range="today" onclick="setSalesRange('today',this)">اليوم</button><button type="button" data-range="week" onclick="setSalesRange('week',this)">هذا الأسبوع</button><button type="button" data-range="month" onclick="setSalesRange('month',this)">هذا الشهر</button></div><div class="sales-filter-row"><select id="saleTypeFilter" onchange="renderSalesTable()"><option value="">كل أنواع البيع</option><option value="retail">🛍️ قطاعي</option><option value="wholesale">📦 جملة</option></select><select id="salePaymentFilter" onchange="renderSalesTable()"><option value="">كل طرق السداد</option><option value="cash">💵 نقدي</option><option value="credit">⏳ آجل</option><option value="transfer">📱 تحويل</option><option value="card">💳 بطاقة</option></select><label class="sales-date-wrap" title="اختيار تاريخ محدد"><i class="fas fa-calendar-days"></i><span id="saleFilterDateLabel">اختر التاريخ</span><input type="date" id="saleFilterDate" onchange="setSalesRange('custom')" class="sales-date-filter" aria-label="اختيار تاريخ محدد"></label><button type="button" class="sales-clear-filters" onclick="clearSalesFilters()"><i class="fas fa-filter-circle-xmark"></i> مسح الفلاتر</button></div></div><div id="salesTable" class="sales-cards-list"></div></div>
     </section>
   </div>`;
   renderSaleProductGrid();
@@ -4911,19 +4911,32 @@ function cairoDateTimeISO(date=new Date()){
 }
 function cairoTimeFromStored(value){
   if(!value)return '';
-  const s=String(value);
-  // السجلات القديمة التي خزنت ISO UTC مثل 2026-08-26T22:43:00.000Z
-  // يتم تحويلها الآن تلقائيًا إلى توقيت القاهرة عند العرض.
+  const s=String(value).trim();
+  const english12 = d => new Intl.DateTimeFormat('en-US',{
+    hour:'numeric',minute:'2-digit',hour12:true,timeZone:'Africa/Cairo'
+  }).format(d);
+
+  // السجلات القديمة المخزنة كـ ISO/UTC يتم تحويلها إلى توقيت القاهرة.
   if(/Z$|[+-]\d{2}:?\d{2}$/.test(s)){
     const d=new Date(s);
-    if(!Number.isNaN(d.getTime())) return new Intl.DateTimeFormat('ar-EG',{hour:'2-digit',minute:'2-digit',hourCycle:'h23',timeZone:'Africa/Cairo'}).format(d);
+    if(!Number.isNaN(d.getTime())) return english12(d);
   }
-  const m=s.match(/T(\d{2}:\d{2})/);
-  return m?m[1]:s.slice(11,16);
+
+  // السجلات القديمة التي تحتوي وقتًا محليًا بصيغة 24 ساعة.
+  const m=s.match(/(?:T|\s)(\d{1,2}):(\d{2})/);
+  if(m){
+    let h=Number(m[1]), min=Number(m[2]);
+    if(Number.isFinite(h)&&Number.isFinite(min)){
+      h=((h%24)+24)%24;
+      return `${String(h%12||12).padStart(2,'0')}:${String(min).padStart(2,'0')} ${h>=12?'PM':'AM'}`;
+    }
+  }
+  return s;
 }
 function currentTimeLabel(){
-  const p=cairoDateTimeParts(new Date());
-  return `${p.hour}:${p.minute}`;
+  return new Intl.DateTimeFormat('en-US',{
+    hour:'numeric',minute:'2-digit',hour12:true,timeZone:'Africa/Cairo'
+  }).format(new Date());
 }
 
 function checkoutPOS(){
@@ -5406,6 +5419,17 @@ function getSalesRangeDates(range){
   if(range==='week'){const day=local.getDay();const diffToSaturday=(day+1)%7;const start=new Date(local);start.setDate(local.getDate()-diffToSaturday);const end=new Date(start);end.setDate(start.getDate()+6);return [iso(start),iso(end)];}
   return ['',''];
 }
+function updateSalesDateFilterLabel(){
+  const input=document.getElementById('saleFilterDate');
+  const label=document.getElementById('saleFilterDateLabel');
+  if(!input||!label)return;
+  if(!input.value){
+    label.textContent='اختر التاريخ';
+    return;
+  }
+  const m=input.value.match(/^(\d{4})-(\d{2})-(\d{2})$/);
+  label.textContent=m?`${m[3]}/${m[2]}/${m[1]}`:input.value;
+}
 function setSalesRange(range,btn){
   window.salesRange=range;
   document.querySelectorAll('.sales-quick-filters button').forEach(b=>b.classList.remove('active'));
@@ -5413,12 +5437,14 @@ function setSalesRange(range,btn){
   if(range!=='custom'){
     const date=document.getElementById('saleFilterDate'); if(date)date.value='';
   }
+  updateSalesDateFilterLabel();
   renderSalesTable();
 }
 function clearSalesFilters(){
   window.salesRange='all';
   const q=document.getElementById('saleSearch'),date=document.getElementById('saleFilterDate'),type=document.getElementById('saleTypeFilter'),pay=document.getElementById('salePaymentFilter');
   if(q)q.value=''; if(date)date.value=''; if(type)type.value=''; if(pay)pay.value='';
+  updateSalesDateFilterLabel();
   document.querySelectorAll('.sales-quick-filters button').forEach(b=>b.classList.toggle('active',b.dataset.range==='all'));
   renderSalesTable();
 }
@@ -5791,12 +5817,24 @@ function updatePurchasePreview(){
   const qty=Number(document.getElementById('purQty')?.value||0);
   const price=Number(document.getElementById('purPrice')?.value||0);
   const total=Math.max(0,qty*price);
-  const paid=Math.min(Math.max(0,Number(document.getElementById('purPaid')?.value||0)),total);
+  const fullBtn=document.getElementById('purFullPaidBtn');
+  const paidInput=document.getElementById('purPaid');
+
+  let paid;
+  if(fullBtn?.classList.contains('active')){
+    paid=total;
+    if(paidInput)paidInput.value=total>0?String(total):'';
+  }else{
+    paid=Math.min(Math.max(0,Number(paidInput?.value||0)),total);
+  }
+
   const remaining=Math.max(0,total-paid);
   const d=document.getElementById('purTotalPreview');
   if(d)d.textContent=fmt(total);
   const pd=document.getElementById('purPaidPreview'); if(pd)pd.textContent=fmt(paid);
   const rd=document.getElementById('purRemainingPreview'); if(rd)rd.textContent=fmt(remaining);
+  const st=document.getElementById('purPaymentStatus');
+  if(st)st.textContent=fullBtn?.classList.contains('active')?'مدفوع بالكامل':'آجل / جزئي';
 }
 function clearPurchaseFilters(){
   ['purchaseSearch','purchaseFrom','purchaseTo','purchaseSupplierFilter'].forEach(id=>{const e=document.getElementById(id);if(e)e.value='';});
@@ -5857,13 +5895,22 @@ function renderPurchasesPage(container){
 }
 
 function setPurchasePayment(mode){
-  const total=Number(document.getElementById('purTotalPreview')?.textContent?.replace(/[^0-9.]/g,'')||0);
+  const qty=Number(document.getElementById('purQty')?.value||0);
+  const price=Number(document.getElementById('purPrice')?.value||0);
+  const total=Math.max(0,qty*price);
   const paid=document.getElementById('purPaid');
   const fullBtn=document.getElementById('purFullPaidBtn');
   const creditBtn=document.getElementById('purCreditBtn');
-  if(mode==='full'){ if(paid)paid.value=total||''; if(fullBtn)fullBtn.classList.add('active'); if(creditBtn)creditBtn.classList.remove('active'); }
-  else { if(paid)paid.value=''; if(creditBtn)creditBtn.classList.add('active'); if(fullBtn)fullBtn.classList.remove('active'); }
-  const st=document.getElementById('purPaymentStatus'); if(st)st.textContent=mode==='full'?'مدفوع بالكامل':'آجل / جزئي';
+
+  if(mode==='full'){
+    if(fullBtn)fullBtn.classList.add('active');
+    if(creditBtn)creditBtn.classList.remove('active');
+    if(paid)paid.value=total>0?String(total):'';
+  }else{
+    if(paid)paid.value='';
+    if(creditBtn)creditBtn.classList.add('active');
+    if(fullBtn)fullBtn.classList.remove('active');
+  }
   updatePurchasePreview();
 }
 
