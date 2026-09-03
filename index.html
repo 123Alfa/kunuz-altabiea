@@ -2628,14 +2628,6 @@ html,body{width:100%;max-width:100%;overflow-x:hidden}
 }
 </style>
 
-
-<style id="sales-date-selected-fix-v181">
-.sales-date-wrap{display:flex!important;align-items:center!important;justify-content:flex-start!important;gap:8px!important;min-width:0!important;padding:0 13px!important;color:#87949a!important;font-weight:800!important;overflow:hidden!important;}
-.sales-date-wrap i{flex:0 0 auto!important;}
-.sales-date-wrap span{display:block!important;flex:1 1 auto!important;min-width:0!important;white-space:nowrap!important;overflow:hidden!important;text-overflow:ellipsis!important;}
-.sales-date-wrap input{z-index:2!important;}
-.sales-date-wrap:has(input:not([value=""])){color:var(--text,#263238)!important;}
-</style>
 </head>
 <body>
 <div id="loading-screen">
@@ -4124,7 +4116,7 @@ function renderSalesPage(container){
     <section class="sales-history-card sales-history-modern sales-history-collapsed" id="salesHistorySection" style="margin-top:18px">
       <div class="sales-history-head sales-history-toggle-head" onclick="toggleSalesHistory()"><div class="sales-history-title"><div class="sales-history-icon"><i class="fas fa-receipt"></i></div><div><h3>سجل المبيعات</h3><small>اضغط لعرض الفواتير والمبالغ والأرباح</small></div></div><div class="sales-history-head-actions"><button type="button" class="sales-refresh-btn" onclick="event.stopPropagation();renderSalesTable()" title="تحديث السجل"><i class="fas fa-rotate"></i></button><button type="button" class="sales-history-open-btn" id="salesHistoryOpenBtn" title="فتح سجل المبيعات"><i class="fas fa-chevron-down"></i></button></div></div>
       <div class="sales-history-body" id="salesHistoryBody"><div class="sales-stats-grid"><div class="sales-stat"><span class="sales-stat-icon"><i class="fas fa-file-invoice"></i></span><div><small>العمليات</small><strong id="salesStatCount">0</strong></div></div><div class="sales-stat"><span class="sales-stat-icon"><i class="fas fa-money-bill-wave"></i></span><div><small>المبيعات</small><strong id="salesStatTotal">0 ج.م</strong></div></div><div class="sales-stat"><span class="sales-stat-icon"><i class="fas fa-hand-holding-dollar"></i></span><div><small>المدفوع</small><strong id="salesStatPaid">0 ج.م</strong></div></div><div class="sales-stat"><span class="sales-stat-icon"><i class="fas fa-chart-line"></i></span><div><small>الربح</small><strong id="salesStatProfit">0 ج.م</strong></div></div></div>
-        <div class="sales-filters"><div class="sales-search-wrap"><i class="fas fa-search"></i><input type="text" id="saleSearch" placeholder="ابحث عن صنف أو عميل أو ملاحظة..." oninput="renderSalesTable()"><button type="button" onclick="document.getElementById('saleSearch').value='';renderSalesTable()"><i class="fas fa-xmark"></i></button></div><div class="sales-quick-filters"><button type="button" class="active" data-range="all" onclick="setSalesRange('all',this)">الكل</button><button type="button" data-range="today" onclick="setSalesRange('today',this)">اليوم</button><button type="button" data-range="week" onclick="setSalesRange('week',this)">هذا الأسبوع</button><button type="button" data-range="month" onclick="setSalesRange('month',this)">هذا الشهر</button></div><div class="sales-filter-row"><select id="saleTypeFilter" onchange="renderSalesTable()"><option value="">كل أنواع البيع</option><option value="retail">🛍️ قطاعي</option><option value="wholesale">📦 جملة</option></select><select id="salePaymentFilter" onchange="renderSalesTable()"><option value="">كل طرق السداد</option><option value="cash">💵 نقدي</option><option value="credit">⏳ آجل</option><option value="transfer">📱 تحويل</option><option value="card">💳 بطاقة</option></select><label class="sales-date-wrap" title="اختيار تاريخ محدد"><i class="fas fa-calendar-days"></i><span id="saleFilterDateLabel">اختر التاريخ</span><input type="date" id="saleFilterDate" onchange="setSalesRange('custom');updateSaleDateLabel()" class="sales-date-filter" aria-label="اختيار تاريخ محدد"></label><button type="button" class="sales-clear-filters" onclick="clearSalesFilters()"><i class="fas fa-filter-circle-xmark"></i> مسح الفلاتر</button></div></div><div id="salesTable" class="sales-cards-list"></div></div>
+        <div class="sales-filters"><div class="sales-search-wrap"><i class="fas fa-search"></i><input type="text" id="saleSearch" placeholder="ابحث عن صنف أو عميل أو ملاحظة..." oninput="renderSalesTable()"><button type="button" onclick="document.getElementById('saleSearch').value='';renderSalesTable()"><i class="fas fa-xmark"></i></button></div><div class="sales-quick-filters"><button type="button" class="active" data-range="all" onclick="setSalesRange('all',this)">الكل</button><button type="button" data-range="today" onclick="setSalesRange('today',this)">اليوم</button><button type="button" data-range="week" onclick="setSalesRange('week',this)">هذا الأسبوع</button><button type="button" data-range="month" onclick="setSalesRange('month',this)">هذا الشهر</button></div><div class="sales-filter-row"><select id="saleTypeFilter" onchange="renderSalesTable()"><option value="">كل أنواع البيع</option><option value="retail">🛍️ قطاعي</option><option value="wholesale">📦 جملة</option></select><select id="salePaymentFilter" onchange="renderSalesTable()"><option value="">كل طرق السداد</option><option value="cash">💵 نقدي</option><option value="credit">⏳ آجل</option><option value="transfer">📱 تحويل</option><option value="card">💳 بطاقة</option></select><label class="sales-date-wrap" title="اختيار تاريخ محدد"><i class="fas fa-calendar-days"></i><span>اختر التاريخ</span><input type="date" id="saleFilterDate" onchange="setSalesRange('custom')" class="sales-date-filter" aria-label="اختيار تاريخ محدد"></label><button type="button" class="sales-clear-filters" onclick="clearSalesFilters()"><i class="fas fa-filter-circle-xmark"></i> مسح الفلاتر</button></div></div><div id="salesTable" class="sales-cards-list"></div></div>
     </section>
   </div>`;
   renderSaleProductGrid();
@@ -4808,7 +4800,7 @@ function openPOSReceiptPreview(invoice){
       <div class="receipt-title">فاتورة بيع</div>
       <div class="receipt-info-grid">
         <div><small>رقم الفاتورة</small><strong>${inv.invoiceSeq||inv.invoiceNo}</strong></div>
-        <div><small>التاريخ</small><strong>${formatInvoiceDate(inv.date)}${inv.time?' • '+inv.time:''}</strong></div>
+        <div><small>التاريخ</small><strong>${invoiceDisplayDate(inv)}${invoiceDisplayTime(inv)?' • '+invoiceDisplayTime(inv):''}</strong></div>
         <div><small>العميل</small><strong>${inv.customerName||'عميل عادي'}</strong></div>
         <div><small>نوع البيع</small><strong>${typeLabel}</strong></div>
       </div>
@@ -4834,7 +4826,7 @@ function printPOSReceipt(){
   const w=window.open('','_blank','width=760,height=900'); if(!w)return showToast('المتصفح منع نافذة الطباعة','warning');
   const doc=`<!doctype html><html lang="ar" dir="rtl"><head><meta charset="utf-8"><title>${inv.invoiceNo}</title><style>
   @page{size:A4;margin:14mm}body{font-family:Arial,sans-serif;color:#222;margin:0;background:#fff}.page{max-width:760px;margin:0 auto;padding:18px}.brand{text-align:center;font-size:24px;font-weight:900;margin-bottom:4px}.sub{text-align:center;color:#666;font-size:12px;line-height:1.8}.line{border-top:1px dashed #888;margin:14px 0}table{width:100%;border-collapse:collapse;font-size:13px}th,td{padding:9px 5px;border-bottom:1px solid #ddd;text-align:right}.r{display:flex;justify-content:space-between;padding:8px 0}.grand{font-size:19px;font-weight:900;border-top:2px solid #222;margin-top:8px;padding-top:12px}.thanks{text-align:center;margin-top:20px;font-size:12px;color:#666}@media print{.page{padding:0}}
-  </style></head><body><div class="page"><div class="brand">متجري</div><div class="sub">فاتورة بيع رقم ${inv.invoiceSeq||inv.invoiceNo}<br>${formatInvoiceDate(inv.date)}${inv.time?' • '+inv.time:''}<br>العميل: ${inv.customerName}<br>نوع البيع: ${inv.type==='wholesale'?'جملة':'قطاعي'}</div><div class="line"></div><table><thead><tr><th>الصنف</th><th>الكمية</th><th>الإجمالي</th></tr></thead><tbody>${rows}</tbody></table><div class="line"></div><div class="r"><span>الإجمالي قبل الخصم</span><b>${fmt(inv.subtotal)}</b></div><div class="r"><span>الخصم</span><b>${fmt(inv.discount)}</b></div><div class="r"><span>الضريبة</span><b>${fmt(inv.tax)}</b></div><div class="r grand"><span>الإجمالي النهائي</span><b>${fmt(inv.total)}</b></div><div class="r"><span>المدفوع</span><b>${fmt(inv.paid)}</b></div><div class="r"><span>${inv.method==='cash'?'الباقي':'المتبقي'}</span><b>${fmt(inv.method==='cash'?inv.change:inv.remaining)}</b></div><div class="r"><span>السداد</span><b>${({cash:'نقدي',credit:'آجل',transfer:'تحويل',card:'بطاقة'})[inv.method]||inv.method||'نقدي'}</b></div><div class="thanks">شكرًا لتعاملكم معنا ❤️</div></div>
+  </style></head><body><div class="page"><div class="brand">متجري</div><div class="sub">فاتورة بيع رقم ${inv.invoiceSeq||inv.invoiceNo}<br>${invoiceDisplayDate(inv)}${invoiceDisplayTime(inv)?' • '+invoiceDisplayTime(inv):''}<br>العميل: ${inv.customerName}<br>نوع البيع: ${inv.type==='wholesale'?'جملة':'قطاعي'}</div><div class="line"></div><table><thead><tr><th>الصنف</th><th>الكمية</th><th>الإجمالي</th></tr></thead><tbody>${rows}</tbody></table><div class="line"></div><div class="r"><span>الإجمالي قبل الخصم</span><b>${fmt(inv.subtotal)}</b></div><div class="r"><span>الخصم</span><b>${fmt(inv.discount)}</b></div><div class="r"><span>الضريبة</span><b>${fmt(inv.tax)}</b></div><div class="r grand"><span>الإجمالي النهائي</span><b>${fmt(inv.total)}</b></div><div class="r"><span>المدفوع</span><b>${fmt(inv.paid)}</b></div><div class="r"><span>${inv.method==='cash'?'الباقي':'المتبقي'}</span><b>${fmt(inv.method==='cash'?inv.change:inv.remaining)}</b></div><div class="r"><span>السداد</span><b>${({cash:'نقدي',credit:'آجل',transfer:'تحويل',card:'بطاقة'})[inv.method]||inv.method||'نقدي'}</b></div><div class="thanks">شكرًا لتعاملكم معنا ❤️</div></div>
 
 
 <style id="stock-movement-style">
@@ -4875,8 +4867,31 @@ function getNextInvoiceSequence(){
 }
 function formatInvoiceDate(dateStr){
   if(!dateStr)return '';
-  const parts=String(dateStr).split('-');
-  return parts.length===3?`${parts[2]}/${parts[1]}/${parts[0]}`:dateStr;
+  const raw=String(dateStr).trim();
+  const iso=raw.match(/^(\d{4})-(\d{2})-(\d{2})/);
+  if(iso)return `${iso[3]}/${iso[2]}/${iso[1]}`;
+  const dmy=raw.match(/^(\d{1,2})[\/-](\d{1,2})[\/-](\d{4})$/);
+  if(dmy)return `${String(dmy[1]).padStart(2,'0')}/${String(dmy[2]).padStart(2,'0')}/${dmy[3]}`;
+  return raw;
+}
+function invoiceDisplayDate(inv){
+  const date=String(inv?.date||'').trim();
+  if(date)return formatInvoiceDate(date);
+  const created=String(inv?.createdAt||'').trim();
+  if(created){
+    const d=new Date(created);
+    if(!Number.isNaN(d.getTime())) return formatInvoiceDate(cairoDateISO(d));
+  }
+  return formatInvoiceDate(cairoDateISO());
+}
+function invoiceDisplayTime(inv){
+  const created=String(inv?.createdAt||'').trim();
+  if(created){
+    const d=new Date(created);
+    if(!Number.isNaN(d.getTime())) return cairoTimeFromStored(d.toISOString());
+  }
+  const stored=String(inv?.time||'').trim();
+  return stored ? cairoTimeFromStored(stored) : '';
 }
 // ===== التوقيت الموحد لبرنامج «متجري» — توقيت مصر =====
 function cairoDateTimeParts(date=new Date()){
@@ -4907,7 +4922,8 @@ function cairoTimeFromStored(value){
   return m?m[1]:s.slice(11,16);
 }
 function currentTimeLabel(){
-  return new Intl.DateTimeFormat('ar-EG',{hour:'2-digit',minute:'2-digit',hourCycle:'h23',timeZone:'Africa/Cairo'}).format(new Date());
+  const p=cairoDateTimeParts(new Date());
+  return `${p.hour}:${p.minute}`;
 }
 
 function checkoutPOS(){
@@ -5390,18 +5406,6 @@ function getSalesRangeDates(range){
   if(range==='week'){const day=local.getDay();const diffToSaturday=(day+1)%7;const start=new Date(local);start.setDate(local.getDate()-diffToSaturday);const end=new Date(start);end.setDate(start.getDate()+6);return [iso(start),iso(end)];}
   return ['',''];
 }
-function updateSaleDateLabel(){
-  const input=document.getElementById('saleFilterDate');
-  const label=document.getElementById('saleFilterDateLabel');
-  if(!input||!label)return;
-  if(!input.value){
-    label.textContent='اختر التاريخ';
-    return;
-  }
-  const parts=input.value.split('-');
-  label.textContent=(parts.length===3)?`${parts[2]}/${parts[1]}/${parts[0]}`:input.value;
-}
-
 function setSalesRange(range,btn){
   window.salesRange=range;
   document.querySelectorAll('.sales-quick-filters button').forEach(b=>b.classList.remove('active'));
@@ -5409,14 +5413,12 @@ function setSalesRange(range,btn){
   if(range!=='custom'){
     const date=document.getElementById('saleFilterDate'); if(date)date.value='';
   }
-  updateSaleDateLabel();
   renderSalesTable();
 }
 function clearSalesFilters(){
   window.salesRange='all';
   const q=document.getElementById('saleSearch'),date=document.getElementById('saleFilterDate'),type=document.getElementById('saleTypeFilter'),pay=document.getElementById('salePaymentFilter');
   if(q)q.value=''; if(date)date.value=''; if(type)type.value=''; if(pay)pay.value='';
-  updateSaleDateLabel();
   document.querySelectorAll('.sales-quick-filters button').forEach(b=>b.classList.toggle('active',b.dataset.range==='all'));
   renderSalesTable();
 }
@@ -8450,6 +8452,11 @@ if ('serviceWorker' in navigator) {
 #contentArea .stock-movement-page .sm-adjust-delete{display:flex!important;visibility:visible!important;opacity:1!important;position:relative!important;z-index:5!important;width:100%!important;min-height:46px!important;padding:10px 14px!important;border:1.5px solid #d83b45!important;border-radius:14px!important;background:#fff5f5!important;color:#c62828!important;font:inherit!important;font-weight:900!important;align-items:center!important;justify-content:center!important;gap:8px!important;cursor:pointer!important}
 #contentArea .stock-movement-page .sm-adjust-delete i{font-size:1rem!important}
 #contentArea .stock-movement-page .sm-movement-card.adjust{padding-bottom:14px!important}
+<style id="sales-history-all-items-v181">
+.sales-cv2-product>div:last-child{min-width:0;flex:1}
+.sales-cv2-product strong{display:block;line-height:1.65;white-space:normal;word-break:break-word;overflow-wrap:anywhere}
+.sales-cv2-date{white-space:nowrap}
+@media(max-width:520px){.sales-cv2-product strong{font-size:.78rem}.sales-cv2-date{font-size:.65rem}}
 </style>
 
 <script id="sales-history-v142-js">
@@ -8524,7 +8531,7 @@ if ('serviceWorker' in navigator) {
       const returnedLines=lines.filter(s=>money(s.returnedQty)>0);
       const activeLines=lines.filter(s=>money(s.qty)>0 && money(s.total)>0);
       const returnStatus=returnedLines.length?(activeLines.length?'partial':'full'):'';
-      return {key:invoiceKey(first),id:first.id,saleBatchId:first.saleBatchId||null,invoiceNo:first.invoiceNo||('INV-'+String(first.id||'').slice(-6)),invoiceSeq:first.invoiceSeq||null,date:first.date||'',time:first.time||'',customerId:first.customerId||null,customerName:first.customerName||'عميل عادي',type:first.type||'retail',paymentMethod:first.paymentMethod||'cash',note:first.note||'',total,profit,paid,remaining,returnedAmount,returnedQty,returnedLines,activeLines,returnStatus,lines};
+      return {key:invoiceKey(first),id:first.id,saleBatchId:first.saleBatchId||null,invoiceNo:first.invoiceNo||('INV-'+String(first.id||'').slice(-6)),invoiceSeq:first.invoiceSeq||null,date:first.date||'',time:first.time||'',createdAt:first.createdAt||'',customerId:first.customerId||null,customerName:first.customerName||'عميل عادي',type:first.type||'retail',paymentMethod:first.paymentMethod||'cash',note:first.note||'',total,profit,paid,remaining,returnedAmount,returnedQty,returnedLines,activeLines,returnStatus,lines};
     }).sort((a,b)=>String(b.date+' '+b.time).localeCompare(String(a.date+' '+a.time)));
   }
   function paymentLabel(m){return ({cash:'نقدي',credit:'آجل',transfer:'تحويل',card:'بطاقة'})[m]||m||'نقدي';}
@@ -8540,7 +8547,7 @@ if ('serviceWorker' in navigator) {
     let t=`🧾 *متجري — فاتورة بيع*\n`;
     t+=`━━━━━━━━━━━━━━\n`;
     t+=`🔢 رقم الفاتورة: *${inv.invoiceSeq||inv.invoiceNo}*\n`;
-    t+=`📅 التاريخ: *${formatInvoiceDate(inv.date)}${inv.time?' — '+inv.time:''}*\n`;
+    t+=`📅 التاريخ: *${invoiceDisplayDate(inv)}${invoiceDisplayTime(inv)?' — '+invoiceDisplayTime(inv):''}*\n`;
     t+=`👤 العميل: *${inv.customerName||'عميل عادي'}*\n`;
     t+=`🛍️ نوع البيع: *${inv.type==='wholesale'?'جملة':'قطاعي'}*\n`;
     t+=`━━━━━━━━━━━━━━\n`;
@@ -8571,15 +8578,15 @@ function historyCard(inv){
     const qtyText=inv.activeLines.reduce((n,s)=>n+money(s.packages||s.qty||0),0);
     const statusClass=inv.returnStatus?'returned':(inv.remaining>0?'due':'paid');
     const statusText=inv.returnStatus?(inv.returnStatus==='partial'?'مرتجع جزئي':'مرتجع بالكامل'):(inv.remaining>0?(inv.paid>0?'متبقي':'آجل'):'مدفوع بالكامل');
-    const names=inv.activeLines.slice(0,2).map(s=>s.productName||'صنف');
-    const preview=names.join(' + ')||'تم إرجاع جميع الأصناف';
-    const extra=inv.activeLines.length>2?' + '+(inv.activeLines.length-2)+' أصناف أخرى':'';
+    const names=inv.activeLines.map(s=>s.productName||'صنف');
+    const preview=names.join(' • ')||'تم إرجاع جميع الأصناف';
+    const extra='';
     const invoiceNumber=invoiceDisplayNumber(inv);
     const key=esc(inv.key);
     const action=(fn,label,icon,cls='')=>`<button type="button" class="sales-cv2-btn ${cls}" onclick="event.preventDefault();event.stopPropagation();${fn}('${key}')"><i class="fas ${icon}"></i><span>${label}</span></button>`;
     return `<article class="sales-cv2-card ${inv.returnStatus?'has-return':''}">
       <div class="sales-cv2-head">
-        <div class="sales-cv2-invoice"><div class="sales-cv2-title"><i class="fas fa-receipt"></i> فاتورة رقم ${esc(invoiceNumber)}</div><div class="sales-cv2-date"><i class="fas fa-calendar-alt"></i> ${esc(formatInvoiceDate(inv.date))} <span>•</span> ${esc(inv.time||'')}</div></div>
+        <div class="sales-cv2-invoice"><div class="sales-cv2-title"><i class="fas fa-receipt"></i> فاتورة رقم ${esc(invoiceNumber)}</div><div class="sales-cv2-date"><i class="fas fa-calendar-alt"></i> ${esc(invoiceDisplayDate(inv))} <span>•</span> ${esc(invoiceDisplayTime(inv))}</div></div>
         <span class="sales-cv2-status ${statusClass}"><i class="fas ${inv.returnStatus?'fa-rotate-left':(inv.remaining>0?'fa-clock':'fa-check-circle')}"></i>${statusText}</span>
       </div>
       <div class="sales-cv2-body">
